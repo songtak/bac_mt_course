@@ -6,6 +6,7 @@ import { parseGpx } from "../utils/gpxParser";
 import { mountains, createNumberList, isMobile } from "../utils/helpers";
 import dayjs from "dayjs";
 import axios from "axios";
+import _ from "lodash";
 
 interface NaverMap {
   setCenter: (latlng: naver.maps.LatLng) => void;
@@ -21,6 +22,8 @@ function MapViewPage() {
   const mapElement = useRef<HTMLDivElement>(null);
   const polylineRef = useRef<naver.maps.Polyline | null>(null);
   const markerRef = useRef<naver.maps.Marker | null>(null);
+
+  console.log("mapElement", mapElement);
 
   /** 선택한 코스 */
   const [selectedCourse, setSelectedCourse] = useState<number>(1);
@@ -64,7 +67,7 @@ function MapViewPage() {
     }
   };
 
-  console.log("currentMyLocation", currentMyLocation);
+  // console.log("currentMyLocation", currentMyLocation);
 
   useEffect(() => {
     // fetchMountainWeather();
@@ -200,7 +203,7 @@ function MapViewPage() {
               new naver.maps.LatLngBounds(path[0], path[0])
             )
           );
-          map.fitBounds(bounds);
+          // map.fitBounds(bounds);
         }
       })
       .catch((err) => {
@@ -236,6 +239,8 @@ function MapViewPage() {
     //   }
     // };
   }, [mountain, currentMyLocation]);
+
+  useEffect(() => {}, []);
 
   /** =-=-=-=-=-=-=-=-=-=-=-=-=-===-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-= */
 

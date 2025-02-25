@@ -31,6 +31,7 @@
   "devDependencies": {
     "@eslint/js": "^9.9.1",
     "@types/fs-extra": "^11.0.4",
+    "@types/lodash": "^4.17.15",
     "@types/navermaps": "^3.7.4",
     "@types/node": "^22.13.4",
     "@types/react": "^18.3.5",
