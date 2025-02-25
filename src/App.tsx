@@ -1,7 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-// import Home from "./pages/HomePage";
-// import MountainList from "./pages/MountainListPage";
-// import MapView from "./pages/MapViewPage";
+
 import * as PAGES from "./pages/index";
 import ScrollToTop from "./utils/ScrollToTop";
 

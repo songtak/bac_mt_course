@@ -6,6 +6,7 @@ import mkcert from "vite-plugin-mkcert";
 export default defineConfig({
   plugins: [react()],
   // base: "/bac_mt_course/",
+  base: "",
   server: {
     port: 3000,
     fs: {

@@ -4,6 +4,8 @@ import { Mountain } from "lucide-react";
 function HomePage() {
   const navigate = useNavigate();
 
+  console.log("HomePage");
+
   return (
     <div className="min-h-screen flex flex-col">
       <main className="flex-1 flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-green-50">
