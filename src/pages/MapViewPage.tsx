@@ -409,6 +409,7 @@ function MapViewPage() {
                   }}
                 >
                   <span
+                    style={{ width: "80px" }}
                     className={`cursor-pointer text-lg ${
                       selectedCourse === i + 1
                         ? "text-slate-900"
@@ -419,12 +420,20 @@ function MapViewPage() {
                   </span>
                   {courseStats[i] && (
                     <span className="flex text-sm text-gray-600 ml-4">
-                      <div style={{ width: "80px" }}>
-                        🚶 {courseStats[i].distance.toFixed(1)} km
+                      <div
+                        style={{ width: "80px" }}
+                        className="flex justify-between"
+                      >
+                        <div>🚶</div>
+                        <div>{courseStats[i].distance.toFixed(1)} km</div>
                       </div>
-                      |
-                      <div className="pl-2 text-end" style={{ width: "80px" }}>
-                        ⛰ {courseStats[i].elevation.toFixed(0)} m
+                      <div className="pl-4"></div>
+                      <div
+                        className=" flex pl-4 justify-between"
+                        style={{ width: "90px" }}
+                      >
+                        <div>⛰</div>
+                        <div>{courseStats[i].elevation.toFixed(0)} m</div>
                       </div>
                     </span>
                   )}
