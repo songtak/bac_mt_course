@@ -3,9 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Share, BookmarkIcon } from "lucide-react";
 // import { mountains } from "../data/mountains";
 import { parseGpx } from "../utils/gpxParser";
-import { mountains, createNumberList, isMobile } from "../utils/helpers";
-import dayjs from "dayjs";
-import axios from "axios";
+import { mountains, createNumberList } from "../utils/helpers";
 
 interface NaverMap {
   setCenter: (latlng: naver.maps.LatLng) => void;
@@ -22,59 +20,15 @@ function MapViewPage() {
   const polylineRef = useRef<naver.maps.Polyline | null>(null);
   const markerRef = useRef<naver.maps.Marker | null>(null);
 
-  /** 선택한 코스 */
   const [selectedCourse, setSelectedCourse] = useState<number>(1);
-  /** 코스 정보 목록 */
-  const [courseStats, setCourseStats] = useState<
-    { distance: number; elevation: number }[]
-  >([]);
 
   const mountain = mountains().find((m) => m.name === mountainName);
 
-  const courseList = createNumberList(mountain?.fileLength as number);
+  const courseList = createNumberList(mountain?.fileLength);
 
   const handleClickCourse = (course: number) => {
     setSelectedCourse(course);
   };
-
-  useEffect(() => {
-    fetchMountainWeather();
-  }, []);
-
-  /** ======================================================================== */
-  const fetchMountainWeather = async () => {
-    const authKey = "RyYwM3--Q0mmMDN_vqNJHw";
-    const mountainNum = 5;
-    const base_date = dayjs().format("YYYYMMDD"); // API 형식에 맞게 YYYYMMDD로 변환
-    const base_time = dayjs().format("HH00"); // 현재 시간의 정각을 기준으로 설정
-
-    // const url = `http://apihub.kma.go.kr/api/typ08/getMountainWeather`;
-    const url = `http://apihub.kma.go.kr/api/typ08/getMountainWeather`;
-    const params = new URLSearchParams({
-      mountainNum,
-      base_date,
-      base_time,
-      authKey,
-    });
-
-    try {
-      const response = await fetch(`${url}?${params.toString()}`, {
-        // method: "GET",
-        headers: { "Access-Control-Allow-Origin": "*" },
-        // mode: "cors",
-        // credentials: "include",
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      console.log("날씨 데이터:", data);
-    } catch (error) {
-      console.error("API 호출 오류:", error);
-    }
-  };
-
-  /** ======================================================================== */
 
   const toRadians = (degrees: number) => (degrees * Math.PI) / 180;
 
@@ -99,9 +53,16 @@ function MapViewPage() {
 
     return R * c; // 결과값 (km)
   };
+  const calculateTotalDistance = (coordinates: [number, number][]): number => {
+    let totalDistance = 0;
+    for (let i = 0; i < coordinates.length - 1; i++) {
+      const [lat1, lon1] = coordinates[i];
+      const [lat2, lon2] = coordinates[i + 1];
+      totalDistance += haversineDistance(lat1, lon1, lat2, lon2);
+    }
+    return totalDistance;
+  };
 
-  /** =-=-=-=-=-=-=-=-=-=-=-=-=-===-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-= */
-  /** =-=-=-=-=-=-=-=-=-=-=-=-=-===-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-= */
   useEffect(() => {
     if (!mapElement.current || !mountain) return;
 
@@ -134,7 +95,7 @@ function MapViewPage() {
           );
           polylineRef.current = new naver.maps.Polyline({
             path: path,
-            strokeColor: "#fba12b",
+            strokeColor: "#5347AA",
             strokeWeight: 3,
             map: map,
           });
@@ -147,6 +108,9 @@ function MapViewPage() {
             )
           );
           map.fitBounds(bounds);
+
+          const totalDistance = calculateTotalDistance(coordinates);
+          console.log(`총 거리: ${totalDistance.toFixed(2)} km`);
         }
       })
       .catch((err) => {
@@ -165,108 +129,9 @@ function MapViewPage() {
     };
   }, [mountain]);
 
-  /** =-=-=-=-=-=-=-=-=-=-=-=-=-===-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-= */
-
-  const calculate3DDistance = (
-    points: { lat: number; lon: number; ele: number }[]
-  ): number => {
-    let totalDistance = 0;
-
-    for (let i = 0; i < points.length - 1; i++) {
-      const { lat: lat1, lon: lon1, ele: ele1 } = points[i];
-      const { lat: lat2, lon: lon2, ele: ele2 } = points[i + 1];
-
-      // 2D 거리 계산 (위도, 경도만 사용)
-      const distance2D = haversineDistance(lat1, lon1, lat2, lon2);
-
-      // 고도 차이 계산 (km 단위로 변환)
-      const elevationChange = (ele2 - ele1) / 1000; // m → km 변환
-
-      // 3D 거리 계산 (피타고라스 정리 사용)
-      const distance3D = Math.sqrt(distance2D ** 2 + elevationChange ** 2);
-
-      totalDistance += distance3D;
-    }
-
-    return totalDistance;
-  };
-  const customParseGpx = async (
-    file: File
-  ): Promise<{ lat: number; lon: number; ele: number }[]> => {
-    const text = await file.text();
-    const parser = new DOMParser();
-    const xml = parser.parseFromString(text, "application/xml");
-
-    const points = Array.from(xml.getElementsByTagName("trkpt")).map((pt) => ({
-      lat: parseFloat(pt.getAttribute("lat")!),
-      lon: parseFloat(pt.getAttribute("lon")!),
-      ele: parseFloat(pt.getElementsByTagName("ele")[0]?.textContent || "0"),
-    }));
-
-    return points;
-  };
-
-  const calculateElevationGain = (
-    points: { lat: number; lon: number; ele: number }[]
-  ): number => {
-    let totalGain = 0;
-
-    for (let i = 1; i < points.length; i++) {
-      const elevationDifference = points[i].ele - points[i - 1].ele;
-      if (elevationDifference > 0) {
-        totalGain += elevationDifference;
-      }
-    }
-
-    return totalGain; // 단위: m
-  };
-
   if (!mountain) {
     return <div>산을 찾을 수 없습니다.</div>;
   }
-
-  useEffect(() => {
-    if (!mountain) return;
-
-    const fetchCourseStats = async () => {
-      try {
-        const stats = await Promise.all(
-          courseList.map(async (i) => {
-            try {
-              const response = await fetch(
-                `/src/assets/bac_gpx/${mountain.name}/${
-                  mountain.name
-                }_00000000${i < 10 ? "0" : ""}${i}.gpx`
-              );
-              if (!response.ok) throw new Error("파일 없음");
-
-              const blob = await response.blob();
-              const file = new File([blob], "track.gpx");
-              const points = await customParseGpx(file);
-
-              if (points.length > 0) {
-                return {
-                  distance: calculate3DDistance(points),
-                  elevation: calculateElevationGain(points),
-                };
-              }
-            } catch (error) {
-              console.error(`코스 ${i} 정보를 불러오는 데 실패:`, error);
-            }
-            return { distance: 0, elevation: 0 };
-          })
-        );
-
-        setCourseStats(stats);
-      } catch (error) {
-        console.error("코스 데이터를 불러오는 중 오류 발생:", error);
-      }
-    };
-    if (courseStats.length < courseList.length) {
-      fetchCourseStats();
-    }
-  }, [mountain, courseList, courseStats]); // 🚨 mountain이 변경될 때만 실행되도록 제한
-  /** =-=-=-=-=-=-=-=-=-=-=-=-=-===-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-= */
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -286,9 +151,7 @@ function MapViewPage() {
 
           <div
             ref={mapElement}
-            className={`w-full ${
-              isMobile() ? "h-[300px]" : "h-[600px]"
-            } rounded-lg overflow-hidden shadow-inner`}
+            className="w-full h-[600px] rounded-lg overflow-hidden shadow-inner"
           />
           <div className="pt-6">
             <div className="flex justify-between pb-4">
@@ -310,8 +173,8 @@ function MapViewPage() {
               >
                 <Share className="cursor-pointer" />
                 <BookmarkIcon
-                  // fill="orange"
-                  // color="orange"
+                  fill="orange"
+                  color="orange"
                   className="cursor-pointer"
                 />
               </div>
@@ -328,7 +191,7 @@ function MapViewPage() {
               {courseList.map((item, i) => (
                 <div
                   key={i}
-                  className={`flex pt-1 pb-1 hover:shadow-md hover:bg-sky-50 cursor-pointer ${
+                  className={`pt-1 pb-1 hover:shadow-md hover:bg-sky-50 cursor-pointer ${
                     selectedCourse === i + 1 && "bg-sky-100 opacity-95"
                   } rounded-lg
                   `}
@@ -345,17 +208,6 @@ function MapViewPage() {
                   >
                     {item} 코스
                   </span>
-                  {courseStats[i] && (
-                    <span className="flex text-sm text-gray-600 ml-4">
-                      <div style={{ width: "80px" }}>
-                        🚶 {courseStats[i].distance.toFixed(1)} km
-                      </div>
-                      |
-                      <div className="pl-2 text-end" style={{ width: "80px" }}>
-                        ⛰ {courseStats[i].elevation.toFixed(0)} m
-                      </div>
-                    </span>
-                  )}
                 </div>
               ))}
             </div>

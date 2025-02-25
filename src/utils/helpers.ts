@@ -39,3 +39,9 @@ export const mountains = (): MergedType[] => {
 export function createNumberList(n: number): number[] {
   return Array.from({ length: n }, (_, i) => i + 1);
 }
+
+export const isMobile = () => {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent
+  );
+};
