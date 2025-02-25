@@ -29,6 +29,13 @@ function MapViewPage() {
     { distance: number; elevation: number }[]
   >([]);
 
+  /** 내 위치 정보 */
+  const [currentMyLocation, setCurrentMyLocation] = useState({
+    lat: 0,
+    lng: 0,
+  });
+  const [locationLoading, setLocationLoading] = useState(false);
+
   const mountain = mountains().find((m) => m.name === mountainName);
 
   const courseList = createNumberList(mountain?.fileLength as number);
@@ -37,9 +44,50 @@ function MapViewPage() {
     setSelectedCourse(course);
   };
 
+  const getCurPosition = () => {
+    setLocationLoading(true);
+    const success = (location) => {
+      setCurrentMyLocation({
+        lat: location.coords.latitude,
+        lng: location.coords.longitude,
+      });
+      setLocationLoading(false);
+    };
+
+    const error = () => {
+      setCurrentMyLocation({ lat: 37.5666103, lng: 126.9783882 });
+      setLocationLoading(false);
+    };
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(success, error);
+    }
+  };
+
+  console.log("currentMyLocation", currentMyLocation);
+
   useEffect(() => {
-    fetchMountainWeather();
+    // fetchMountainWeather();
+    getCurPosition();
   }, []);
+
+  // useEffect(() => {
+  //   if (currentMyLocation.lat !== 0 && currentMyLocation.lng !== 0) {
+  //     // 네이버 지도 옵션 선택
+
+  //     // mapRef.current = new naver.maps.Map("map", mapOptions);
+
+  //     new naver.maps.Marker({
+  //       // 생성될 마커의 위치
+  //       position: new naver.maps.LatLng(
+  //         currentMyLocation.lat,
+  //         currentMyLocation.lng
+  //       ),
+  //       // 마커를 표시할 Map 객체
+  //       map: mapRef.current,
+  //     });
+  //   }
+  // }, [currentMyLocation]);
 
   /** ======================================================================== */
   const fetchMountainWeather = async () => {
@@ -108,16 +156,22 @@ function MapViewPage() {
     const mapOptions = {
       center: new naver.maps.LatLng(mountain.lat, mountain.lot),
       zoom: 13,
-      zoomControl: true,
+      // zoomControl: true,
+      // zoomControlOptions: {
+      //   style: naver.maps.ZoomControlStyle.SMALL,
+      //   position: naver.maps.Position.TOP_RIGHT,
+      // },
       mapTypeControl: true,
     };
 
     const map = new naver.maps.Map(mapElement.current, mapOptions);
-    mapRef.current = map;
+    // mapRef.current = map;
 
     // Load GPX file
     fetch(
-      `/src/assets/bac_gpx/${mountain.name}/${mountain.name}_00000000${
+      `https://songtak.github.io/bac_mt_course/assets/bac_gpx/${
+        mountain.name
+      }/${mountain.name}_00000000${
         selectedCourse < 10 && "0"
       }${selectedCourse}.gpx`
     )
@@ -154,16 +208,34 @@ function MapViewPage() {
         console.error(err);
       });
 
+    // if (currentMyLocation.lat !== 0 && currentMyLocation.lng !== 0) {
+    //   //   console.log("???");
+
+    //   //   // 네이버 지도 옵션 선택
+
+    //   //   // mapRef.current = new naver.maps.Map("map", mapOptions);
+
+    //   new naver.maps.Marker({
+    //     // 생성될 마커의 위치
+    //     position: new naver.maps.LatLng(
+    //       currentMyLocation.lat,
+    //       currentMyLocation.lng
+    //     ),
+    //     // 마커를 표시할 Map 객체
+    //     map: map,
+    //   });
+    // }
+
     // Cleanup
-    return () => {
-      if (markerRef.current) {
-        markerRef.current.setMap(null);
-      }
-      if (polylineRef.current) {
-        polylineRef.current.setMap(null);
-      }
-    };
-  }, [mountain]);
+    // return () => {
+    //   if (markerRef.current) {
+    //     markerRef.current.setMap(null);
+    //   }
+    //   if (polylineRef.current) {
+    //     polylineRef.current.setMap(null);
+    //   }
+    // };
+  }, [mountain, currentMyLocation]);
 
   /** =-=-=-=-=-=-=-=-=-=-=-=-=-===-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-= */
 
@@ -234,9 +306,9 @@ function MapViewPage() {
           courseList.map(async (i) => {
             try {
               const response = await fetch(
-                `/src/assets/bac_gpx/${mountain.name}/${
+                `https://songtak.github.io/bac_mt_course/assets/bac_gpx/${
                   mountain.name
-                }_00000000${i < 10 ? "0" : ""}${i}.gpx`
+                }/${mountain.name}_00000000${i < 10 ? "0" : ""}${i}.gpx`
               );
               if (!response.ok) throw new Error("파일 없음");
 
