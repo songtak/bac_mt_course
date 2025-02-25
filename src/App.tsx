@@ -1,14 +1,16 @@
 import { Routes, Route } from "react-router-dom";
-import Home from "./pages/Home";
-import MountainList from "./pages/MountainList";
-import MapView from "./pages/MapView";
+// import Home from "./pages/HomePage";
+// import MountainList from "./pages/MountainListPage";
+// import MapView from "./pages/MapViewPage";
+import * as PAGES from "./pages/index";
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/list" element={<MountainList />} />
-      <Route path="/map/:mountainName" element={<MapView />} />
+      <Route path="/" element={<PAGES.HomePage />} />
+      <Route path="/list" element={<PAGES.MountainListPage />} />
+      <Route path="/map/:mountainName" element={<PAGES.MapViewPage />} />
+      <Route path="/sign-up" element={<PAGES.SignUpPage />} />
     </Routes>
   );
 }

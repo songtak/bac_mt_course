@@ -6,7 +6,7 @@ import axios from "axios";
 import _ from "lodash";
 import kor_bac from "../assets/kor_bac.json";
 
-function MountainList() {
+function MountainListPage() {
   /**  */
   const [filteredList, setFilteredList] = useState<any[]>([]);
   const navigate = useNavigate();
@@ -57,4 +57,4 @@ function MountainList() {
   );
 }
 
-export default MountainList;
+export default MountainListPage;

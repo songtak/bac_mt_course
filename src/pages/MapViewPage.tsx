@@ -11,7 +11,7 @@ interface NaverMap {
   fitBounds: (bounds: naver.maps.LatLngBounds) => void;
 }
 
-function MapView() {
+function MapViewPage() {
   const { mountainName } = useParams();
   const navigate = useNavigate();
   const [error, setError] = useState<string>("");
@@ -136,4 +136,4 @@ function MapView() {
   );
 }
 
-export default MapView;
+export default MapViewPage;

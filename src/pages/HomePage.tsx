@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Mountain } from "lucide-react";
 
-function Home() {
+function HomePage() {
   const navigate = useNavigate();
 
   return (
@@ -30,4 +30,4 @@ function Home() {
   );
 }
 
-export default Home;
+export default HomePage;
