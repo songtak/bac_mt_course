@@ -113,9 +113,7 @@ function MountainListPage() {
                 setIsFilterShow(false);
               }}
             >
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                검색 필터
-              </h2>
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">검색</h2>
               <ArrowDown />
             </div>
           ) : (
@@ -125,9 +123,7 @@ function MountainListPage() {
                 setIsFilterShow(true);
               }}
             >
-              <h2 className="text-xl font-semibold text-gray-800 ">
-                검색 필터
-              </h2>
+              <h2 className="text-xl font-semibold text-gray-800 ">검색</h2>
               <ArrowUp />
             </div>
           )}

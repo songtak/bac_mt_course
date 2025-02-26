@@ -1,10 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import { Mountain } from "lucide-react";
+import { jsonToGpx, jsonData } from "../utils/helpers";
 
 function HomePage() {
   const navigate = useNavigate();
 
-  console.log("HomePage");
+  // console.log("jsonToGpx", jsonToGpx(jsonData));
 
   return (
     <div className="min-h-screen flex flex-col">

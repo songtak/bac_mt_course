@@ -23,7 +23,7 @@ function MapViewPage() {
   const polylineRef = useRef<naver.maps.Polyline | null>(null);
   const markerRef = useRef<naver.maps.Marker | null>(null);
 
-  console.log("mapElement", mapElement);
+  // console.log("mapElement", mapElement);
 
   /** 선택한 코스 */
   const [selectedCourse, setSelectedCourse] = useState<number>(1);
@@ -172,10 +172,9 @@ function MapViewPage() {
 
     // Load GPX file
     fetch(
-      `https://songtak.github.io/bac_mt_course/assets/bac_gpx/${
-        mountain.name
-      }/${mountain.name}_00000000${
-        selectedCourse < 10 && "0"
+      // `https://songtak.github.io/bac_mt_course/assets/bac_gpx/${
+      `/assets/bac_gpx/${mountain.name}/${mountain.name}_00000000${
+        selectedCourse < 10 ? "0" : ""
       }${selectedCourse}.gpx`
     )
       .then((response) => response.blob())
@@ -393,11 +392,11 @@ function MapViewPage() {
                 />
               </div>
             </div>
-            <div className=" text-gray-400 pb-4 ">{mountain.address}</div>
+            <div className=" text-stone-600 pb-4 ">{mountain.address}</div>
             <div className="font-thin">{mountain.reason}</div>
 
             <div className="pt-10">
-              <div className="text-2xl ">코스</div>
+              <div className="text-2xl ">추천 코스</div>
               <div className="font-thin pb-4 text-xs">
                 (* 코스 번호는 사용자 편의를 위해 임의로 설정한 값으로 실제
                 코스명과 다를 수 있습니다.)

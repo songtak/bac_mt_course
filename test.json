@@ -1,99 +1,25 @@
-import { kor1 } from "../assets/kor1";
-import { kor2 } from "../assets/kor2";
-
-type Kor1Type = {
-  id: number;
-  name: string;
-  height: number;
-  address: string;
-  reason: string;
-  fileLength: number;
-};
-
-type Kor2Type = {
-  frtrlId: string;
-  frtrlNm: string;
-  mtnCd: string;
-  ctpvNm: string;
-  addrNm: string;
-  lat: string;
-  lot: string;
-  aslAltide: string;
-  crtrDt: string;
-};
-
-type MergedType = Kor1Type & Kor2Type;
-
-export const mountains = (): MergedType[] => {
-  return kor1
-    .map((mountain) => {
-      const matching = kor2.find((m) => m.frtrlNm === mountain.name);
-      if (matching) {
-        return { ...mountain, ...matching };
-      }
-      return null;
-    })
-    .filter((m): m is MergedType => m !== null);
-};
-
-export function createNumberList(n: number): number[] {
-  return Array.from({ length: n }, (_, i) => i + 1);
-}
-
-export const isMobile = () => {
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    navigator.userAgent
-  );
-};
-
-export const jsonToGpx = (jsonData: any) => {
-  const { MNTN_NM, PMNTN_NM } = jsonData.attributes;
-  const coordinates = jsonData.geometry.paths[0];
-
-  const gpxHeader = `<?xml version="1.0" encoding="UTF-8"?>
-<gpx version="1.1" creator="CustomScript" xmlns="http://www.topografix.com/GPX/1/1">
-  <metadata>
-    <name>${MNTN_NM} - ${PMNTN_NM}</name>
-  </metadata>
-  <trk>
-    <name>${MNTN_NM} - ${PMNTN_NM}</name>
-    <trkseg>`;
-
-  const gpxBody = coordinates
-    .map(([lon, lat]) => `      <trkpt lon="${lon}" lat="${lat}"></trkpt>`)
-    .join("\n");
-
-  const gpxFooter = `
-    </trkseg>
-  </trk>
-</gpx>`;
-
-  return gpxHeader + "\n" + gpxBody + gpxFooter;
-};
-
-// 예제 JSON 데이터
-export const jsonData = {
-  attributes: {
-    FID: 6,
-    PMNTN_SN: 1119,
-    MNTN_CODE: "414800101",
-    MNTN_NM: "감악산",
-    PMNTN_NM: "황방리구간",
-    PMNTN_MAIN: " ",
-    PMNTN_LT: 1.18,
-    PMNTN_DFFL: "쉬움",
-    PMNTN_UPPL: 21,
-    PMNTN_GODN: 15,
-    PMNTN_MTRQ: " ",
-    PMNTN_CNRL: " ",
-    PMNTN_CLS_: " ",
-    PMNTN_RISK: " ",
-    PMNTN_RECO: " ",
-    DATA_STDR_: "2016-12-31",
-    MNTN_ID: "416300101",
+{
+  "attributes": {
+    "FID": 6,
+    "PMNTN_SN": 1119,
+    "MNTN_CODE": "414800101",
+    "MNTN_NM": "감악산",
+    "PMNTN_NM": "황방리구간",
+    "PMNTN_MAIN": " ",
+    "PMNTN_LT": 1.18,
+    "PMNTN_DFFL": "쉬움",
+    "PMNTN_UPPL": 21,
+    "PMNTN_GODN": 15,
+    "PMNTN_MTRQ": " ",
+    "PMNTN_CNRL": " ",
+    "PMNTN_CLS_": " ",
+    "PMNTN_RISK": " ",
+    "PMNTN_RECO": " ",
+    "DATA_STDR_": "2016-12-31",
+    "MNTN_ID": "416300101"
   },
-  geometry: {
-    paths: [
+  "geometry": {
+    "paths": [
       [
         [197380.85012594424, 593486.67985464633],
         [197392.00610000081, 593484.48340000212],
@@ -230,8 +156,8 @@ export const jsonData = {
         [198156.56539999973, 592875.7920000013],
         [198160.67270000186, 592876.37760000117],
         [198164.09729999956, 592878.25280000269],
-        [198165.96630000044, 592880.37590000406],
-      ],
-    ],
-  },
-};
+        [198165.96630000044, 592880.37590000406]
+      ]
+    ]
+  }
+}
