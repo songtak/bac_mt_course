@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gpx xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" creator="Tranggle Track 1.1.0 - http://www.tranggle.com" version="1.1" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
-
 <!-- <gpx version="1.1" creator="ReactApp" xmlns="http://www.topografix.com/GPX/1/1"> -->
   <trk>
     <name>신산리구간</name>
@@ -35,7 +34,7 @@
       <trkpt lat="37.93772644923684" lon="126.969479212473"></trkpt>
       <trkpt lat="37.93769829693785" lon="126.96945584706168"></trkpt>
       <trkpt lat="37.93765773895403" lon="126.9694161092273"></trkpt>
-      <trkpt lat="37.9376202011022" lon="126.9693771323542"></trkpt>
+      <trkpt lat="37.9376202011022" lon="126.969377132å3542"></trkpt>
       <trkpt lat="37.937583813905306" lon="126.96933534638801"></trkpt>
       <trkpt lat="37.93755342775517" lon="126.96931392497036"></trkpt>
       <trkpt lat="37.93751403563715" lon="126.96932982405313"></trkpt>
