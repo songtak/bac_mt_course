@@ -2,5 +2,14 @@ import HomePage from "./HomePage";
 import MapViewPage from "./MapViewPage";
 import MountainListPage from "./MountainListPage";
 import SignUpPage from "./SignUpPage";
+import LoginPage from "./LoginPage";
+import MyPage from "./MyPage";
 
-export { HomePage, MapViewPage, MountainListPage, SignUpPage };
+export {
+  HomePage,
+  MapViewPage,
+  MountainListPage,
+  SignUpPage,
+  LoginPage,
+  MyPage,
+};

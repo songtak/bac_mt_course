@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import {
   collection,
   doc,
@@ -9,7 +9,8 @@ import {
   where,
 } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
-import { db, auth } from "../utils/firebaseConfig";
+import CryptoJS from "crypto-js";
+import { db } from "../utils/firebaseConfig";
 import { ArrowLeft } from "lucide-react";
 import _ from "lodash";
 
@@ -21,9 +22,9 @@ interface FormData {
   nickname: string;
 }
 
-/** 회원가입 */
 const SignUpPage: React.FC = () => {
   const navigate = useNavigate();
+  const auth = getAuth();
 
   const [formData, setFormData] = useState<FormData>({
     name: "",
@@ -81,7 +82,9 @@ const SignUpPage: React.FC = () => {
 
       if (!snapshot.empty) {
         field === "email"
-          ? setEmailErrorMessage("이미 사용 중인 이메일입니다.")
+          ? setEmailErrorMessage(
+              `이미 사용 중인 ${field === "email" ? "이메일" : "닉네임"}입니다.`
+            )
           : setNicknameErrorMessage("이미 사용 중인 닉네임입니다.");
 
         field === "email"
@@ -89,16 +92,22 @@ const SignUpPage: React.FC = () => {
           : setIsNicknameChecked(false);
       } else {
         field === "email"
-          ? setEmailSuccessMessage("사용 가능한 이메일입니다.")
-          : setNicknameSuccessMessage("사용 가능한 닉네임입니다.");
+          ? setEmailSuccessMessage(
+              `사용 가능한 ${field === "email" ? "이메일" : "닉네임"}입니다.`
+            )
+          : setNicknameSuccessMessage(`사용 가능한 닉네임입니다.`);
         field === "email"
           ? setIsEmailChecked(true)
           : setIsNicknameChecked(true);
       }
     } catch (error) {
       field === "email"
-        ? setEmailErrorMessage("이메일 중복 확인 중 오류가 발생했습니다.")
-        : setNicknameErrorMessage("닉네임 중복 확인 중 오류가 발생했습니다.");
+        ? setEmailErrorMessage(
+            `${
+              field === "email" ? "이메일" : "닉네임"
+            } 중복 확인 중 오류가 발생했습니다.`
+          )
+        : setNicknameErrorMessage(`닉네임 중복 확인 중 오류가 발생했습니다.`);
     } finally {
       setIsLoading(false);
     }
@@ -108,7 +117,7 @@ const SignUpPage: React.FC = () => {
     return (
       formData.name &&
       formData.email &&
-      formData.password.length > 5 &&
+      formData.password &&
       formData.confirmPassword &&
       formData.nickname &&
       formData.password === formData.confirmPassword &&
@@ -120,30 +129,33 @@ const SignUpPage: React.FC = () => {
   /** 회원 가입 */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // setErrorMessage("");
+    // setSuccessMessage("");
 
     if (!isFormValid()) return;
 
     setIsLoading(true);
 
     try {
-      // Firebase Auth 회원가입
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        formData.email,
-        formData.password
-      );
-
-      // Firebase에서 생성된 유저 ID
-      const user = userCredential.user;
-      const token = await user.getIdToken(); // 🔥 JWT 토큰 가져오기
-
       const usersRef = collection(db, "users");
       const snapshot = await getDocs(usersRef);
       const newUserId = snapshot.size + 1;
 
-      // Firestore에 유저 정보 저장
+      const hashedToken = CryptoJS.AES.encrypt(
+        `${newUserId}${formData.email}`,
+        "greenturtle"
+      ).toString();
+
+      console.log("hashedToken", hashedToken);
+
+      // await createUserWithEmailAndPassword(
+      //   auth,
+      //   formData.email,
+      //   formData.password
+      // );
+
       await setDoc(doc(db, "users", formData.email), {
-        access_token: token, // 🔥 JWT 토큰 저장
+        access_token: hashedToken,
         email: formData.email,
         name: formData.name,
         nickname: formData.nickname,
@@ -152,11 +164,10 @@ const SignUpPage: React.FC = () => {
         createdAt: new Date(),
       });
 
-      console.log("회원가입이 성공적으로 완료되었습니다!");
-      localStorage.setItem("access_token", token);
-      setTimeout(() => navigate(-1), 1500);
+      // setSuccessMessage("회원가입이 성공적으로 완료되었습니다!");
+      // setTimeout(() => navigate(-1), 1500);
     } catch (error: any) {
-      console.error("회원가입 중 오류 발생:", error);
+      // setErrorMessage("회원가입 중 오류가 발생했습니다.");
     } finally {
       setIsLoading(false);
     }
@@ -178,7 +189,6 @@ const SignUpPage: React.FC = () => {
             type="text"
             name="name"
             placeholder="이름"
-            maxLength={20}
             value={formData.name}
             onChange={handleChange}
             className="w-full p-3 border border-gray-300 rounded-md"
@@ -206,8 +216,9 @@ const SignUpPage: React.FC = () => {
               중복 확인
             </button>
           </div>
-          <span className="text-xs text-gray-500">{emailSuccessMessage}</span>
-          <span className="text-xs text-red-500">{emailErrorMessage}</span>
+          <span className="text-xs text-gray-500 ">{emailSuccessMessage}</span>
+          <span className="text-xs text-red-500 ">{emailErrorMessage}</span>
+
           <div className="flex space-x-2">
             <input
               type="text"
@@ -215,7 +226,7 @@ const SignUpPage: React.FC = () => {
               placeholder="닉네임"
               value={formData.nickname}
               onChange={handleChange}
-              maxLength={40}
+              maxLength={20}
               className="flex-1 p-3 border border-gray-300 rounded-md"
             />
             <button
@@ -244,29 +255,18 @@ const SignUpPage: React.FC = () => {
             placeholder="비밀번호"
             value={formData.password}
             onChange={handleChange}
+            maxLength={20}
             className="w-full p-3 border border-gray-300 rounded-md"
-            maxLength={12}
           />
-          {formData.password.length > 0 && formData.password.length < 6 && (
-            <span className="text-xs text-red-500 ">
-              비밀번호는 6자리 이상 12자리 이하만 가능합니다.
-            </span>
-          )}
           <input
             type="password"
             name="confirmPassword"
             placeholder="비밀번호 확인"
             value={formData.confirmPassword}
             onChange={handleChange}
-            maxLength={12}
+            maxLength={20}
             className="w-full p-3 border border-gray-300 rounded-md"
           />
-          {formData.confirmPassword.length > 0 &&
-            formData.password !== formData.confirmPassword && (
-              <span className="text-xs text-red-500 ">
-                비밀번호가 같지 않습니다.
-              </span>
-            )}
 
           <button
             type="submit"

@@ -12,6 +12,14 @@ export default defineConfig({
     fs: {
       allow: ["."], // 특정 폴더 접근 허용
     },
+    proxy: {
+      "/weather": {
+        target: "https://apihub.kma.go.kr", // 원본 API 서버
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/weather/, ""), // '/api'를 제거하고 요청
+      },
+    },
   },
   optimizeDeps: {
     exclude: ["lucide-react"],

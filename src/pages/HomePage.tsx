@@ -11,7 +11,7 @@ function HomePage() {
     <div className="min-h-screen flex flex-col">
       <main className="flex-1 flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-green-50">
         <h1 className="text-4xl md:text-6xl font-bold text-gray-800 mb-8">
-          대한민국 100대 명산
+          봉우리 헌터
         </h1>
 
         <button

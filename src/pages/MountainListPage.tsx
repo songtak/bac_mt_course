@@ -1,16 +1,20 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Search, ArrowDown, ArrowUp } from "lucide-react";
-import axios from "axios";
 // import kor_bac from "../assets/kor_bac.json";
 import { mountains, createNumberList } from "../utils/helpers";
 import _ from "lodash";
+import { signOut } from "firebase/auth";
+import { auth } from "../utils/firebaseConfig";
+import useUserStore from "../stores/useUserStore";
 
 const cities = _.uniq(mountains().map((mountain) => mountain.ctpvNm)).sort();
 
 // http://openapi.forest.go.kr/openapi/service/trailInfoService/getforestspatialdataservice
 
-function MountainListPage() {
+const MountainListPage = () => {
+  const userStore = useUserStore();
+
   /** */
   const [mountainList, setMountainList] = useState<any[]>(mountains());
   const [filteredList, setFilteredList] = useState<any[]>(mountains());
@@ -44,6 +48,18 @@ function MountainListPage() {
     }
 
     setFilteredList(filtered);
+  };
+
+  /** 로그아웃 */
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      localStorage.clear();
+      navigate("/list");
+      console.log("로그아웃 성공!");
+    } catch (error) {
+      console.error("로그아웃 실패:", error);
+    }
   };
 
   // 필터 초기화 함수
@@ -91,17 +107,29 @@ function MountainListPage() {
             <ArrowLeft className="w-5 h-5 mr-2 cursor-pointer" />
             돌아가기
           </button> */}
-          <div
-            className="cursor-pointer"
-            onClick={() => {
-              navigate("/sign-up");
-            }}
-          >
-            회원가입
-          </div>
+          {!userStore.isLogin ? (
+            <div
+              className="cursor-pointer"
+              onClick={() => {
+                navigate("/sign-in");
+              }}
+            >
+              로그인
+            </div>
+          ) : (
+            <div
+              className="cursor-pointer"
+              onClick={() => {
+                // handleLogout();
+                navigate("/my");
+              }}
+            >
+              {userStore.userInfo?.nickname}
+            </div>
+          )}
         </div>
         <h1 className="text-3xl font-bold text-gray-800 mb-8">
-          100대 명산 목록
+          대한민국 100대 명산
         </h1>
 
         {/* 검색 필터 섹션 */}
@@ -114,7 +142,7 @@ function MountainListPage() {
               }}
             >
               <h2 className="text-xl font-semibold text-gray-800 mb-4">검색</h2>
-              <ArrowDown />
+              <ArrowUp />
             </div>
           ) : (
             <div
@@ -124,7 +152,7 @@ function MountainListPage() {
               }}
             >
               <h2 className="text-xl font-semibold text-gray-800 ">검색</h2>
-              <ArrowUp />
+              <ArrowDown />
             </div>
           )}
           {isFilterShow && (
@@ -272,6 +300,6 @@ function MountainListPage() {
       </div>
     </div>
   );
-}
+};
 
 export default MountainListPage;

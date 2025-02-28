@@ -5,8 +5,9 @@ import { ArrowLeft, Share, BookmarkIcon } from "lucide-react";
 import { parseGpx } from "../utils/gpxParser";
 import { mountains, createNumberList, isMobile } from "../utils/helpers";
 import dayjs from "dayjs";
-import axios from "axios";
 import _ from "lodash";
+import { getMountainWeather } from "../services/weatherApi";
+import { weatherCode, weatherEmoji } from "../models/weather"; // JSON 데이터 import
 
 interface NaverMap {
   setCenter: (latlng: naver.maps.LatLng) => void;
@@ -39,6 +40,12 @@ function MapViewPage() {
   });
   const [locationLoading, setLocationLoading] = useState(false);
 
+  /** 날씨 이모지 */
+  const [weatherEmojiList, setWeatherEmojiList] = useState<string[]>([]);
+  const [weatherList, setWeatherList] = useState<any[]>([]);
+
+  const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
+
   const mountain = mountains().find((m) => m.name === mountainName);
 
   const courseList = createNumberList(mountain?.fileLength as number);
@@ -68,11 +75,118 @@ function MapViewPage() {
   };
 
   // console.log("currentMyLocation", currentMyLocation);
+  const getNearestPastHour = () => {
+    return dayjs().minute() === 0
+      ? dayjs().subtract(1, "hour").startOf("hour").format("HHmm") // 정시라면 한 시간 전 반환
+      : dayjs().startOf("hour").format("HHmm"); // 정시가 아니면 현재 시간의 정시 반환
+  };
 
+  /** ======================================================================== */
+  const getWeatherIconsAndValues = (filteredData: any[]) => {
+    return filteredData.map((d: any) => ({
+      emoji: getWeatherEmoji(d.category, d.fcstValue),
+      value: d.fcstValue, // 원본 fcstValue 그대로 반환
+    }));
+  };
+
+  // 특정 값에 맞는 라벨 찾기 (범위 기반)
+  const getWeatherLabel = (category: string, value: string | number) => {
+    const categoryData = weatherCode[category];
+    if (!categoryData || !categoryData.range) return value; // 범위 데이터가 없으면 그대로 반환
+
+    if (Array.isArray(categoryData.range)) {
+      if (value === "강수없음" || value === "적설없음") return value; // 강수/적설 없음 그대로 반환
+      const numericValue = parseFloat(value as string); // 숫자로 변환
+      if (isNaN(numericValue)) return value; // 숫자가 아닐 경우 원래 값 반환
+
+      const rangeMatch = categoryData.range.find(
+        (r) => numericValue >= r.min && (r.max === null || numericValue < r.max)
+      );
+      return rangeMatch ? rangeMatch.label : value; // **범위 초과 방지**
+    }
+
+    return value; // 범위가 아닌 경우 그대로 반환
+  };
+
+  // 특정 값에 맞는 이모지 찾기
+  const getWeatherEmoji = (category: string, value: string | number) => {
+    const label = getWeatherLabel(category, value);
+
+    console.log(
+      `🧐 Debug | Category: ${category}, Value: ${value}, Label: ${label}, Emoji: ${
+        weatherEmoji[category]?.[label] || "❓"
+      }`
+    );
+
+    return weatherEmoji[category]?.[label] || "❓";
+  };
+
+  const getWeatherIcons = (filteredData: any[]) => {
+    return filteredData.map((d: any) =>
+      getWeatherEmoji(d.category, d.fcstValue)
+    );
+  };
+
+  // 날씨 데이터를 가져오고 이모지를 매핑하는 함수
+  const getWeatherList = async () => {
+    const weatherList = await getMountainWeather();
+    console.log("weatherList", weatherList);
+
+    // 1. 현재 날짜 구하기 (YYYYMMDD 포맷)
+    const today = dayjs().format("YYYYMMDD");
+
+    // 2. 오늘 날짜의 fcstBase 데이터만 필터링
+    const todayData = weatherList.filter((d: any) => d.fcstBase === today);
+
+    if (todayData.length === 0) {
+      console.log("오늘 날짜의 예보 데이터가 없습니다.");
+      return;
+    }
+
+    // 3. 가장 가까운 fcstTime 찾기
+    const now = parseInt(dayjs().format("HHmm"), 10);
+    const closestFcstTime = todayData
+      .map((d: any) => parseInt(d.fcstTime, 10))
+      .sort((a, b) => Math.abs(now - a) - Math.abs(now - b))[0];
+
+    // 4. 해당 fcstTime의 모든 카테고리 데이터 필터링
+    const filteredData = todayData.filter(
+      (d: any) => parseInt(d.fcstTime, 10) === closestFcstTime
+    );
+
+    console.log("filteredData", filteredData);
+
+    // 5. SKY 코드 변환 예외처리
+    const SKY_MAPPING: Record<string, string> = {
+      "1.0": "맑음",
+      "3.0": "구름많음",
+      "4.0": "흐림",
+    };
+    filteredData.forEach((d: any) => {
+      if (d.category === "SKY") {
+        d.fcstValue = SKY_MAPPING[d.fcstValue] || d.fcstValue;
+      }
+    });
+
+    // 6. POP(강수확률) 값 변환 (소수점 제거)
+    filteredData.forEach((d: any) => {
+      if (d.category === "POP") {
+        d.fcstValue = `${parseInt(d.fcstValue, 10)}`;
+      }
+    });
+
+    // 7. 이모지 + fcstValue 배열 반환
+    const weatherData = getWeatherIconsAndValues(filteredData);
+    setWeatherList(weatherData);
+    console.log("🌈 최종 날씨 데이터:", weatherData);
+  };
+
+  // React 컴포넌트에서 실행
   useEffect(() => {
-    // fetchMountainWeather();
-    getCurPosition();
+    getWeatherList();
   }, []);
+
+  /** ======================================================================== */
 
   // useEffect(() => {
   //   if (currentMyLocation.lat !== 0 && currentMyLocation.lng !== 0) {
@@ -91,39 +205,6 @@ function MapViewPage() {
   //     });
   //   }
   // }, [currentMyLocation]);
-
-  /** ======================================================================== */
-  const fetchMountainWeather = async () => {
-    const authKey = "RyYwM3--Q0mmMDN_vqNJHw";
-    const mountainNum = 5;
-    const base_date = dayjs().format("YYYYMMDD"); // API 형식에 맞게 YYYYMMDD로 변환
-    const base_time = dayjs().format("HH00"); // 현재 시간의 정각을 기준으로 설정
-
-    // const url = `http://apihub.kma.go.kr/api/typ08/getMountainWeather`;
-    const url = `http://apihub.kma.go.kr/api/typ08/getMountainWeather`;
-    const params = new URLSearchParams({
-      mountainNum,
-      base_date,
-      base_time,
-      authKey,
-    });
-
-    try {
-      const response = await fetch(`${url}?${params.toString()}`, {
-        // method: "GET",
-        headers: { "Access-Control-Allow-Origin": "*" },
-        // mode: "cors",
-        // credentials: "include",
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      console.log("날씨 데이터:", data);
-    } catch (error) {
-      console.error("API 호출 오류:", error);
-    }
-  };
 
   /** ======================================================================== */
 
@@ -239,8 +320,6 @@ function MapViewPage() {
     // };
   }, [mountain, currentMyLocation]);
 
-  useEffect(() => {}, []);
-
   /** =-=-=-=-=-=-=-=-=-=-=-=-=-===-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-= */
 
   const calculate3DDistance = (
@@ -344,6 +423,10 @@ function MapViewPage() {
   }, [mountain, courseList, courseStats]); // 🚨 mountain이 변경될 때만 실행되도록 제한
   /** =-=-=-=-=-=-=-=-=-=-=-=-=-===-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-= */
 
+  console.log("weatherEmojiList", weatherEmojiList.length);
+
+  /** =-=-=-=-=-=-=-=-=-=-=-=-=-===-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-= */
+
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="container mx-auto p-4">
@@ -354,24 +437,18 @@ function MapViewPage() {
               className="flex items-center text-gray-600 hover:text-gray-800"
             >
               <ArrowLeft className="w-5 h-5 mr-2 cursor-pointer" />
-              목록으로
             </button>
           </div>
 
           {error && <p className="mb-4 text-red-500">{error}</p>}
 
-          <div
-            ref={mapElement}
-            className={`w-full ${
-              isMobile() ? "h-[300px]" : "h-[600px]"
-            } rounded-lg overflow-hidden shadow-inner`}
-          />
-          <div className="pt-6">
+          <div>
             <div className="flex justify-between pb-4">
               <div className="flex">
                 <h1 className="text-2xl font-bold pt-4 pr-2">
                   {mountain.name}
                 </h1>
+
                 {mountain.ctpvNm && (
                   <div className="pt-3 pr-2">
                     <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mt-2">
@@ -380,6 +457,7 @@ function MapViewPage() {
                   </div>
                 )}
               </div>
+
               <div
                 className="pt-5 flex  justify-between"
                 style={{ width: "60px" }}
@@ -392,8 +470,39 @@ function MapViewPage() {
                 />
               </div>
             </div>
+
+            <div className="w-full flex justify-center items-center gap-4 text-3xl">
+              {weatherList.map((item, i) => (
+                <div
+                  key={i}
+                  className={`cursor-pointer transition-transform duration-200 hover:scale-125 ${
+                    selectedIcon === item.emoji ? "scale-150 text-blue-500" : ""
+                  }`}
+                  onClick={() => setSelectedIcon(item.emoji)}
+                >
+                  {item.emoji}
+                </div>
+              ))}
+            </div>
+            {/* {weatherEmojiList.length > 0 && (
+              <div className="w-full flex justify-center items-center pb-10">
+                {weatherEmojiList.map((item: any, i: number) => (
+                  <div key={i} className="text-4xl">
+                    {item}
+                  </div>
+                ))}
+              </div>
+            )} */}
+
             <div className=" text-stone-600 pb-4 ">{mountain.address}</div>
-            <div className="font-thin">{mountain.reason}</div>
+            <div className="font-thin pb-6">{mountain.reason}</div>
+
+            <div
+              ref={mapElement}
+              className={`w-full ${
+                isMobile() ? "h-[150px]" : "h-[300px]"
+              } rounded-lg overflow-hidden shadow-inner`}
+            />
 
             <div className="pt-10">
               <div className="text-2xl ">추천 코스</div>
