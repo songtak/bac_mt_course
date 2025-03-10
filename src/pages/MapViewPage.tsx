@@ -1,13 +1,21 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Share, BookmarkIcon } from "lucide-react";
-// import { mountains } from "../data/mountains";
 import { parseGpx } from "../utils/gpxParser";
 import { mountains, createNumberList, isMobile } from "../utils/helpers";
 import dayjs from "dayjs";
 import _ from "lodash";
 import { getMountainWeather } from "../services/weatherApi";
-import { weatherCode, weatherEmoji } from "../models/weather"; // JSON 데이터 import
+import {
+  getWeatherIconsAndValues,
+  getWeatherEmoji,
+} from "../utils/weaderHelpers";
+import {
+  customParseGpx,
+  calculateElevationGain,
+  calculate3DDistance,
+  isWithin50Meters,
+} from "../utils/geoHeplers";
 
 interface NaverMap {
   setCenter: (latlng: naver.maps.LatLng) => void;
@@ -18,14 +26,13 @@ interface NaverMap {
 function MapViewPage() {
   const { mountainName } = useParams();
   const navigate = useNavigate();
-  const [error, setError] = useState<string>("");
   const mapRef = useRef<NaverMap | null>(null);
-  const mapElement = useRef<HTMLDivElement>(null);
+  const mapElement = useRef<HTMLDivElement | NaverMap>(null);
   const polylineRef = useRef<naver.maps.Polyline | null>(null);
   const markerRef = useRef<naver.maps.Marker | null>(null);
+  const hasFetchedLocation = useRef(false);
 
-  // console.log("mapElement", mapElement);
-
+  const [error, setError] = useState<string>("");
   /** 선택한 코스 */
   const [selectedCourse, setSelectedCourse] = useState<number>(1);
   /** 코스 정보 목록 */
@@ -38,94 +45,206 @@ function MapViewPage() {
     lat: 0,
     lng: 0,
   });
-  const [locationLoading, setLocationLoading] = useState(false);
+
+  /** 보여줄 위치의 버튼 타입 */
+  const [locationButtonType, setLocationButtonType] = useState<"peak" | "user">(
+    "peak"
+  );
+
+  /** 정상인지 판별 */
+  const [isPeak, setIsPeak] = useState<boolean>(false);
 
   /** 날씨 이모지 */
   const [weatherEmojiList, setWeatherEmojiList] = useState<string[]>([]);
+  /** 이모지 + fcstValue 배열 */
   const [weatherList, setWeatherList] = useState<any[]>([]);
 
+  /** 선택된 날씨 이모지 */
   const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
 
+  /** 산 정보 */
   const mountain = mountains().find((m) => m.name === mountainName);
 
+  /** 코스 갯수 */
   const courseList = createNumberList(mountain?.fileLength as number);
 
-  const handleClickCourse = (course: number) => {
+  console.log("locationButtonType", locationButtonType);
+
+  /** ======================================================================== */
+
+  /** 코스 선택 */
+  const handleClickCourse = async (course: number) => {
     setSelectedCourse(course);
   };
 
-  const getCurPosition = () => {
-    setLocationLoading(true);
-    const success = (location) => {
-      setCurrentMyLocation({
-        lat: location.coords.latitude,
-        lng: location.coords.longitude,
-      });
-      setLocationLoading(false);
-    };
+  /** 등산 완료 버튼 클릭 */
+  const handleClickPeakHunter = () => {};
 
-    const error = () => {
-      setCurrentMyLocation({ lat: 37.5666103, lng: 126.9783882 });
-      setLocationLoading(false);
-    };
-
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(success, error);
+  const handleShare = async () => {
+    if (navigator.share) {
+      // 모바일 기기에서 네이티브 공유
+      try {
+        await navigator.share({
+          title: document.title,
+          text: "이 링크를 공유합니다!",
+          url: window.location.href,
+        });
+      } catch (error) {
+        console.error("공유 실패:", error);
+      }
+    } else {
+      // 웹에서는 클립보드 복사
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        alert("주소가 복사되었습니다!");
+      } catch (error) {
+        console.error("클립보드 복사 실패:", error);
+      }
     }
   };
 
-  // console.log("currentMyLocation", currentMyLocation);
-  const getNearestPastHour = () => {
-    return dayjs().minute() === 0
-      ? dayjs().subtract(1, "hour").startOf("hour").format("HHmm") // 정시라면 한 시간 전 반환
-      : dayjs().startOf("hour").format("HHmm"); // 정시가 아니면 현재 시간의 정시 반환
+  /** 코스를 맵에 보여주기 및 산으로 시점 포커스 */
+  const setGpxCourseAndPocusMap = () => {
+    if (!mapElement.current || !mountain) return;
+
+    const mapOptions = {
+      center: new naver.maps.LatLng(mountain.lat, mountain.lot),
+      zoom: 12,
+      mapTypeControl: true,
+    };
+
+    const map = new naver.maps.Map(mapElement.current, mapOptions);
+    mapRef.current = map; // ✅ mapRef를 저장하여 참조 유지
+
+    // setTimeout(() => {
+    //   const circle = new naver.maps.Circle({
+    //     map: mapRef.current,
+    //     center: new naver.maps.LatLng(mountain.lat, mountain.lon),
+    //     radius: 50,
+    //     fillColor: "#ff0000",
+    //     fillOpacity: 0.8, // ✅ 더 불투명하게 설정
+    //     strokeColor: "#ff0000",
+    //     strokeOpacity: 1,
+    //     strokeWeight: 5, // ✅ 테두리 두껍게
+    //     zIndex: 1000, // ✅ 다른 요소보다 위로 표시
+    //   });
+
+    //   console.log("✅ 네이버 지도 원 추가됨:", circle);
+
+    //   // ✅ 원이 지도에서 보이도록 지도 중심 이동
+    //   mapRef.current.setCenter(
+    //     new naver.maps.LatLng(mountain.lat, mountain.lon)
+    //   );
+
+    //   // ✅ 원이 지도 화면 안에 들어오도록 자동 조정
+    //   const bounds = new naver.maps.LatLngBounds();
+    //   bounds.extend(new naver.maps.LatLng(mountain.lat, mountain.lon));
+    //   mapRef.current.fitBounds(bounds);
+    // }, 1000); // ✅ 지도 로드 후 1초 뒤 원 추가
+
+    console.log("✅ 네이버 지도 초기화 완료");
+    fetch(
+      `https://songtak.github.io/bac_mt_course/assets/bac_gpx/${
+        mountain.name
+      }/${mountain.name}_00000000${
+        selectedCourse < 10 ? "0" : ""
+      }${selectedCourse}.gpx`
+    )
+      .then((response) => response.blob())
+      .then((blob) => {
+        const file = new File([blob], "track.gpx");
+        return parseGpx(file);
+      })
+      .then((coordinates) => {
+        if (coordinates.length > 0) {
+          const path = coordinates.map(
+            ([lat, lng]) => new naver.maps.LatLng(lat, lng)
+          );
+          // setPeakLocation({lat:lat, lng:lng})
+
+          polylineRef.current = new naver.maps.Polyline({
+            path: path,
+            strokeColor: "#fba12b",
+            strokeWeight: 3,
+            map: map,
+          });
+        }
+      })
+      .catch((err) => {
+        setError("GPX 파일을 불러오는데 실패했습니다");
+        console.error(err);
+      });
+
+    // ✅ **지도 초기화 후 위치 가져오기 (최초 한 번만 실행)**
+    if (!hasFetchedLocation.current) {
+      setTimeout(() => getCurPosition(), 500); // 💡 지도 초기화 후 0.5초 뒤 실행
+      hasFetchedLocation.current = true;
+    }
+
+    return () => {
+      if (polylineRef.current) polylineRef.current.setMap(null);
+    };
+  };
+  /** ======================================================================== */
+
+  /** 📍 현재 위치 가져오는 함수 */
+  const getCurPosition = (isCenter: any = false) => {
+    if (!navigator.geolocation) {
+      console.error("Geolocation을 지원하지 않습니다.");
+      return;
+    }
+
+    console.log("📡 getCurPosition 호출됨");
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        console.log("📍 현재 위치:", lat, lng);
+
+        setCurrentMyLocation({ lat, lng });
+
+        if (mapRef.current) {
+          const newPosition = new naver.maps.LatLng(lat, lng);
+          if (isCenter) {
+            mapRef.current.setCenter(newPosition);
+            mapRef.current.setZoom(18); // 🔹 원하는 줌 레벨로 설정 (예: 16)
+          }
+
+          if (markerRef.current) {
+            console.log("✅ 기존 마커 위치 업데이트");
+            markerRef.current.setPosition(newPosition);
+            markerRef.current.setMap(mapRef.current);
+          } else {
+            console.log("🆕 새로운 마커 추가");
+            markerRef.current = new naver.maps.Marker({
+              position: newPosition,
+              map: mapRef.current,
+              icon: {
+                content: `
+                <div style="
+                  width:24px;
+                  height:24px;
+                  background:#ff3b30;
+                  border-radius:50%;
+                  border:3px solid white;
+                  box-shadow:0px 0px 10px rgba(0,0,0,0.3);
+                  z-index: 9999;
+                "></div>`,
+                anchor: new naver.maps.Point(12, 12),
+              },
+            });
+            console.log("🎯 마커가 추가되었습니다.", markerRef.current);
+          }
+        }
+      },
+      (error) => {
+        console.error("❌ 위치 정보를 가져오는 데 실패했습니다.", error);
+      }
+    );
   };
 
   /** ======================================================================== */
-  const getWeatherIconsAndValues = (filteredData: any[]) => {
-    return filteredData.map((d: any) => ({
-      emoji: getWeatherEmoji(d.category, d.fcstValue),
-      value: d.fcstValue, // 원본 fcstValue 그대로 반환
-    }));
-  };
-
-  // 특정 값에 맞는 라벨 찾기 (범위 기반)
-  const getWeatherLabel = (category: string, value: string | number) => {
-    const categoryData = weatherCode[category];
-    if (!categoryData || !categoryData.range) return value; // 범위 데이터가 없으면 그대로 반환
-
-    if (Array.isArray(categoryData.range)) {
-      if (value === "강수없음" || value === "적설없음") return value; // 강수/적설 없음 그대로 반환
-      const numericValue = parseFloat(value as string); // 숫자로 변환
-      if (isNaN(numericValue)) return value; // 숫자가 아닐 경우 원래 값 반환
-
-      const rangeMatch = categoryData.range.find(
-        (r) => numericValue >= r.min && (r.max === null || numericValue < r.max)
-      );
-      return rangeMatch ? rangeMatch.label : value; // **범위 초과 방지**
-    }
-
-    return value; // 범위가 아닌 경우 그대로 반환
-  };
-
-  // 특정 값에 맞는 이모지 찾기
-  const getWeatherEmoji = (category: string, value: string | number) => {
-    const label = getWeatherLabel(category, value);
-
-    console.log(
-      `🧐 Debug | Category: ${category}, Value: ${value}, Label: ${label}, Emoji: ${
-        weatherEmoji[category]?.[label] || "❓"
-      }`
-    );
-
-    return weatherEmoji[category]?.[label] || "❓";
-  };
-
-  const getWeatherIcons = (filteredData: any[]) => {
-    return filteredData.map((d: any) =>
-      getWeatherEmoji(d.category, d.fcstValue)
-    );
-  };
 
   // 날씨 데이터를 가져오고 이모지를 매핑하는 함수
   const getWeatherList = async () => {
@@ -154,8 +273,6 @@ function MapViewPage() {
       (d: any) => parseInt(d.fcstTime, 10) === closestFcstTime
     );
 
-    console.log("filteredData", filteredData);
-
     // 5. SKY 코드 변환 예외처리
     const SKY_MAPPING: Record<string, string> = {
       "1.0": "맑음",
@@ -181,205 +298,71 @@ function MapViewPage() {
     console.log("🌈 최종 날씨 데이터:", weatherData);
   };
 
-  // React 컴포넌트에서 실행
+  /** ======================================================================== */
+
+  /** 산 코스 취득 */
+  useEffect(() => {
+    setGpxCourseAndPocusMap();
+  }, [_.isEmpty(mountain), selectedCourse]);
+
+  /** ✅ `currentMyLocation`이 변경될 때 마커 업데이트 */
+  useEffect(() => {
+    if (!mapRef.current || currentMyLocation.lat === 0) return;
+
+    const newPosition = new naver.maps.LatLng(
+      currentMyLocation.lat,
+      currentMyLocation.lng
+    );
+
+    if (
+      isWithin50Meters(
+        currentMyLocation.lat,
+        currentMyLocation.lng,
+        mountain.lat,
+        mountain.lon
+      )
+    ) {
+      console.log("🎉 목표 지점 도착!");
+      setIsPeak(true);
+    } else {
+      setIsPeak(false);
+    }
+
+    if (markerRef.current) {
+      markerRef.current.setPosition(newPosition);
+    } else {
+      markerRef.current = new naver.maps.Marker({
+        position: newPosition,
+        map: mapRef.current,
+        icon: {
+          content: `
+          <div style="
+            width:24px;
+            height:24px;
+            background:#ff3b30;
+            border-radius:50%;
+            border:3px solid white;
+            box-shadow:0px 0px 10px rgba(0,0,0,0.3);
+            z-index: 9999;
+          "></div>`,
+          anchor: new naver.maps.Point(12, 12),
+        },
+      });
+
+      console.log("🎯 마커가 추가되었습니다.", markerRef.current);
+    }
+  }, [currentMyLocation]);
+
+  /** 날씨 정보 취득 */
   useEffect(() => {
     getWeatherList();
   }, []);
-
-  /** ======================================================================== */
-
-  // useEffect(() => {
-  //   if (currentMyLocation.lat !== 0 && currentMyLocation.lng !== 0) {
-  //     // 네이버 지도 옵션 선택
-
-  //     // mapRef.current = new naver.maps.Map("map", mapOptions);
-
-  //     new naver.maps.Marker({
-  //       // 생성될 마커의 위치
-  //       position: new naver.maps.LatLng(
-  //         currentMyLocation.lat,
-  //         currentMyLocation.lng
-  //       ),
-  //       // 마커를 표시할 Map 객체
-  //       map: mapRef.current,
-  //     });
-  //   }
-  // }, [currentMyLocation]);
-
-  /** ======================================================================== */
-
-  const toRadians = (degrees: number) => (degrees * Math.PI) / 180;
-
-  const haversineDistance = (
-    lat1: number,
-    lon1: number,
-    lat2: number,
-    lon2: number
-  ): number => {
-    const R = 6371; // 지구 반지름 (km)
-    const dLat = toRadians(lat2 - lat1);
-    const dLon = toRadians(lon2 - lon1);
-
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(toRadians(lat1)) *
-        Math.cos(toRadians(lat2)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-    return R * c; // 결과값 (km)
-  };
-
-  /** =-=-=-=-=-=-=-=-=-=-=-=-=-===-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-= */
-  /** =-=-=-=-=-=-=-=-=-=-=-=-=-===-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-= */
-  useEffect(() => {
-    if (!mapElement.current || !mountain) return;
-
-    const mapOptions = {
-      center: new naver.maps.LatLng(mountain.lat, mountain.lot),
-      zoom: 13,
-      // zoomControl: true,
-      // zoomControlOptions: {
-      //   style: naver.maps.ZoomControlStyle.SMALL,
-      //   position: naver.maps.Position.TOP_RIGHT,
-      // },
-      mapTypeControl: true,
-    };
-
-    const map = new naver.maps.Map(mapElement.current, mapOptions);
-    // mapRef.current = map;
-
-    // Load GPX file
-    fetch(
-      // `https://songtak.github.io/bac_mt_course/assets/bac_gpx/${
-      `/assets/bac_gpx/${mountain.name}/${mountain.name}_00000000${
-        selectedCourse < 10 ? "0" : ""
-      }${selectedCourse}.gpx`
-    )
-      .then((response) => response.blob())
-      .then((blob) => {
-        const file = new File([blob], "track.gpx");
-        return parseGpx(file);
-      })
-      .then((coordinates) => {
-        if (coordinates.length > 0) {
-          // Create polyline
-          const path = coordinates.map(
-            ([lat, lng]) => new naver.maps.LatLng(lat, lng)
-          );
-          polylineRef.current = new naver.maps.Polyline({
-            path: path,
-            strokeColor: "#fba12b",
-            strokeWeight: 3,
-            map: map,
-          });
-
-          // Fit bounds
-          const bounds = new naver.maps.LatLngBounds(
-            path.reduce(
-              (bounds, coord) => bounds.extend(coord),
-              new naver.maps.LatLngBounds(path[0], path[0])
-            )
-          );
-          // map.fitBounds(bounds);
-        }
-      })
-      .catch((err) => {
-        setError("GPX 파일을 불러오는데 실패했습니다");
-        console.error(err);
-      });
-
-    // if (currentMyLocation.lat !== 0 && currentMyLocation.lng !== 0) {
-    //   //   console.log("???");
-
-    //   //   // 네이버 지도 옵션 선택
-
-    //   //   // mapRef.current = new naver.maps.Map("map", mapOptions);
-
-    //   new naver.maps.Marker({
-    //     // 생성될 마커의 위치
-    //     position: new naver.maps.LatLng(
-    //       currentMyLocation.lat,
-    //       currentMyLocation.lng
-    //     ),
-    //     // 마커를 표시할 Map 객체
-    //     map: map,
-    //   });
-    // }
-
-    // Cleanup
-    // return () => {
-    //   if (markerRef.current) {
-    //     markerRef.current.setMap(null);
-    //   }
-    //   if (polylineRef.current) {
-    //     polylineRef.current.setMap(null);
-    //   }
-    // };
-  }, [mountain, currentMyLocation]);
-
-  /** =-=-=-=-=-=-=-=-=-=-=-=-=-===-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-= */
-
-  const calculate3DDistance = (
-    points: { lat: number; lon: number; ele: number }[]
-  ): number => {
-    let totalDistance = 0;
-
-    for (let i = 0; i < points.length - 1; i++) {
-      const { lat: lat1, lon: lon1, ele: ele1 } = points[i];
-      const { lat: lat2, lon: lon2, ele: ele2 } = points[i + 1];
-
-      // 2D 거리 계산 (위도, 경도만 사용)
-      const distance2D = haversineDistance(lat1, lon1, lat2, lon2);
-
-      // 고도 차이 계산 (km 단위로 변환)
-      const elevationChange = (ele2 - ele1) / 1000; // m → km 변환
-
-      // 3D 거리 계산 (피타고라스 정리 사용)
-      const distance3D = Math.sqrt(distance2D ** 2 + elevationChange ** 2);
-
-      totalDistance += distance3D;
-    }
-
-    return totalDistance;
-  };
-  const customParseGpx = async (
-    file: File
-  ): Promise<{ lat: number; lon: number; ele: number }[]> => {
-    const text = await file.text();
-    const parser = new DOMParser();
-    const xml = parser.parseFromString(text, "application/xml");
-
-    const points = Array.from(xml.getElementsByTagName("trkpt")).map((pt) => ({
-      lat: parseFloat(pt.getAttribute("lat")!),
-      lon: parseFloat(pt.getAttribute("lon")!),
-      ele: parseFloat(pt.getElementsByTagName("ele")[0]?.textContent || "0"),
-    }));
-
-    return points;
-  };
-
-  const calculateElevationGain = (
-    points: { lat: number; lon: number; ele: number }[]
-  ): number => {
-    let totalGain = 0;
-
-    for (let i = 1; i < points.length; i++) {
-      const elevationDifference = points[i].ele - points[i - 1].ele;
-      if (elevationDifference > 0) {
-        totalGain += elevationDifference;
-      }
-    }
-
-    return totalGain; // 단위: m
-  };
 
   if (!mountain) {
     return <div>산을 찾을 수 없습니다.</div>;
   }
 
+  /** 산 코스 길이와 상승 고도 취득 */
   useEffect(() => {
     if (!mountain) return;
 
@@ -423,13 +406,11 @@ function MapViewPage() {
   }, [mountain, courseList, courseStats]); // 🚨 mountain이 변경될 때만 실행되도록 제한
   /** =-=-=-=-=-=-=-=-=-=-=-=-=-===-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-= */
 
-  console.log("weatherEmojiList", weatherEmojiList.length);
-
   /** =-=-=-=-=-=-=-=-=-=-=-=-=-===-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-= */
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <div className="container mx-auto p-4">
+      <div className="container mx-auto p-4" style={{ maxWidth: "700px" }}>
         <div className="bg-white rounded-lg shadow-lg p-6">
           <div className="flex items-center justify-between mb-6">
             <button
@@ -462,7 +443,7 @@ function MapViewPage() {
                 className="pt-5 flex  justify-between"
                 style={{ width: "60px" }}
               >
-                <Share className="cursor-pointer" />
+                <Share className="cursor-pointer" onClick={handleShare} />
                 <BookmarkIcon
                   // fill="orange"
                   // color="orange"
@@ -500,9 +481,51 @@ function MapViewPage() {
             <div
               ref={mapElement}
               className={`w-full ${
-                isMobile() ? "h-[150px]" : "h-[300px]"
+                isMobile() ? "h-[180px]" : "h-[360px]"
               } rounded-lg overflow-hidden shadow-inner`}
             />
+            {locationButtonType !== "user" && (
+              <div className="mt-4">
+                <button
+                  onClick={() => {
+                    getCurPosition(true);
+                    setLocationButtonType("user");
+                  }}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 transition"
+                >
+                  내 위치
+                </button>
+              </div>
+            )}
+            {locationButtonType !== "peak" && (
+              <div className="mt-4">
+                <button
+                  onClick={() => {
+                    setGpxCourseAndPocusMap();
+                    setLocationButtonType("peak");
+                  }}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 transition"
+                >
+                  산으로
+                </button>
+              </div>
+            )}
+
+            <div className="mt-4">
+              <button
+                disabled={!isPeak}
+                onClick={() => {
+                  handleClickPeakHunter();
+                }}
+                className={`px-4 py-2 ${
+                  isPeak ? "bg-blue-500" : "bg-gray-500"
+                } text-white rounded-md shadow-md hover:${
+                  isPeak && "bg-blue-600"
+                } transition`}
+              >
+                등산완료
+              </button>
+            </div>
 
             <div className="pt-10">
               <div className="text-2xl ">추천 코스</div>
