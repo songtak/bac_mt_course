@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Share, BookmarkIcon } from "lucide-react";
 import { parseGpx } from "../utils/gpxParser";
-import { mountains, createNumberList, isMobile } from "../utils/helpers";
+import { createNumberList, isMobile } from "../utils/helpers";
 import dayjs from "dayjs";
 import _ from "lodash";
 import { getMountainWeather } from "../services/weatherApi";
@@ -16,6 +16,8 @@ import {
   calculate3DDistance,
   isWithin50Meters,
 } from "../utils/geoHeplers";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../utils/firebaseConfig";
 
 interface NaverMap {
   setCenter: (latlng: naver.maps.LatLng) => void;
@@ -23,66 +25,85 @@ interface NaverMap {
   fitBounds: (bounds: naver.maps.LatLngBounds) => void;
 }
 
+interface Mountain {
+  id: string;
+  name: string;
+  height: number;
+  latitude: number;
+  longitude: number;
+  capital: string;
+  address: string;
+  fileLength: number;
+  gpxId?: string;
+  reason?: string;
+  isBac: boolean;
+  code?: string;
+}
+
 function MapViewPage() {
-  const { mountainName } = useParams();
+  const { mountainId } = useParams();
   const navigate = useNavigate();
   const mapRef = useRef<NaverMap | null>(null);
   const mapElement = useRef<HTMLDivElement | NaverMap>(null);
   const polylineRef = useRef<naver.maps.Polyline | null>(null);
-  const markerRef = useRef<naver.maps.Marker | null>(null);
+  const markerRef = useRef<naver.maps.Marker | null>(null); // 내 위치 마커
+  const mountainMarkerRef = useRef<naver.maps.Marker | null>(null); // 산 위치 마커
   const hasFetchedLocation = useRef(false);
 
   const [error, setError] = useState<string>("");
-  /** 선택한 코스 */
   const [selectedCourse, setSelectedCourse] = useState<number>(1);
-  /** 코스 정보 목록 */
   const [courseStats, setCourseStats] = useState<
     { distance: number; elevation: number }[]
   >([]);
-
-  /** 내 위치 정보 */
   const [currentMyLocation, setCurrentMyLocation] = useState({
     lat: 0,
     lng: 0,
   });
-
-  /** 보여줄 위치의 버튼 타입 */
   const [locationButtonType, setLocationButtonType] = useState<"peak" | "user">(
     "peak"
   );
-
-  /** 정상인지 판별 */
   const [isPeak, setIsPeak] = useState<boolean>(false);
-
-  /** 날씨 이모지 */
   const [weatherEmojiList, setWeatherEmojiList] = useState<string[]>([]);
-  /** 이모지 + fcstValue 배열 */
   const [weatherList, setWeatherList] = useState<any[]>([]);
-
-  /** 선택된 날씨 이모지 */
   const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
 
-  /** 산 정보 */
-  const mountain = mountains().find((m) => m.name === mountainName);
+  // Firebase에서 mountainId로 산 정보 불러오기
+  const [mountainData, setMountainData] = useState<Mountain | null>(null);
+  useEffect(() => {
+    if (!mountainId) return;
+    const fetchMountain = async () => {
+      try {
+        const docRef = doc(db, "mountains", mountainId);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setMountainData({ id: docSnap.id, ...docSnap.data() } as Mountain);
+        } else {
+          setError("해당 산을 찾을 수 없습니다.");
+        }
+      } catch (err) {
+        console.error("Error fetching mountain:", err);
+        setError("산 정보를 불러오는데 실패했습니다.");
+      }
+    };
+    fetchMountain();
+  }, [mountainId]);
 
-  /** 코스 갯수 */
-  const courseList = createNumberList(mountain?.fileLength as number);
+  /** 코스 목록 */
+  const courseList: any[] = [];
+  // const courseList = mountainData ? createNumberList(mountainData.id) : [];
 
-  console.log("locationButtonType", locationButtonType);
+  // console.log("courseList", courseList.length);
 
-  /** ======================================================================== */
-
-  /** 코스 선택 */
   const handleClickCourse = async (course: number) => {
     setSelectedCourse(course);
   };
 
-  /** 등산 완료 버튼 클릭 */
-  const handleClickPeakHunter = () => {};
+  const handleClickPeakHunter = () => {
+    // TODO: 등산 완료 로직 구현
+  };
 
   const handleShare = async () => {
     if (navigator.share) {
-      // 모바일 기기에서 네이티브 공유
       try {
         await navigator.share({
           title: document.title,
@@ -93,7 +114,6 @@ function MapViewPage() {
         console.error("공유 실패:", error);
       }
     } else {
-      // 웹에서는 클립보드 복사
       try {
         await navigator.clipboard.writeText(window.location.href);
         alert("주소가 복사되었습니다!");
@@ -103,50 +123,52 @@ function MapViewPage() {
     }
   };
 
-  /** 코스를 맵에 보여주기 및 산으로 시점 포커스 */
+  // 지도 초기화 및 산 마커와 GPX 코스 표시, 그리고 산 위치에 마커 추가
   const setGpxCourseAndPocusMap = () => {
-    if (!mapElement.current || !mountain) return;
+    if (!mapElement.current || !mountainData) return;
 
     const mapOptions = {
-      center: new naver.maps.LatLng(mountain.lat, mountain.lot),
-      zoom: 12,
+      center: new naver.maps.LatLng(
+        mountainData.latitude,
+        mountainData.longitude
+      ),
+      zoom: 14,
       mapTypeControl: true,
     };
 
     const map = new naver.maps.Map(mapElement.current, mapOptions);
-    mapRef.current = map; // ✅ mapRef를 저장하여 참조 유지
+    mapRef.current = map;
 
-    // setTimeout(() => {
-    //   const circle = new naver.maps.Circle({
-    //     map: mapRef.current,
-    //     center: new naver.maps.LatLng(mountain.lat, mountain.lon),
-    //     radius: 50,
-    //     fillColor: "#ff0000",
-    //     fillOpacity: 0.8, // ✅ 더 불투명하게 설정
-    //     strokeColor: "#ff0000",
-    //     strokeOpacity: 1,
-    //     strokeWeight: 5, // ✅ 테두리 두껍게
-    //     zIndex: 1000, // ✅ 다른 요소보다 위로 표시
-    //   });
-
-    //   console.log("✅ 네이버 지도 원 추가됨:", circle);
-
-    //   // ✅ 원이 지도에서 보이도록 지도 중심 이동
-    //   mapRef.current.setCenter(
-    //     new naver.maps.LatLng(mountain.lat, mountain.lon)
-    //   );
-
-    //   // ✅ 원이 지도 화면 안에 들어오도록 자동 조정
-    //   const bounds = new naver.maps.LatLngBounds();
-    //   bounds.extend(new naver.maps.LatLng(mountain.lat, mountain.lon));
-    //   mapRef.current.fitBounds(bounds);
-    // }, 1000); // ✅ 지도 로드 후 1초 뒤 원 추가
+    // 산 위치 마커 추가 (다른 색상으로 표시)
+    const mountainPosition = new naver.maps.LatLng(
+      mountainData.latitude,
+      mountainData.longitude
+    );
+    if (!mountainMarkerRef.current) {
+      mountainMarkerRef.current = new naver.maps.Marker({
+        position: mountainPosition,
+        map: map,
+        icon: {
+          content: `<div style="
+            width:24px;
+            height:24px;
+            background:#007AFF;
+            border-radius:50%;
+            border:3px solid white;
+          "></div>`,
+          anchor: new naver.maps.Point(12, 12),
+        },
+      });
+    } else {
+      mountainMarkerRef.current.setPosition(mountainPosition);
+      mountainMarkerRef.current.setMap(map);
+    }
 
     console.log("✅ 네이버 지도 초기화 완료");
     fetch(
       `https://songtak.github.io/bac_mt_course/assets/bac_gpx/${
-        mountain.name
-      }/${mountain.name}_00000000${
+        mountainData.name
+      }/${mountainData.name}_00000000${
         selectedCourse < 10 ? "0" : ""
       }${selectedCourse}.gpx`
     )
@@ -160,8 +182,6 @@ function MapViewPage() {
           const path = coordinates.map(
             ([lat, lng]) => new naver.maps.LatLng(lat, lng)
           );
-          // setPeakLocation({lat:lat, lng:lng})
-
           polylineRef.current = new naver.maps.Polyline({
             path: path,
             strokeColor: "#fba12b",
@@ -175,9 +195,8 @@ function MapViewPage() {
         console.error(err);
       });
 
-    // ✅ **지도 초기화 후 위치 가져오기 (최초 한 번만 실행)**
     if (!hasFetchedLocation.current) {
-      setTimeout(() => getCurPosition(), 500); // 💡 지도 초기화 후 0.5초 뒤 실행
+      setTimeout(() => getCurPosition(), 500);
       hasFetchedLocation.current = true;
     }
 
@@ -185,9 +204,8 @@ function MapViewPage() {
       if (polylineRef.current) polylineRef.current.setMap(null);
     };
   };
-  /** ======================================================================== */
 
-  /** 📍 현재 위치 가져오는 함수 */
+  // 현재 위치 마커 생성 (내 위치 마커는 markerRef에 저장)
   const getCurPosition = (isCenter: any = false) => {
     if (!navigator.geolocation) {
       console.error("Geolocation을 지원하지 않습니다.");
@@ -208,7 +226,7 @@ function MapViewPage() {
           const newPosition = new naver.maps.LatLng(lat, lng);
           if (isCenter) {
             mapRef.current.setCenter(newPosition);
-            mapRef.current.setZoom(18); // 🔹 원하는 줌 레벨로 설정 (예: 16)
+            mapRef.current.setZoom(18);
           }
 
           if (markerRef.current) {
@@ -216,25 +234,23 @@ function MapViewPage() {
             markerRef.current.setPosition(newPosition);
             markerRef.current.setMap(mapRef.current);
           } else {
-            console.log("🆕 새로운 마커 추가");
+            console.log("🆕 새로운 마커 추가 (내 위치)");
             markerRef.current = new naver.maps.Marker({
               position: newPosition,
               map: mapRef.current,
               icon: {
-                content: `
-                <div style="
+                content: `<div style="
                   width:24px;
                   height:24px;
                   background:#ff3b30;
                   border-radius:50%;
                   border:3px solid white;
                   box-shadow:0px 0px 10px rgba(0,0,0,0.3);
-                  z-index: 9999;
                 "></div>`,
                 anchor: new naver.maps.Point(12, 12),
               },
             });
-            console.log("🎯 마커가 추가되었습니다.", markerRef.current);
+            console.log("🎯 내 위치 마커 추가:", markerRef.current);
           }
         }
       },
@@ -244,68 +260,10 @@ function MapViewPage() {
     );
   };
 
-  /** ======================================================================== */
-
-  // 날씨 데이터를 가져오고 이모지를 매핑하는 함수
-  const getWeatherList = async () => {
-    const weatherList = await getMountainWeather();
-    console.log("weatherList", weatherList);
-
-    // 1. 현재 날짜 구하기 (YYYYMMDD 포맷)
-    const today = dayjs().format("YYYYMMDD");
-
-    // 2. 오늘 날짜의 fcstBase 데이터만 필터링
-    const todayData = weatherList.filter((d: any) => d.fcstBase === today);
-
-    if (todayData.length === 0) {
-      console.log("오늘 날짜의 예보 데이터가 없습니다.");
-      return;
-    }
-
-    // 3. 가장 가까운 fcstTime 찾기
-    const now = parseInt(dayjs().format("HHmm"), 10);
-    const closestFcstTime = todayData
-      .map((d: any) => parseInt(d.fcstTime, 10))
-      .sort((a, b) => Math.abs(now - a) - Math.abs(now - b))[0];
-
-    // 4. 해당 fcstTime의 모든 카테고리 데이터 필터링
-    const filteredData = todayData.filter(
-      (d: any) => parseInt(d.fcstTime, 10) === closestFcstTime
-    );
-
-    // 5. SKY 코드 변환 예외처리
-    const SKY_MAPPING: Record<string, string> = {
-      "1.0": "맑음",
-      "3.0": "구름많음",
-      "4.0": "흐림",
-    };
-    filteredData.forEach((d: any) => {
-      if (d.category === "SKY") {
-        d.fcstValue = SKY_MAPPING[d.fcstValue] || d.fcstValue;
-      }
-    });
-
-    // 6. POP(강수확률) 값 변환 (소수점 제거)
-    filteredData.forEach((d: any) => {
-      if (d.category === "POP") {
-        d.fcstValue = `${parseInt(d.fcstValue, 10)}`;
-      }
-    });
-
-    // 7. 이모지 + fcstValue 배열 반환
-    const weatherData = getWeatherIconsAndValues(filteredData);
-    setWeatherList(weatherData);
-    console.log("🌈 최종 날씨 데이터:", weatherData);
-  };
-
-  /** ======================================================================== */
-
-  /** 산 코스 취득 */
   useEffect(() => {
     setGpxCourseAndPocusMap();
-  }, [_.isEmpty(mountain), selectedCourse]);
+  }, [_.isEmpty(mountainData), selectedCourse]);
 
-  /** ✅ `currentMyLocation`이 변경될 때 마커 업데이트 */
   useEffect(() => {
     if (!mapRef.current || currentMyLocation.lat === 0) return;
 
@@ -315,11 +273,12 @@ function MapViewPage() {
     );
 
     if (
+      mountainData &&
       isWithin50Meters(
         currentMyLocation.lat,
         currentMyLocation.lng,
-        mountain.lat,
-        mountain.lon
+        mountainData.latitude,
+        mountainData.longitude
       )
     ) {
       console.log("🎉 목표 지점 도착!");
@@ -335,36 +294,27 @@ function MapViewPage() {
         position: newPosition,
         map: mapRef.current,
         icon: {
-          content: `
-          <div style="
+          content: `<div style="
             width:24px;
             height:24px;
             background:#ff3b30;
             border-radius:50%;
             border:3px solid white;
             box-shadow:0px 0px 10px rgba(0,0,0,0.3);
-            z-index: 9999;
           "></div>`,
           anchor: new naver.maps.Point(12, 12),
         },
       });
-
-      console.log("🎯 마커가 추가되었습니다.", markerRef.current);
+      console.log("🎯 내 위치 마커 추가:", markerRef.current);
     }
   }, [currentMyLocation]);
 
-  /** 날씨 정보 취득 */
   useEffect(() => {
-    getWeatherList();
+    // getWeatherList();
   }, []);
 
-  if (!mountain) {
-    return <div>산을 찾을 수 없습니다.</div>;
-  }
-
-  /** 산 코스 길이와 상승 고도 취득 */
   useEffect(() => {
-    if (!mountain) return;
+    if (courseList.length === 0) return;
 
     const fetchCourseStats = async () => {
       try {
@@ -373,8 +323,8 @@ function MapViewPage() {
             try {
               const response = await fetch(
                 `https://songtak.github.io/bac_mt_course/assets/bac_gpx/${
-                  mountain.name
-                }/${mountain.name}_00000000${i < 10 ? "0" : ""}${i}.gpx`
+                  mountainData.name
+                }/${mountainData.name}_00000000${i < 10 ? "0" : ""}${i}.gpx`
               );
               if (!response.ok) throw new Error("파일 없음");
 
@@ -400,13 +350,11 @@ function MapViewPage() {
         console.error("코스 데이터를 불러오는 중 오류 발생:", error);
       }
     };
-    if (courseStats.length < courseList.length) {
+    if (courseList.length && courseStats.length < courseList.length) {
       fetchCourseStats();
     }
-  }, [mountain, courseList, courseStats]); // 🚨 mountain이 변경될 때만 실행되도록 제한
-  /** =-=-=-=-=-=-=-=-=-=-=-=-=-===-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-= */
-
-  /** =-=-=-=-=-=-=-=-=-=-=-=-=-===-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-= */
+  }, [courseList]);
+  // }, [mountainData, courseList, courseStats]);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -421,162 +369,151 @@ function MapViewPage() {
             </button>
           </div>
 
-          {error && <p className="mb-4 text-red-500">{error}</p>}
+          {/* {error && <p className="mb-4 text-red-500">{error}</p>} */}
 
-          <div>
-            <div className="flex justify-between pb-4">
-              <div className="flex">
-                <h1 className="text-2xl font-bold pt-4 pr-2">
-                  {mountain.name}
-                </h1>
-
-                {mountain.ctpvNm && (
-                  <div className="pt-3 pr-2">
-                    <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mt-2">
-                      {mountain.ctpvNm}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              <div
-                className="pt-5 flex  justify-between"
-                style={{ width: "60px" }}
-              >
-                <Share className="cursor-pointer" onClick={handleShare} />
-                <BookmarkIcon
-                  // fill="orange"
-                  // color="orange"
-                  className="cursor-pointer"
-                />
-              </div>
-            </div>
-
-            <div className="w-full flex justify-center items-center gap-4 text-3xl">
-              {weatherList.map((item, i) => (
-                <div
-                  key={i}
-                  className={`cursor-pointer transition-transform duration-200 hover:scale-125 ${
-                    selectedIcon === item.emoji ? "scale-150 text-blue-500" : ""
-                  }`}
-                  onClick={() => setSelectedIcon(item.emoji)}
-                >
-                  {item.emoji}
+          {!mountainData ? (
+            <div>산 정보를 불러오는 중입니다...</div>
+          ) : (
+            <>
+              <div className="flex justify-between pb-4">
+                <div className="flex">
+                  <h1 className="text-2xl font-bold pt-4 pr-2">
+                    {mountainData.name}
+                  </h1>
+                  {mountainData.capital && (
+                    <div className="pt-3 pr-2">
+                      <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mt-2">
+                        {mountainData.capital}
+                      </span>
+                    </div>
+                  )}
                 </div>
-              ))}
-            </div>
-            {/* {weatherEmojiList.length > 0 && (
-              <div className="w-full flex justify-center items-center pb-10">
-                {weatherEmojiList.map((item: any, i: number) => (
-                  <div key={i} className="text-4xl">
-                    {item}
+                <div
+                  className="pt-5 flex justify-between"
+                  style={{ width: "60px" }}
+                >
+                  <Share className="cursor-pointer" onClick={handleShare} />
+                  <BookmarkIcon className="cursor-pointer" />
+                </div>
+              </div>
+
+              <div className="w-full flex justify-center items-center gap-4 text-3xl">
+                {weatherList.map((item, i) => (
+                  <div
+                    key={i}
+                    className={`cursor-pointer transition-transform duration-200 hover:scale-125 ${
+                      selectedIcon === item.emoji
+                        ? "scale-150 text-blue-500"
+                        : ""
+                    }`}
+                    onClick={() => setSelectedIcon(item.emoji)}
+                  >
+                    {item.emoji}
                   </div>
                 ))}
               </div>
-            )} */}
-
-            <div className=" text-stone-600 pb-4 ">{mountain.address}</div>
-            <div className="font-thin pb-6">{mountain.reason}</div>
-
-            <div
-              ref={mapElement}
-              className={`w-full ${
-                isMobile() ? "h-[180px]" : "h-[360px]"
-              } rounded-lg overflow-hidden shadow-inner`}
-            />
-            {locationButtonType !== "user" && (
-              <div className="mt-4">
-                <button
-                  onClick={() => {
-                    getCurPosition(true);
-                    setLocationButtonType("user");
-                  }}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 transition"
-                >
-                  내 위치
-                </button>
+              <div className=" text-stone-600 pb-4 ">
+                {mountainData.address}
               </div>
-            )}
-            {locationButtonType !== "peak" && (
-              <div className="mt-4">
-                <button
-                  onClick={() => {
-                    setGpxCourseAndPocusMap();
-                    setLocationButtonType("peak");
-                  }}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 transition"
-                >
-                  산으로
-                </button>
-              </div>
-            )}
+              <div className="font-thin pb-6">{mountainData.reason}</div>
 
-            <div className="mt-4">
-              <button
-                disabled={!isPeak}
-                onClick={() => {
-                  handleClickPeakHunter();
-                }}
-                className={`px-4 py-2 ${
-                  isPeak ? "bg-blue-500" : "bg-gray-500"
-                } text-white rounded-md shadow-md hover:${
-                  isPeak && "bg-blue-600"
-                } transition`}
-              >
-                등산완료
-              </button>
-            </div>
-
-            <div className="pt-10">
-              <div className="text-2xl ">추천 코스</div>
-              <div className="font-thin pb-4 text-xs">
-                (* 코스 번호는 사용자 편의를 위해 임의로 설정한 값으로 실제
-                코스명과 다를 수 있습니다.)
-              </div>
-              {courseList.map((item, i) => (
-                <div
-                  key={i}
-                  className={`flex pt-1 pb-1 hover:shadow-md hover:bg-sky-50 cursor-pointer ${
-                    selectedCourse === i + 1 && "bg-sky-100 opacity-95"
-                  } rounded-lg
-                  `}
-                  onClick={() => {
-                    handleClickCourse(item);
-                  }}
-                >
-                  <span
-                    style={{ width: "80px" }}
-                    className={`cursor-pointer text-lg ${
-                      selectedCourse === i + 1
-                        ? "text-slate-900"
-                        : "text-slate-500"
-                    }  pl-3`}
+              <div
+                ref={mapElement}
+                className={`w-full ${
+                  isMobile() ? "h-[180px]" : "h-[360px]"
+                } rounded-lg overflow-hidden shadow-inner`}
+              />
+              {locationButtonType !== "user" && (
+                <div className="mt-4">
+                  <button
+                    onClick={() => {
+                      getCurPosition(true);
+                      setLocationButtonType("user");
+                    }}
+                    className="px-4 py-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 transition"
                   >
-                    {item} 코스
-                  </span>
-                  {courseStats[i] && (
-                    <span className="flex text-sm text-gray-600 ml-4">
-                      <div
-                        style={{ width: "80px" }}
-                        className="flex justify-between"
-                      >
-                        <div>🚶</div>
-                        <div>{courseStats[i].distance.toFixed(1)} km</div>
-                      </div>
-                      <div className="pl-4"></div>
-                      <div
-                        className=" flex pl-4 justify-between"
-                        style={{ width: "90px" }}
-                      >
-                        <div>⛰</div>
-                        <div>{courseStats[i].elevation.toFixed(0)} m</div>
-                      </div>
-                    </span>
-                  )}
+                    내 위치
+                  </button>
                 </div>
-              ))}
-            </div>
-          </div>
+              )}
+              {locationButtonType !== "peak" && (
+                <div className="mt-4">
+                  <button
+                    onClick={() => {
+                      setGpxCourseAndPocusMap();
+                      setLocationButtonType("peak");
+                    }}
+                    className="px-4 py-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 transition"
+                  >
+                    산으로
+                  </button>
+                </div>
+              )}
+
+              <div className="mt-4">
+                <button
+                  disabled={!isPeak}
+                  onClick={() => handleClickPeakHunter()}
+                  className={`px-4 py-2 ${
+                    isPeak ? "bg-blue-500" : "bg-gray-500"
+                  } text-white rounded-md shadow-md hover:${
+                    isPeak && "bg-blue-600"
+                  } transition`}
+                >
+                  등산완료
+                </button>
+              </div>
+
+              {courseList.length > 0 && (
+                <div className="pt-10">
+                  <div className="text-2xl ">추천 코스</div>
+                  <div className="font-thin pb-4 text-xs">
+                    (* 코스 번호는 사용자 편의를 위해 임의로 설정한 값으로 실제
+                    코스명과 다를 수 있습니다.)
+                  </div>
+                  {courseList.map((item, i) => (
+                    <div
+                      key={i}
+                      className={`flex pt-1 pb-1 hover:shadow-md hover:bg-sky-50 cursor-pointer ${
+                        selectedCourse === i + 1 && "bg-sky-100 opacity-95"
+                      } rounded-lg`}
+                      onClick={() => handleClickCourse(item)}
+                    >
+                      <span
+                        style={{ width: "80px" }}
+                        className={`cursor-pointer text-lg ${
+                          selectedCourse === i + 1
+                            ? "text-slate-900"
+                            : "text-slate-500"
+                        } pl-3`}
+                      >
+                        {item} 코스
+                      </span>
+                      {courseStats[i] && (
+                        <span className="flex text-sm text-gray-600 ml-4">
+                          <div
+                            style={{ width: "80px" }}
+                            className="flex justify-between"
+                          >
+                            <div>🚶</div>
+                            <div>{courseStats[i].distance.toFixed(1)} km</div>
+                          </div>
+                          <div className="pl-4"></div>
+                          <div
+                            className="flex pl-4 justify-between"
+                            style={{ width: "90px" }}
+                          >
+                            <div>⛰</div>
+                            <div>{courseStats[i].elevation.toFixed(0)} m</div>
+                          </div>
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
     </div>

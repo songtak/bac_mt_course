@@ -84,5 +84,5 @@ export const isWithin50Meters = (
   targetLon: number
 ): boolean => {
   const distance = haversineDistance(userLat, userLon, targetLat, targetLon);
-  return distance <= 50; // 50m 이내인지 확인
+  return distance <= 1; // 50m 이내인지 확인
 };

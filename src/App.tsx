@@ -7,6 +7,8 @@ import GPXExporter from "./pages/GPXExporter";
 import useAuth from "./utils/hooks/useAuth";
 import useUserStore from "./stores/useUserStore";
 import { getUserData } from "./services/userApi";
+import AddressSettingPage from "./pages/AddressSettingPage";
+import ExcelUploader from "./pages/ExcelUploader";
 
 function App() {
   const user = useAuth();
@@ -23,10 +25,11 @@ function App() {
     <>
       <ScrollToTop />
       <Routes>
+        {/* <Route path="/" element={<ExcelUploader />} /> */}
         <Route path="/" element={<PAGES.HomePage />} />
         <Route path="/gpx" element={<GPXExporter />} />
         <Route path="/list" element={<PAGES.MountainListPage />} />
-        <Route path="/map/:mountainName" element={<PAGES.MapViewPage />} />
+        <Route path="/map/:mountainId" element={<PAGES.MapViewPage />} />
         <Route path="/sign-up" element={<PAGES.SignUpPage />} />
         <Route path="/sign-in" element={<PAGES.LoginPage />} />
         <Route path="/my" element={<PAGES.MyPage />} />
