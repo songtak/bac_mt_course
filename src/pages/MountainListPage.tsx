@@ -18,8 +18,23 @@ import { db } from "../utils/firebaseConfig";
 import useUserStore from "../stores/useUserStore";
 import { useInView } from "react-intersection-observer";
 import { mountains } from "../utils/helpers";
+import HeightSlider from "../components/HeightSlider"; // HeightSlider 컴포넌트 import
 
-const cities = _.uniq(mountains().map((mountain) => mountain.ctpvNm)).sort();
+const cities = [
+  "강원특별자치도",
+  "경기도",
+  "경상남도",
+  "경상북도",
+  "부산광역시",
+  "서울특별시",
+  "울산광역시",
+  "인천광역시",
+  "전라남도",
+  "전북특별자치도",
+  "제주특별자치도",
+  "충청남도",
+  "충청북도",
+];
 
 interface Mountain {
   id: string;
@@ -59,15 +74,14 @@ const MountainListPage = () => {
     useState<QueryDocumentSnapshot<DocumentData> | null>(null);
   const [loading, setLoading] = useState(false);
 
-  /** 검색 여부 */
-  const [isSearch, setIsSearch] = useState(false);
-
   // UI에서 사용하는 필터 상태
   const [nameFilter, setNameFilter] = useState("");
   const [heightFilter, setHeightFilter] = useState<[number, number]>([0, 2000]);
   const [cityFilter, setCityFilter] = useState("");
   const [isBacFilter, setIsBacFilter] = useState(false);
   const [isFilterShow, setIsFilterShow] = useState<boolean>(false);
+  const [isFilterReset, setIsFilterReset] = useState<boolean>(false);
+  const [isSearched, setIsSearched] = useState<boolean>(false);
 
   // 실제 쿼리에 적용할 검색 필터 (검색 버튼 클릭 시 업데이트)
   const [searchFilters, setSearchFilters] =
@@ -242,6 +256,7 @@ const MountainListPage = () => {
       city: cityFilter,
       isBac: isBacFilter,
     });
+    setIsSearched(true);
   };
 
   // 필터 초기화: UI 상태와 active 검색 필터 모두 초기 상태로
@@ -251,34 +266,21 @@ const MountainListPage = () => {
     setCityFilter("");
     setIsBacFilter(false);
     setSearchFilters(defaultFilters);
-  };
-
-  // 높이 슬라이더 핸들러
-  const handleHeightChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    index: number
-  ) => {
-    const newHeight: [number, number] = [...heightFilter];
-    newHeight[index] = parseInt(e.target.value);
-    if (index === 0 && newHeight[0] > newHeight[1]) {
-      newHeight[0] = newHeight[1];
-    } else if (index === 1 && newHeight[1] < newHeight[0]) {
-      newHeight[1] = newHeight[0];
-    }
-    setHeightFilter(newHeight);
+    setIsFilterReset(!isFilterReset);
+    setIsSearched(false);
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between">
-          <div className="flex items-center mb-6 h-3"></div>
           <div>
             <h1
               className="text-3xl font-bold text-gray-800 mb-8 cursor-pointer"
               onClick={() => navigate("/")}
             >
-              ⛰️ 봉우리 헌터
+              봉우리 헌터
+              {/* ⛰️ */}
             </h1>
           </div>
 
@@ -295,7 +297,6 @@ const MountainListPage = () => {
             <div
               className="cursor-pointer"
               onClick={() => {
-                // handleLogout();
                 navigate("/my");
               }}
             >
@@ -322,10 +323,7 @@ const MountainListPage = () => {
               <ArrowUp />
             </div>
           ) : (
-            <div
-              className="flex justify-between "
-              // onClick={() => setIsFilterShow(true)}
-            >
+            <div className="flex justify-between ">
               <h2 className="text-xl font-semibold text-gray-800">검색</h2>
               <ArrowDown />
             </div>
@@ -334,69 +332,11 @@ const MountainListPage = () => {
           {isFilterShow && (
             <>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                {/* 이름 필터 */}
-                <div>
-                  <label
-                    htmlFor="nameFilter"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
-                    산 이름
-                  </label>
-                  <div className="relative">
-                    <input
-                      id="nameFilter"
-                      type="text"
-                      placeholder="산 이름을 입력하세요"
-                      value={nameFilter}
-                      onChange={(e) => setNameFilter(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <Search className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
-                  </div>
-                </div>
-
-                {/* 높이 필터 */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    높이 범위 ({heightFilter[0]}m ~ {heightFilter[1]}m)
-                  </label>
-                  <div className="space-y-4">
-                    <div>
-                      <span className="text-xs text-gray-500">
-                        최소: {heightFilter[0]}m
-                      </span>
-                      <input
-                        type="range"
-                        min={0}
-                        max={2000}
-                        step={50}
-                        value={heightFilter[0]}
-                        onChange={(e) => handleHeightChange(e, 0)}
-                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                      />
-                    </div>
-                    <div>
-                      <span className="text-xs text-gray-500">
-                        최대: {heightFilter[1]}m
-                      </span>
-                      <input
-                        type="range"
-                        min={0}
-                        max={2000}
-                        step={50}
-                        value={heightFilter[1]}
-                        onChange={(e) => handleHeightChange(e, 1)}
-                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                      />
-                    </div>
-                  </div>
-                </div>
-
                 {/* 도시 필터 */}
                 <div>
                   <label
                     htmlFor="cityFilter"
-                    className="block text-sm font-medium text-gray-700 mb-2"
+                    className="block text-sm font-bold text-gray-700 mb-2"
                   >
                     도시
                   </label>
@@ -415,11 +355,38 @@ const MountainListPage = () => {
                   </select>
                 </div>
 
+                {/* 높이 필터 - 듀얼 슬라이더로 대체 */}
+                <div>
+                  <HeightSlider
+                    heightFilter={heightFilter}
+                    setHeightFilter={setHeightFilter}
+                    isFilterReset={isFilterReset}
+                  />
+                </div>
+
+                {/* 이름 필터 */}
+                <div>
+                  <label
+                    htmlFor="nameFilter"
+                    className="block text-sm font-bold text-gray-700 mb-2"
+                  >
+                    산 이름
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="nameFilter"
+                      type="text"
+                      placeholder="산 이름을 입력하세요"
+                      value={nameFilter}
+                      onChange={(e) => setNameFilter(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <Search className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
+                  </div>
+                </div>
+
                 {/* 100대 명산 필터 */}
                 <div className="flex flex-col">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    100대 명산 여부
-                  </label>
                   <div className="flex items-center">
                     <input
                       type="checkbox"
@@ -427,30 +394,35 @@ const MountainListPage = () => {
                       onChange={(e) => setIsBacFilter(e.target.checked)}
                       className="mr-2"
                     />
-                    <span>100대 명산</span>
+                    <span
+                      className="text-sm"
+                      onClick={() => setIsBacFilter(!isBacFilter)}
+                    >
+                      100대 명산
+                    </span>
                   </div>
                 </div>
               </div>
-              {/* <div className="flex justify-between"> */}
               <div className="">
                 {/* 검색 결과 갯수 표시 */}
-                <div className="flex flex-col justify-end mt-4 text-sm text-gray-600">
-                  총 <span className="">{resultCount}</span>개의 산이
-                  검색되었습니다.
+                <div className=" mt-4 text-sm text-gray-600">
+                  총{" "}
+                  <span className="text-blue-700 font-bold">{resultCount}</span>
+                  개의 산이 검색되었습니다.
                 </div>
                 {/* 필터 버튼 */}
-                <div className="flex justify-end mt-6">
-                  <button
-                    onClick={handleClickSearch}
-                    className="px-4 py-2 text-sm text-gray-700 bg-blue-100 rounded-md hover:bg-blue-200 mr-2"
-                  >
-                    검색
-                  </button>
+                <div className="flex justify-between mt-6">
                   <button
                     onClick={resetFilters}
-                    className="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                    className="px-4 py-2 text-sm font-medium text-gray-800 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 transition ease-in-out duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 mr-2"
                   >
                     필터 초기화
+                  </button>
+                  <button
+                    onClick={handleClickSearch}
+                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 transition ease-in-out duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    검색
                   </button>
                 </div>
               </div>
@@ -460,59 +432,85 @@ const MountainListPage = () => {
 
         {/* 산 목록 */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {mountainList.length > 0 ? (
-            mountainList.map((mountain) => (
-              <div
-                key={mountain.id}
-                onClick={() => navigate(`/map/${mountain.id}`)}
-                className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer overflow-hidden opacity-80 hover:opacity-100"
-              >
-                <div className="h-48 overflow-hidden">
-                  <img
-                    src={`${
-                      mountain.isBac
-                        ? `https://songtak.github.io/bac_mt_course/assets/bac_img/${mountain.name}.jpeg`
-                        : "https://songtak.github.io/bac_mt_course/assets/bac_img/empty_thumbnail_1.jpeg"
-                    }`}
-                    alt={mountain.name}
-                    className="w-full h-full object-cover"
-                  />
+          {mountainList.length > 0
+            ? mountainList.map((mountain) => (
+                <div
+                  key={mountain.id}
+                  onClick={() => navigate(`/map/${mountain.id}`)}
+                  className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer overflow-hidden opacity-80 hover:opacity-100"
+                >
+                  <div className="h-48 overflow-hidden">
+                    <img
+                      src={`${
+                        mountain.isBac
+                          ? `https://songtak.github.io/bac_mt_course/assets/bac_img/${mountain.name}.jpeg`
+                          : "https://songtak.github.io/bac_mt_course/assets/bac_img/empty_thumbnail_1.jpeg"
+                      }`}
+                      alt={mountain.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="p-4">
+                    <h2 className="text-xl font-semibold text-gray-800">
+                      {mountain.name}
+                    </h2>
+                    <p className="text-gray-600 mt-2">{mountain.height}m</p>
+                    <p className="text-gray-500 text-sm mt-1">
+                      {mountain.address}
+                    </p>
+                    {mountain.capital && (
+                      <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mt-2 mr-2">
+                        {mountain.capital}
+                      </span>
+                    )}
+                    {mountain.isBac && (
+                      <span className="inline-block bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded mt-2">
+                        100대 명산
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <div className="p-4">
-                  <h2 className="text-xl font-semibold text-gray-800">
-                    {mountain.name}
-                  </h2>
-                  <p className="text-gray-600 mt-2">{mountain.height}m</p>
-                  <p className="text-gray-500 text-sm mt-1">
-                    {mountain.address}
-                  </p>
-                  {mountain.capital && (
-                    <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mt-2 mr-2">
-                      {mountain.capital}
-                    </span>
-                  )}
-                  {mountain.isBac && (
-                    <span className="inline-block bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded mt-2">
-                      100대 명산
-                    </span>
-                  )}
+              ))
+            : isSearched &&
+              !loading && (
+                <div className="bg-white rounded-lg shadow-md  transition-shadow duration-300  overflow-hidden ">
+                  <div className="col-span-3 text-center py-12 text-gray-700">
+                    <div className="text-2xl pb-4">🌿 앗! 결과가 없어요.</div>
+                    <div>다른 조건으로 한 번 더 찾아보시겠어요?</div>
+                  </div>
                 </div>
-              </div>
-            ))
-          ) : (
-            <div className="col-span-3 text-center py-12 text-gray-500">
-              검색 결과가 없습니다. 다른 필터 조건을 시도해보세요.
-            </div>
-          )}
+              )}
         </div>
 
         {/* 로딩 표시 */}
         {loading && (
-          <p className="text-center text-gray-500 mt-4">⏳ 더 불러오는 중...</p>
+          <p className="text-center text-gray-500 mt-4">열심히 오르는 중! 🧚</p>
         )}
 
         {/* 무한 스크롤 감지 요소 */}
         <div ref={ref} className="h-10" />
+        {/* <div>
+          <p className="text-gray-900 text-sm">⚠️ 이용 시 안내 말씀</p>
+          <p className="text-xs text-gray-500 pt-2">
+            봉우리 헌터는 여러분의 즐겁고 편안한 등산을 돕기 위해 공식적으로
+            공개된 여러 정보를 바탕으로 산 정보를 제공하고 있어요.
+          </p>
+          <p className="text-xs text-gray-500 pt-2">
+            다만, 자료를 정리하고 입력하는 과정에서 일부 정보가 실제와 조금 다를
+            수 있습니다.
+          </p>
+          <p className="text-xs text-gray-500 pt-2">
+            만약 잘못된 정보나 실제와 다른 부분을 발견하시면 언제든지 편하게
+            알려주세요!
+          </p>
+          <p className="text-xs text-gray-500">
+            빠르게 확인하고 반영해서 더 정확한 정보를 제공하겠습니다.
+          </p>
+          <p className="text-xs text-gray-500 pt-2">
+            항상 더 좋은 봉우리 헌터가 되도록 최선을 다할게요!
+          </p>
+          <p className="text-xs text-gray-500 pt-2">고맙습니다! 🌄</p>
+        </div> */}
       </div>
     </div>
   );

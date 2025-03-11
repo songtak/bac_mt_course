@@ -18,6 +18,7 @@ import {
 } from "../utils/geoHeplers";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../utils/firebaseConfig";
+import useUserStore from "../stores/useUserStore";
 
 interface NaverMap {
   setCenter: (latlng: naver.maps.LatLng) => void;
@@ -41,6 +42,7 @@ interface Mountain {
 }
 
 function MapViewPage() {
+  const userStore = useUserStore();
   const { mountainId } = useParams();
   const navigate = useNavigate();
   const mapRef = useRef<NaverMap | null>(null);
@@ -360,20 +362,43 @@ function MapViewPage() {
     <div className="min-h-screen bg-gray-100">
       <div className="container mx-auto p-4" style={{ maxWidth: "700px" }}>
         <div className="bg-white rounded-lg shadow-lg p-6">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-1">
             <button
               onClick={() => navigate("/list")}
               className="flex items-center text-gray-600 hover:text-gray-800"
             >
               <ArrowLeft className="w-5 h-5 mr-2 cursor-pointer" />
             </button>
+            {!userStore.isLogin ? (
+              <div
+                className="cursor-pointer"
+                onClick={() => {
+                  navigate("/sign-in");
+                }}
+              >
+                로그인
+              </div>
+            ) : (
+              <div
+                className="cursor-pointer"
+                onClick={() => {
+                  // handleLogout();
+                  navigate("/my");
+                }}
+              >
+                {userStore.userInfo?.nickname}
+              </div>
+            )}
           </div>
 
           {/* {error && <p className="mb-4 text-red-500">{error}</p>} */}
 
           {!mountainData ? (
-            <div>산 정보를 불러오는 중입니다...</div>
+            <div className="mt-40 pb-60 animate-bounce text-center text-gray-500">
+              🦅 산 정보 확인 중!
+            </div>
           ) : (
+            // <div>산 정보를 불러오는 중입니다...</div>
             <>
               <div className="flex justify-between pb-4">
                 <div className="flex">
@@ -387,6 +412,13 @@ function MapViewPage() {
                       </span>
                     </div>
                   )}
+                  {mountainData.isBac && (
+                    <div className="pt-3 pr-2">
+                      <span className="inline-block bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded mt-2">
+                        100대 명산
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <div
                   className="pt-5 flex justify-between"
@@ -396,7 +428,6 @@ function MapViewPage() {
                   <BookmarkIcon className="cursor-pointer" />
                 </div>
               </div>
-
               <div className="w-full flex justify-center items-center gap-4 text-3xl">
                 {weatherList.map((item, i) => (
                   <div
@@ -415,55 +446,57 @@ function MapViewPage() {
               <div className=" text-stone-600 pb-4 ">
                 {mountainData.address}
               </div>
-              <div className="font-thin pb-6">{mountainData.reason}</div>
-
+              <div className="font-thin pb-4">{mountainData.reason}</div>
               <div
                 ref={mapElement}
                 className={`w-full ${
-                  isMobile() ? "h-[180px]" : "h-[360px]"
+                  isMobile() ? "h-[300px]" : "h-[360px]"
                 } rounded-lg overflow-hidden shadow-inner`}
               />
-              {locationButtonType !== "user" && (
-                <div className="mt-4">
-                  <button
-                    onClick={() => {
-                      getCurPosition(true);
-                      setLocationButtonType("user");
-                    }}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 transition"
-                  >
-                    내 위치
-                  </button>
+              <div className="flex justify-between">
+                <div>
+                  {locationButtonType !== "user" && (
+                    <div className="mt-4">
+                      <button
+                        onClick={() => {
+                          getCurPosition(true);
+                          setLocationButtonType("user");
+                        }}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 transition"
+                      >
+                        내 위치
+                      </button>
+                    </div>
+                  )}
+                  {locationButtonType !== "peak" && (
+                    <div className="mt-4">
+                      <button
+                        onClick={() => {
+                          setGpxCourseAndPocusMap();
+                          setLocationButtonType("peak");
+                        }}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 transition"
+                      >
+                        산으로
+                      </button>
+                    </div>
+                  )}
                 </div>
-              )}
-              {locationButtonType !== "peak" && (
-                <div className="mt-4">
-                  <button
-                    onClick={() => {
-                      setGpxCourseAndPocusMap();
-                      setLocationButtonType("peak");
-                    }}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 transition"
-                  >
-                    산으로
-                  </button>
-                </div>
-              )}
 
-              <div className="mt-4">
-                <button
-                  disabled={!isPeak}
-                  onClick={() => handleClickPeakHunter()}
-                  className={`px-4 py-2 ${
-                    isPeak ? "bg-blue-500" : "bg-gray-500"
-                  } text-white rounded-md shadow-md hover:${
-                    isPeak && "bg-blue-600"
-                  } transition`}
-                >
-                  등산완료
-                </button>
+                <div className="mt-4">
+                  <button
+                    disabled={!isPeak}
+                    onClick={() => handleClickPeakHunter()}
+                    className={`px-4 py-2 ${
+                      isPeak ? "bg-blue-500" : "bg-gray-500"
+                    } text-white rounded-md shadow-md hover:${
+                      isPeak && "bg-blue-600"
+                    } transition`}
+                  >
+                    등산완료
+                  </button>
+                </div>
               </div>
-
               {courseList.length > 0 && (
                 <div className="pt-10">
                   <div className="text-2xl ">추천 코스</div>
@@ -514,6 +547,16 @@ function MapViewPage() {
               )}
             </>
           )}
+        </div>
+        <div className="font-thin pt-4 text-xs opacity-70">
+          <span>⚠️ 산 정보에 일부 오차가 있을 수 있습니다. </span>
+          <span
+            className="text-blue-600 font-bold cursor-pointer underline"
+            onClick={() => {}}
+          >
+            알려주시면
+          </span>
+          <span> 빠르게 반영하겠습니다!</span>
         </div>
       </div>
     </div>
