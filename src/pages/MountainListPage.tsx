@@ -271,12 +271,48 @@ const MountainListPage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-8">
-          ⛰️ 봉우리 헌터
-        </h1>
+        <div className="flex justify-between">
+          <div className="flex items-center mb-6 h-3"></div>
+          <div>
+            <h1
+              className="text-3xl font-bold text-gray-800 mb-8 cursor-pointer"
+              onClick={() => navigate("/")}
+            >
+              ⛰️ 봉우리 헌터
+            </h1>
+          </div>
+
+          {!userStore.isLogin ? (
+            <div
+              className="cursor-pointer"
+              onClick={() => {
+                navigate("/sign-in");
+              }}
+            >
+              로그인
+            </div>
+          ) : (
+            <div
+              className="cursor-pointer"
+              onClick={() => {
+                // handleLogout();
+                navigate("/my");
+              }}
+            >
+              {userStore.userInfo?.nickname}
+            </div>
+          )}
+        </div>
 
         {/* 검색 필터 섹션 */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+        <div
+          className={`bg-white rounded-lg shadow-md p-6 mb-8 ${
+            isFilterShow === false && "cursor-pointer"
+          }`}
+          onClick={() => {
+            isFilterShow === false && setIsFilterShow(true);
+          }}
+        >
           {isFilterShow ? (
             <div
               className="flex justify-between cursor-pointer"
@@ -287,8 +323,8 @@ const MountainListPage = () => {
             </div>
           ) : (
             <div
-              className="flex justify-between cursor-pointer"
-              onClick={() => setIsFilterShow(true)}
+              className="flex justify-between "
+              // onClick={() => setIsFilterShow(true)}
             >
               <h2 className="text-xl font-semibold text-gray-800">검색</h2>
               <ArrowDown />
@@ -395,26 +431,28 @@ const MountainListPage = () => {
                   </div>
                 </div>
               </div>
-
-              {/* 필터 버튼 */}
-              <div className="flex justify-end mt-6">
-                <button
-                  onClick={handleClickSearch}
-                  className="px-4 py-2 text-sm text-gray-700 bg-blue-100 rounded-md hover:bg-blue-200 mr-2"
-                >
-                  검색
-                </button>
-                <button
-                  onClick={resetFilters}
-                  className="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-                >
-                  필터 초기화
-                </button>
-              </div>
-
-              {/* 검색 결과 갯수 표시 */}
-              <div className="mt-4 text-sm text-gray-600">
-                총 {resultCount}개의 산이 검색되었습니다.
+              {/* <div className="flex justify-between"> */}
+              <div className="">
+                {/* 검색 결과 갯수 표시 */}
+                <div className="flex flex-col justify-end mt-4 text-sm text-gray-600">
+                  총 <span className="">{resultCount}</span>개의 산이
+                  검색되었습니다.
+                </div>
+                {/* 필터 버튼 */}
+                <div className="flex justify-end mt-6">
+                  <button
+                    onClick={handleClickSearch}
+                    className="px-4 py-2 text-sm text-gray-700 bg-blue-100 rounded-md hover:bg-blue-200 mr-2"
+                  >
+                    검색
+                  </button>
+                  <button
+                    onClick={resetFilters}
+                    className="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                  >
+                    필터 초기화
+                  </button>
+                </div>
               </div>
             </>
           )}
