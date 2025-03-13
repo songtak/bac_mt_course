@@ -22,7 +22,7 @@ function App() {
   }, [user]);
 
   return (
-    <>
+    <div>
       <ScrollToTop />
       <Routes>
         {/* <Route path="/" element={<ExcelUploader />} /> */}
@@ -34,7 +34,7 @@ function App() {
         <Route path="/sign-in" element={<PAGES.LoginPage />} />
         <Route path="/my" element={<PAGES.MyPage />} />
       </Routes>
-    </>
+    </div>
   );
 }
 

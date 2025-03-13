@@ -13,12 +13,16 @@ import {
   QueryDocumentSnapshot,
   DocumentData,
   getCountFromServer,
+  doc,
+  getDoc,
 } from "firebase/firestore";
-import { db } from "../utils/firebaseConfig";
+import { db, auth } from "../utils/firebaseConfig";
 import useUserStore from "../stores/useUserStore";
 import { useInView } from "react-intersection-observer";
 import { mountains } from "../utils/helpers";
 import HeightSlider from "../components/HeightSlider"; // HeightSlider 컴포넌트 import
+import Bookmark from "../components/Bookmark";
+import { signOut } from "firebase/auth";
 
 const cities = [
   "강원특별자치도",
@@ -64,6 +68,7 @@ const defaultFilters: SearchFilters = {
   isBac: false,
 };
 
+/** 산목록 */
 const MountainListPage = () => {
   const navigate = useNavigate();
   const userStore = useUserStore();
@@ -83,12 +88,50 @@ const MountainListPage = () => {
   const [isFilterReset, setIsFilterReset] = useState<boolean>(false);
   const [isSearched, setIsSearched] = useState<boolean>(false);
 
+  const [bookmarkList, setBookmarkList] = useState<number[]>([]);
+
   // 실제 쿼리에 적용할 검색 필터 (검색 버튼 클릭 시 업데이트)
   const [searchFilters, setSearchFilters] =
     useState<SearchFilters>(defaultFilters);
 
   // 검색 결과 총 갯수
   const [resultCount, setResultCount] = useState<number>(0);
+  /** ================================================================================ */
+  const user = auth.currentUser;
+
+  /** 북마크 정보 취득 */
+  const getUserBookmarks = async (): Promise<string[]> => {
+    if (!user || !user.email) {
+      console.error("로그인된 사용자가 없습니다.");
+      return [];
+    }
+
+    try {
+      const bookmarkRef = doc(db, "bookmark", user.email);
+      const bookmarkSnap = await getDoc(bookmarkRef);
+      if (bookmarkSnap.exists()) {
+        const data = bookmarkSnap.data();
+        // mountainId 필드가 배열로 저장되어 있음
+
+        setBookmarkList(data.mountainId);
+        return data.mountainId || [];
+      } else {
+        // 북마크 문서가 없으면 빈 배열 반환
+        return [];
+      }
+    } catch (error) {
+      console.error("북마크 목록 호출 실패:", error);
+      return [];
+    }
+  };
+
+  useEffect(() => {
+    if (user && user.email) {
+      getUserBookmarks();
+    }
+  }, [user]);
+
+  /** ================================================================================ */
 
   // 기본 필터와 active 필터가 동일한지 확인하는 함수
   const isDefaultFilters = (): boolean => {
@@ -184,7 +227,7 @@ const MountainListPage = () => {
         }
         count = docs.length;
       }
-      console.log("최종 개수:", count);
+      // console.log("최종 개수:", count);
       setResultCount(count);
     } catch (error: any) {
       console.error("Error fetching count:", error.message);
@@ -270,8 +313,19 @@ const MountainListPage = () => {
     setIsSearched(false);
   };
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      localStorage.clear();
+      navigate("/list");
+      console.log("로그아웃 성공!");
+    } catch (error) {
+      console.error("로그아웃 실패:", error);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50  pointer-events-auto">
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between">
           <div>
@@ -286,18 +340,20 @@ const MountainListPage = () => {
 
           {!userStore.isLogin ? (
             <div
-              className="cursor-pointer"
+              className="h-10 px-4 py-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 hover:cursor-pointer transition"
               onClick={() => {
                 navigate("/sign-in");
               }}
             >
               로그인
+              {/* 산행 시작하기 */}
             </div>
           ) : (
             <div
               className="cursor-pointer"
               onClick={() => {
-                navigate("/my");
+                // navigate("/my");
+                handleLogout();
               }}
             >
               {userStore.userInfo?.nickname}
@@ -376,7 +432,7 @@ const MountainListPage = () => {
                     <input
                       id="nameFilter"
                       type="text"
-                      placeholder="산 이름을 입력하세요"
+                      placeholder="산 이름을 입력"
                       value={nameFilter}
                       onChange={(e) => setNameFilter(e.target.value)}
                       className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -392,10 +448,10 @@ const MountainListPage = () => {
                       type="checkbox"
                       checked={isBacFilter}
                       onChange={(e) => setIsBacFilter(e.target.checked)}
-                      className="mr-2"
+                      className="mr-2 cursor-pointer"
                     />
                     <span
-                      className="text-sm"
+                      className="text-sm cursor-pointer"
                       onClick={() => setIsBacFilter(!isBacFilter)}
                     >
                       100대 명산
@@ -436,7 +492,10 @@ const MountainListPage = () => {
             ? mountainList.map((mountain) => (
                 <div
                   key={mountain.id}
-                  onClick={() => navigate(`/map/${mountain.id}`)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/map/${mountain.id}`);
+                  }}
                   className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer overflow-hidden opacity-80 hover:opacity-100"
                 >
                   <div className="h-48 overflow-hidden">
@@ -451,9 +510,21 @@ const MountainListPage = () => {
                     />
                   </div>
                   <div className="p-4">
-                    <h2 className="text-xl font-semibold text-gray-800">
-                      {mountain.name}
-                    </h2>
+                    <div className="flex justify-between ">
+                      <h2 className="text-xl font-semibold text-gray-800">
+                        {mountain.name}
+                      </h2>
+                      <div
+                        className="pointer-events-none"
+                        onClick={(e) => e.stopPropagation()} // 이벤트 버블링 방지
+                      >
+                        <Bookmark
+                          mountainId={mountain.id}
+                          bookmarkList={bookmarkList}
+                          setBookmarkList={setBookmarkList}
+                        />
+                      </div>
+                    </div>
                     <p className="text-gray-600 mt-2">{mountain.height}m</p>
                     <p className="text-gray-500 text-sm mt-1">
                       {mountain.address}

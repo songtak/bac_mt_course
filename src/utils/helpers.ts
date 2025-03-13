@@ -46,6 +46,17 @@ export const isMobile = () => {
   );
 };
 
+export const toggleValue = (arr: number[], value: any): number[] => {
+  // if (typeof value !== "string") return [];
+  if (arr.includes(value)) {
+    // 값이 이미 존재하면 해당 값을 제거
+    return arr.filter((item) => item !== value);
+  } else {
+    // 값이 없으면 배열에 추가
+    return [...arr, value];
+  }
+};
+
 export const jsonToGpx = (jsonData: any) => {
   const { MNTN_NM, PMNTN_NM } = jsonData.attributes;
   const coordinates = jsonData.geometry.paths[0];

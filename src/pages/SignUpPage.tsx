@@ -96,6 +96,8 @@ const SignUpPage: React.FC = () => {
           : setIsNicknameChecked(true);
       }
     } catch (error) {
+      console.log("error", error);
+
       field === "email"
         ? setEmailErrorMessage("이메일 중복 확인 중 오류가 발생했습니다.")
         : setNicknameErrorMessage("닉네임 중복 확인 중 오류가 발생했습니다.");

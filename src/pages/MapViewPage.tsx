@@ -17,8 +17,9 @@ import {
   isWithin50Meters,
 } from "../utils/geoHeplers";
 import { doc, getDoc } from "firebase/firestore";
-import { db } from "../utils/firebaseConfig";
+import { db, auth } from "../utils/firebaseConfig";
 import useUserStore from "../stores/useUserStore";
+import Bookmark from "../components/Bookmark";
 
 interface NaverMap {
   setCenter: (latlng: naver.maps.LatLng) => void;
@@ -69,8 +70,49 @@ function MapViewPage() {
   const [weatherList, setWeatherList] = useState<any[]>([]);
   const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
 
+  /**  */
+  const [bookmarkList, setBookmarkList] = useState<number[]>([]);
+
   // Firebase에서 mountainId로 산 정보 불러오기
   const [mountainData, setMountainData] = useState<Mountain | null>(null);
+
+  /** ================================================================================ */
+  const user = auth.currentUser;
+
+  /** 북마크 정보 취득 */
+  const getUserBookmarks = async (): Promise<number[]> => {
+    if (!user || !user.email) {
+      console.error("로그인된 사용자가 없습니다.");
+      return [];
+    }
+
+    try {
+      const bookmarkRef = doc(db, "bookmark", user.email);
+      const bookmarkSnap = await getDoc(bookmarkRef);
+      if (bookmarkSnap.exists()) {
+        const data = bookmarkSnap.data();
+        // mountainId 필드가 배열로 저장되어 있음
+
+        setBookmarkList(data.mountainId);
+        return data.mountainId || [];
+      } else {
+        // 북마크 문서가 없으면 빈 배열 반환
+        return [];
+      }
+    } catch (error) {
+      console.error("북마크 목록 호출 실패:", error);
+      return [];
+    }
+  };
+
+  useEffect(() => {
+    if (user && user.email) {
+      getUserBookmarks();
+    }
+  }, [user]);
+
+  /** ================================================================================ */
+
   useEffect(() => {
     if (!mountainId) return;
     const fetchMountain = async () => {
@@ -93,8 +135,6 @@ function MapViewPage() {
   /** 코스 목록 */
   const courseList: any[] = [];
   // const courseList = mountainData ? createNumberList(mountainData.id) : [];
-
-  // console.log("courseList", courseList.length);
 
   const handleClickCourse = async (course: number) => {
     setSelectedCourse(course);
@@ -371,18 +411,18 @@ function MapViewPage() {
             </button>
             {!userStore.isLogin ? (
               <div
-                className="cursor-pointer"
+                className="h-10 px-4 py-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 hover:cursor-pointer transition"
                 onClick={() => {
                   navigate("/sign-in");
                 }}
               >
                 로그인
+                {/* 산행 시작하기 */}
               </div>
             ) : (
               <div
                 className="cursor-pointer"
                 onClick={() => {
-                  // handleLogout();
                   navigate("/my");
                 }}
               >
@@ -425,7 +465,16 @@ function MapViewPage() {
                   style={{ width: "60px" }}
                 >
                   <Share className="cursor-pointer" onClick={handleShare} />
-                  <BookmarkIcon className="cursor-pointer" />
+                  <div
+                    className="pointer-events-none"
+                    onClick={(e) => e.stopPropagation()} // 이벤트 버블링 방지
+                  >
+                    <Bookmark
+                      mountainId={Number(mountainId)}
+                      bookmarkList={bookmarkList}
+                      setBookmarkList={setBookmarkList}
+                    />
+                  </div>
                 </div>
               </div>
               <div className="w-full flex justify-center items-center gap-4 text-3xl">

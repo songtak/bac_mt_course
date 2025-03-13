@@ -25,10 +25,10 @@ function HomePage() {
         </button>
       </main>
 
-      <footer className="bg-white py-4 text-center shadow-lg">
+      {/* <footer className="bg-white py-4 text-center shadow-lg">
         <p className="text-gray-600">한국등산-트레킹지원센터 정보 제공</p>
-        {/* https://www.komount.or.kr */}
-      </footer>
+        https://www.komount.or.kr
+      </footer> */}
     </div>
   );
 }
