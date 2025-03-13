@@ -29,7 +29,8 @@ function App() {
         <Route path="/" element={<PAGES.HomePage />} />
         <Route path="/gpx" element={<GPXExporter />} />
         <Route path="/list" element={<PAGES.MountainListPage />} />
-        <Route path="/map/:mountainId" element={<PAGES.MapViewPage />} />
+        <Route path="/map-detail/:mountainId" element={<PAGES.MapViewPage />} />
+        <Route path="/map" element={<PAGES.MapPage />} />
         <Route path="/sign-up" element={<PAGES.SignUpPage />} />
         <Route path="/sign-in" element={<PAGES.LoginPage />} />
         <Route path="/my" element={<PAGES.MyPage />} />

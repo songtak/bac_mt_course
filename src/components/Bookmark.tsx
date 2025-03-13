@@ -11,6 +11,7 @@ import { auth, db } from "../utils/firebaseConfig";
 import { BookmarkIcon, XIcon } from "lucide-react";
 import { toggleValue } from "../utils/helpers";
 import Modal from "./Modal";
+import Toast from "./Toast";
 import { useNavigate } from "react-router-dom";
 
 interface Props {
@@ -26,6 +27,8 @@ const Bookmark = ({ mountainId, bookmarkList, setBookmarkList }: Props) => {
 
   const user = auth.currentUser;
   const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
+  const [isOpenToast, setIsOpenToast] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<string>("");
 
   const toggleBookmark = async () => {
     if (!user || !user.email) {
@@ -52,10 +55,14 @@ const Bookmark = ({ mountainId, bookmarkList, setBookmarkList }: Props) => {
             mountainId: arrayRemove(mountainId),
           });
           console.log(`북마크에서 ${mountainId} 제거됨.`);
+          setToastMessage("북마크에서 제거했습니다.");
+          setIsOpenToast(true);
         } else {
           await updateDoc(bookmarkRef, {
             mountainId: arrayUnion(mountainId),
           });
+          setToastMessage("북마크에 추가했습니다.");
+          setIsOpenToast(true);
           console.log(`북마크에 ${mountainId} 추가됨.`);
         }
       } else {
@@ -69,12 +76,20 @@ const Bookmark = ({ mountainId, bookmarkList, setBookmarkList }: Props) => {
   };
   return (
     <>
-      <div className="text-amber-500 pointer-events-auto">
+      <div className="text-gray-300 pointer-events-auto">
         <BookmarkIcon
-          color="currentColor"
+          color={`${
+            hasBookmark
+              ? "rgb(125 211 252 / var(--tw-text-opacity, 1))"
+              : "rgb(209 213 219 / var(--tw-text-opacity, 1))"
+          } `}
           size={24}
           strokeWidth={2}
-          fill={`${hasBookmark ? "currentColor" : "none"} `}
+          fill={`${
+            hasBookmark
+              ? "rgb(125 211 252 / var(--tw-text-opacity, 1))"
+              : "none"
+          } `}
           className="cursor-pointer z-10"
           onClick={(e) => {
             e.stopPropagation();
@@ -82,6 +97,13 @@ const Bookmark = ({ mountainId, bookmarkList, setBookmarkList }: Props) => {
           }}
         />
       </div>
+      <Toast
+        isOpen={isOpenToast}
+        message={toastMessage}
+        onClose={() => {
+          setIsOpenToast(false);
+        }}
+      />
       <Modal
         open={isOpenModal}
         onClose={() => {

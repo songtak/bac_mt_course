@@ -72,15 +72,15 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-start justify-center bg-white py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-6">
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center text-gray-600 hover:text-gray-800 mb-6"
+          className="flex items-center text-gray-500 hover:text-gray-700 transition mb-6"
         >
           <ArrowLeft className="w-5 h-5 mr-2" />
         </button>
-        <h1 className="text-3xl font-bold text-gray-800">로그인</h1>
+        <h1 className="text-3xl font-light text-gray-900">로그인</h1>
 
         <form className="space-y-4" onSubmit={handleLogin}>
           <input
@@ -91,23 +91,23 @@ const LoginPage: React.FC = () => {
               setEmail(e.target.value);
               setIsForgot(false);
             }}
-            className="w-full p-3 border border-gray-300 rounded-md"
+            className="w-full px-4 py-3 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200"
           />
           <input
             type="password"
             placeholder="비밀번호"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-md"
+            className="w-full px-4 py-3 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200"
           />
 
           {errorMessage && (
-            <p className="text-red-500 text-sm">{errorMessage}</p>
+            <p className="text-xs text-red-500">{errorMessage}</p>
           )}
           {isForgot && (
             <button
               onClick={handleResetPassword}
-              className="text-sm text-blue-500 underline"
+              className="text-xs text-blue-500 underline"
             >
               비밀번호를 잊으셨나요?
             </button>
@@ -116,19 +116,21 @@ const LoginPage: React.FC = () => {
           <button
             type="submit"
             disabled={isLoading}
-            className={`w-full py-3 ${
-              isLoading ? "bg-gray-300" : "bg-blue-500"
-            } text-white rounded-md`}
+            className={`w-full py-3 rounded-md shadow-sm transition focus:outline-none ${
+              isLoading
+                ? "bg-gray-300 text-gray-700"
+                : "bg-blue-500 text-white hover:bg-blue-600"
+            }`}
           >
             {isLoading ? "로그인 중..." : "로그인"}
           </button>
         </form>
 
-        <p className="text-sm text-gray-600">
+        <p className="text-xs text-gray-500">
           계정이 없으신가요?{" "}
           <button
             onClick={() => navigate("/sign-up")}
-            className="text-blue-500 underline"
+            className="text-blue-500 underline transition hover:text-blue-600"
           >
             회원가입
           </button>

@@ -1,11 +1,13 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import { auth, db } from "../utils/firebaseConfig";
 
 interface ITokenStore {
   isLogin: boolean | null;
   setIsLogin: (login: boolean) => void;
   userInfo: any;
   setUserInfo: (info: any) => void;
+  setLogout: () => void;
 }
 
 const useUserStore = create<ITokenStore>()(
@@ -18,6 +20,12 @@ const useUserStore = create<ITokenStore>()(
       userInfo: null,
       setUserInfo: (info: any) => {
         set({ userInfo: info });
+      },
+      setLogout: () => {
+        set({
+          isLogin: null,
+          userInfo: null,
+        });
       },
     }),
     {

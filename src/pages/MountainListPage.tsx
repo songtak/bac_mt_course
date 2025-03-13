@@ -19,11 +19,16 @@ import {
 import { db, auth } from "../utils/firebaseConfig";
 import useUserStore from "../stores/useUserStore";
 import { useInView } from "react-intersection-observer";
-import { mountains } from "../utils/helpers";
+// import { mountains } from "../utils/helpers";
 import HeightSlider from "../components/HeightSlider"; // HeightSlider 컴포넌트 import
 import Bookmark from "../components/Bookmark";
 import { signOut } from "firebase/auth";
-
+import {
+  customParseGpx,
+  calculateElevationGain,
+  calculate3DDistance,
+  isWithinMeters,
+} from "../utils/geoHeplers";
 const cities = [
   "강원특별자치도",
   "경기도",
@@ -125,11 +130,83 @@ const MountainListPage = () => {
     }
   };
 
+  /** 사용자 위치 정보 취득 */
+  const getUserLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          // naver.maps.LatLng 객체 생성 (필요시)
+          const myLatLng = new naver.maps.LatLng(lat, lng);
+          console.log("내 위치:", lat, lng);
+          // 여기서 myLatLng을 사용해 추가 로직을 작성할 수 있습니다.
+          getNearbyMountains(lat, lng);
+        },
+        (error) => {
+          console.error("위치 정보를 가져오지 못했습니다.", error);
+        }
+      );
+    } else {
+      console.error("이 브라우저는 Geolocation을 지원하지 않습니다.");
+    }
+  };
+
+  const getNearbyMountains = async (
+    userLat: number,
+    userLon: number,
+    radiusInKm: number = 5
+  ) => {
+    // 반경에 따른 위도/경도 차이 계산
+    const latDelta = radiusInKm / 111; // 약 5km에 해당하는 위도 차이
+    const lonDelta = radiusInKm / (111 * Math.cos(userLat * (Math.PI / 180))); // 경도 차이는 위도에 따라 달라짐
+
+    const minLat = userLat - latDelta;
+    const maxLat = userLat + latDelta;
+    const minLon = userLon - lonDelta;
+    const maxLon = userLon + lonDelta;
+
+    // 산 문서에는 'latitude'와 'longitude' 필드가 있어야 합니다.
+    const mountainsRef = collection(db, "mountains");
+    const q = query(
+      mountainsRef,
+      where("latitude", ">=", minLat),
+      where("latitude", "<=", maxLat),
+      where("longitude", ">=", minLon),
+      where("longitude", "<=", maxLon)
+    );
+
+    const querySnapshot = await getDocs(q);
+    const results = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    // 클라이언트 사이드에서 정확한 거리 계산 후 필터링 (isWithinMeters 함수 사용)
+    const nearbyMountains = results.filter((mountain: any) =>
+      isWithinMeters(
+        userLat,
+        userLon,
+        mountain.latitude,
+        mountain.longitude,
+        radiusInKm
+      )
+    );
+
+    console.log("nearbyMountains", nearbyMountains);
+
+    return nearbyMountains;
+  };
+
   useEffect(() => {
     if (user && user.email) {
       getUserBookmarks();
     }
   }, [user]);
+
+  useEffect(() => {
+    getUserLocation();
+  }, [navigator.geolocation]);
 
   /** ================================================================================ */
 
@@ -325,74 +402,79 @@ const MountainListPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50  pointer-events-auto">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between">
-          <div>
-            <h1
-              className="text-3xl font-bold text-gray-800 mb-8 cursor-pointer"
-              onClick={() => navigate("/")}
-            >
-              봉우리 헌터
-              {/* ⛰️ */}
-            </h1>
-          </div>
-
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <header className="flex justify-between items-center px-8 py-6 border-b border-gray-200">
+        <h1
+          className="text-3xl font-light text-gray-900 cursor-pointer"
+          onClick={() => navigate("/")}
+        >
+          봉우리 헌터
+        </h1>
+        <nav className="space-x-6">
           {!userStore.isLogin ? (
-            <div
-              className="h-10 px-4 py-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 hover:cursor-pointer transition"
-              onClick={() => {
-                navigate("/sign-in");
-              }}
+            <span
+              onClick={() => navigate("/sign-in")}
+              className="cursor-pointer font-light text-gray-900 transition hover:underline"
             >
               로그인
-              {/* 산행 시작하기 */}
-            </div>
+            </span>
           ) : (
-            <div
-              className="cursor-pointer"
-              onClick={() => {
-                // navigate("/my");
-                handleLogout();
-              }}
+            <span
+              onClick={() => navigate("/my")}
+              className="cursor-pointer font-light text-gray-900 transition hover:underline"
             >
-              {userStore.userInfo?.nickname}
-            </div>
+              {userStore.userInfo?.nickname} 🦖
+            </span>
           )}
+        </nav>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-5xl mx-auto px-5 py-6">
+        <div className="flex justify-between">
+          <h2 className="text-2xl font-light text-gray-700 mb-8">
+            봉우리 목록
+          </h2>
+          <div
+            className="text-[14px] h-10 font-light px-6 py-2 border border-gray-300 rounded-md text-gray-900 transition hover:bg-gray-100 hover:cursor-pointer"
+            onClick={() => {
+              navigate("/map");
+            }}
+          >
+            내 주변 봉우리 찾기
+          </div>
         </div>
 
         {/* 검색 필터 섹션 */}
         <div
-          className={`bg-white rounded-lg shadow-md p-6 mb-8 ${
-            isFilterShow === false && "cursor-pointer"
+          className={`bg-white/95  rounded-xl shadow-sm p-6 mb-4 border transition duration-300 ${
+            !isFilterShow && "cursor-pointer"
           }`}
           onClick={() => {
-            isFilterShow === false && setIsFilterShow(true);
+            !isFilterShow && setIsFilterShow(true);
           }}
         >
-          {isFilterShow ? (
-            <div
-              className="flex justify-between cursor-pointer"
-              onClick={() => setIsFilterShow(false)}
-            >
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">검색</h2>
-              <ArrowUp />
-            </div>
-          ) : (
-            <div className="flex justify-between ">
-              <h2 className="text-xl font-semibold text-gray-800">검색</h2>
-              <ArrowDown />
-            </div>
-          )}
+          <div
+            className="flex justify-between items-center"
+            onClick={() => setIsFilterShow(!isFilterShow)}
+          >
+            <Search className="text-gray-400" size={20} />
+            {isFilterShow ? (
+              <ArrowUp className="text-gray-400" size={20} />
+            ) : (
+              <ArrowDown className="text-gray-400" size={20} />
+            )}
+          </div>
 
           {isFilterShow && (
-            <>
+            <div className="mt-6">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 {/* 도시 필터 */}
                 <div>
                   <label
                     htmlFor="cityFilter"
-                    className="block text-sm font-bold text-gray-700 mb-2"
+                    className="block text-sm font-light text-gray-700 mb-1"
                   >
                     도시
                   </label>
@@ -400,7 +482,7 @@ const MountainListPage = () => {
                     id="cityFilter"
                     value={cityFilter}
                     onChange={(e) => setCityFilter(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">모든 도시</option>
                     {cities.map((city) => (
@@ -411,8 +493,11 @@ const MountainListPage = () => {
                   </select>
                 </div>
 
-                {/* 높이 필터 - 듀얼 슬라이더로 대체 */}
+                {/* 높이 필터 */}
                 <div>
+                  <label className="block text-sm font-light text-gray-700 mb-1">
+                    높이
+                  </label>
                   <HeightSlider
                     heightFilter={heightFilter}
                     setHeightFilter={setHeightFilter}
@@ -424,7 +509,7 @@ const MountainListPage = () => {
                 <div>
                   <label
                     htmlFor="nameFilter"
-                    className="block text-sm font-bold text-gray-700 mb-2"
+                    className="block text-sm font-light text-gray-700 mb-1"
                   >
                     산 이름
                   </label>
@@ -432,17 +517,20 @@ const MountainListPage = () => {
                     <input
                       id="nameFilter"
                       type="text"
-                      placeholder="산 이름을 입력"
+                      placeholder="산 이름 입력"
                       value={nameFilter}
                       onChange={(e) => setNameFilter(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    <Search className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
+                    <Search
+                      className="absolute right-3 top-2.5 text-gray-400"
+                      size={20}
+                    />
                   </div>
                 </div>
 
                 {/* 100대 명산 필터 */}
-                <div className="flex flex-col">
+                <div className="flex flex-col justify-end">
                   <div className="flex items-center">
                     <input
                       type="checkbox"
@@ -459,108 +547,114 @@ const MountainListPage = () => {
                   </div>
                 </div>
               </div>
-              <div className="">
-                {/* 검색 결과 갯수 표시 */}
-                <div className=" mt-4 text-sm text-gray-600">
+
+              <div className="mt-6 flex flex-col md:flex-row items-center justify-between">
+                <div className="text-sm text-gray-500">
                   총{" "}
-                  <span className="text-blue-700 font-bold">{resultCount}</span>
-                  개의 산이 검색되었습니다.
+                  <span className="text-blue-600 font-medium">
+                    {resultCount}
+                  </span>
+                  개의 산 검색됨
                 </div>
-                {/* 필터 버튼 */}
-                <div className="flex justify-between mt-6">
+                <div className="mt-4 md:mt-0 flex space-x-4">
                   <button
                     onClick={resetFilters}
-                    className="px-4 py-2 text-sm font-medium text-gray-800 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 transition ease-in-out duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 mr-2"
+                    className="px-4 py-2 border border-gray-200 text-gray-600 rounded-md shadow-sm hover:bg-gray-50 transition"
                   >
                     필터 초기화
                   </button>
                   <button
                     onClick={handleClickSearch}
-                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 transition ease-in-out duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md shadow-sm hover:bg-blue-700 transition"
                   >
                     검색
                   </button>
                 </div>
               </div>
-            </>
+            </div>
           )}
         </div>
 
-        {/* 산 목록 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {mountainList.length > 0
-            ? mountainList.map((mountain) => (
-                <div
-                  key={mountain.id}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/map/${mountain.id}`);
-                  }}
-                  className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer overflow-hidden opacity-80 hover:opacity-100"
-                >
-                  <div className="h-48 overflow-hidden">
-                    <img
-                      src={`${
-                        mountain.isBac
-                          ? `https://songtak.github.io/bac_mt_course/assets/bac_img/${mountain.name}.jpeg`
-                          : "https://songtak.github.io/bac_mt_course/assets/bac_img/empty_thumbnail_1.jpeg"
-                      }`}
-                      alt={mountain.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="p-4">
-                    <div className="flex justify-between ">
-                      <h2 className="text-xl font-semibold text-gray-800">
-                        {mountain.name}
-                      </h2>
-                      <div
-                        className="pointer-events-none"
-                        onClick={(e) => e.stopPropagation()} // 이벤트 버블링 방지
-                      >
-                        <Bookmark
-                          mountainId={mountain.id}
-                          bookmarkList={bookmarkList}
-                          setBookmarkList={setBookmarkList}
-                        />
-                      </div>
+        {mountainList.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+            {mountainList.map((mountain) => (
+              <div
+                key={mountain.id}
+                onClick={() => navigate(`/map-detail/${mountain.id}`)}
+                className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition cursor-pointer"
+              >
+                {/* 이미지 영역 (카드 상단에 플러시하게) */}
+                <div className="h-48 overflow-hidden rounded-t-xl">
+                  <img
+                    src={`${
+                      mountain.isBac
+                        ? `https://songtak.github.io/bac_mt_course/assets/bac_img/${mountain.name}.jpeg`
+                        : "https://songtak.github.io/bac_mt_course/assets/bac_img/empty_thumbnail_1.jpeg"
+                    }`}
+                    alt={mountain.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                {/* 산 정보 영역에만 패딩 적용 */}
+                <div className="p-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-xl font-light text-gray-900">
+                      {mountain.name}
+                    </h3>
+                    <div
+                      className="pointer-events-auto"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Bookmark
+                        mountainId={mountain.id}
+                        bookmarkList={bookmarkList}
+                        setBookmarkList={setBookmarkList}
+                      />
                     </div>
-                    <p className="text-gray-600 mt-2">{mountain.height}m</p>
-                    <p className="text-gray-500 text-sm mt-1">
-                      {mountain.address}
-                    </p>
+                  </div>
+                  <p className="text-gray-600 mt-2">{mountain.height}m</p>
+                  <p className="text-gray-500 text-sm mt-1">
+                    {mountain.address}
+                  </p>
+                  <div className="mt-3">
                     {mountain.capital && (
-                      <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mt-2 mr-2">
+                      <span className="inline-block bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">
                         {mountain.capital}
                       </span>
                     )}
                     {mountain.isBac && (
-                      <span className="inline-block bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded mt-2">
+                      <span className="inline-block bg-sky-100 text-sky-700 text-xs px-2 py-1 rounded ml-2">
                         100대 명산
                       </span>
                     )}
                   </div>
                 </div>
-              ))
-            : isSearched &&
-              !loading && (
-                <div className="bg-white rounded-lg shadow-md  transition-shadow duration-300  overflow-hidden ">
-                  <div className="col-span-3 text-center py-12 text-gray-700">
-                    <div className="text-2xl pb-4">🌿 앗! 결과가 없어요.</div>
-                    <div>다른 조건으로 한 번 더 찾아보시겠어요?</div>
-                  </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          isSearched &&
+          !loading && (
+            <div className="bg-white rounded-lg shadow-md  transition-shadow duration-300  overflow-hidden ">
+              <div className="col-span-3 text-center py-12 text-gray-700">
+                <div className="text-2xl pb-4  font-light">결과가 없어요.</div>
+                <div className="font-light">
+                  다른 조건으로 한 번 더 찾아보시겠어요?
                 </div>
-              )}
-        </div>
-
-        {/* 로딩 표시 */}
-        {loading && (
-          <p className="text-center text-gray-500 mt-4">열심히 오르는 중! 🧚</p>
+              </div>
+            </div>
+          )
         )}
+      </main>
 
-        {/* 무한 스크롤 감지 요소 */}
-        <div ref={ref} className="h-10" />
-        {/* <div>
+      {/* 로딩 표시 */}
+      {loading && (
+        <p className="text-center text-gray-500 mt-4">봉우리 오르는 중...</p>
+      )}
+
+      {/* 무한 스크롤 감지 요소 */}
+      <div ref={ref} className="h-10" />
+      {/* <div>
           <p className="text-gray-900 text-sm">⚠️ 이용 시 안내 말씀</p>
           <p className="text-xs text-gray-500 pt-2">
             봉우리 헌터는 여러분의 즐겁고 편안한 등산을 돕기 위해 공식적으로
@@ -582,7 +676,7 @@ const MountainListPage = () => {
           </p>
           <p className="text-xs text-gray-500 pt-2">고맙습니다! 🌄</p>
         </div> */}
-      </div>
+      {/* </div> */}
     </div>
   );
 };

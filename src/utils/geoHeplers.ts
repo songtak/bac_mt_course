@@ -77,12 +77,15 @@ export const calculate3DDistance = (
   return totalDistance;
 };
 
-export const isWithin50Meters = (
+export const isWithinMeters = (
   userLat: number,
   userLon: number,
   targetLat: number,
-  targetLon: number
+  targetLon: number,
+  meters: number
 ): boolean => {
+  // const distance = haversineDistance(userLat, userLon, 37.5399201, 127.008768);
+
   const distance = haversineDistance(userLat, userLon, targetLat, targetLon);
-  return distance <= 1; // 50m 이내인지 확인
+  return distance <= meters * 0.001; // 0.1이 100m
 };

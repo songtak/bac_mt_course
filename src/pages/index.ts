@@ -4,6 +4,7 @@ import MountainListPage from "./MountainListPage";
 import SignUpPage from "./SignUpPage";
 import LoginPage from "./LoginPage";
 import MyPage from "./MyPage";
+import MapPage from "./MapPage";
 
 export {
   HomePage,
@@ -12,4 +13,5 @@ export {
   SignUpPage,
   LoginPage,
   MyPage,
+  MapPage,
 };

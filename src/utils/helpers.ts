@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { kor1 } from "../assets/kor1";
 import { kor2 } from "../assets/kor2";
 
@@ -56,6 +57,16 @@ export const toggleValue = (arr: number[], value: any): number[] => {
     return [...arr, value];
   }
 };
+
+export const toFormattedDate = (timestamp: {
+  seconds: number;
+  nanoseconds: number;
+}): string => {
+  const ms = timestamp.seconds * 1000 + timestamp.nanoseconds / 1e6;
+  return dayjs(ms).format("YYYY.MM.DD HH:mm");
+};
+
+/** =================================================================================== */
 
 export const jsonToGpx = (jsonData: any) => {
   const { MNTN_NM, PMNTN_NM } = jsonData.attributes;

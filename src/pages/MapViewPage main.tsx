@@ -500,173 +500,242 @@ function MapViewPage() {
   /** ================================================================================ */
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center text-gray-600 hover:text-gray-800 transition"
-        >
-          <ArrowLeft className="w-5 h-5 mr-2" />
-          <span className="text-sm">뒤로</span>
-        </button>
-        <div className="flex items-center space-x-4">
+    <div className="min-h-screen bg-gray-50">
+      <div
+        className="container mx-auto p-4 px-4"
+        style={{ maxWidth: "700px", minWidth: "300px" }}
+      >
+        <div className="flex items-center justify-between mb-1">
           <button
-            onClick={handleShare}
-            className="text-gray-600 hover:text-gray-800 transition"
+            onClick={() => navigate(-1)}
+            // onClick={() => navigate("/list")}
+            className="flex items-center text-gray-600 hover:text-gray-800"
           >
-            <Share size={20} />
+            <ArrowLeft className="w-5 h-5 mr-2 cursor-pointer" />
           </button>
-          <div onClick={(e) => e.stopPropagation()} className="cursor-pointer">
-            <Bookmark
-              mountainId={Number(mountainId)}
-              bookmarkList={bookmarkList}
-              setBookmarkList={setBookmarkList}
-            />
-          </div>
+          {!userStore.isLogin ? (
+            <div
+              className="h-10 px-4 py-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 hover:cursor-pointer transition"
+              onClick={() => {
+                navigate("/sign-in");
+              }}
+            >
+              로그인
+              {/* 산행 시작하기 */}
+            </div>
+          ) : (
+            <div
+              className="h-10 px-4 py-1.5 bg-white font-bold text-blue-500 border-2 border-blue-500 rounded-full hover:bg-blue-500 hover:cursor-pointer hover:text-white transition"
+              onClick={() => {
+                navigate("/my");
+              }}
+            >
+              {userStore.userInfo?.nickname}
+            </div>
+          )}
         </div>
-      </header>
+        <div className="bg-white rounded-lg shadow-lg p-6 mt-6">
+          {/* {error && <p className="mb-4 text-red-500">{error}</p>} */}
 
-      {/* Main Content */}
-      <main className="container mx-auto px-6 py-8">
-        {!mountainData ? (
-          <div className="text-center text-gray-500 mt-40">
-            산 정보를 불러오는 중입니다...
-          </div>
-        ) : (
-          <>
-            {/* 산 정보 섹션 */}
-            <section className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900">
-                {mountainData.name}
-              </h1>
-              <p className="text-gray-600 mt-2 text-lg">
-                {mountainData.height} m
-              </p>
-              <div className="mt-2 flex items-center space-x-2">
-                {mountainData.capital && (
-                  <span className="inline-block bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">
-                    {mountainData.capital}
+          {!mountainData ? (
+            <div className="mt-40 pb-60 animate-bounce text-center text-gray-500">
+              🦅 산 정보 확인 중!
+            </div>
+          ) : (
+            // <div>산 정보를 불러오는 중입니다...</div>
+            <>
+              <div className="flex justify-between pb-4">
+                <div className="">
+                  <span className="text-2xl font-bold  pr-2">
+                    {mountainData.name}
+                    <span className="pl-2 py-1 text-lg font-normal text-gray-500">
+                      {mountainData.height} m
+                    </span>
                   </span>
-                )}
-                {mountainData.isBac && (
-                  <span className="inline-block bg-sky-100 text-sky-700 text-xs px-2 py-1 rounded">
-                    100대 명산
-                  </span>
-                )}
+                  <div className="flex">
+                    {mountainData.capital && (
+                      <div className=" pr-2">
+                        <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mt-1">
+                          {mountainData.capital}
+                        </span>
+                      </div>
+                    )}
+                    {mountainData.isBac && (
+                      <div className=" pr-2">
+                        <span className="inline-block bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded mt-1">
+                          100대 명산
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div
+                  className=" flex justify-between"
+                  style={{ width: "60px" }}
+                >
+                  <Share
+                    className="cursor-pointer"
+                    onClick={handleShare}
+                    color="gray"
+                    // size={22}
+                  />
+                  <div
+                    className="pointer-events-none"
+                    onClick={(e) => e.stopPropagation()} // 이벤트 버블링 방지
+                  >
+                    <Bookmark
+                      mountainId={Number(mountainId)}
+                      bookmarkList={bookmarkList}
+                      setBookmarkList={setBookmarkList}
+                    />
+                  </div>
+                </div>
               </div>
-              <p className="text-gray-500 text-sm mt-3">
+              <div className="w-full flex justify-center items-center gap-4 text-3xl">
+                {weatherList.map((item, i) => (
+                  <div
+                    key={i}
+                    className={`cursor-pointer transition-transform duration-200 hover:scale-125 ${
+                      selectedIcon === item.emoji
+                        ? "scale-150 text-blue-500"
+                        : ""
+                    }`}
+                    onClick={() => setSelectedIcon(item.emoji)}
+                  >
+                    {item.emoji}
+                  </div>
+                ))}
+              </div>
+              <div className=" text-stone-600 pb-4 ">
                 {mountainData.address}
-              </p>
-            </section>
-
-            {/* 지도 섹션 */}
-            <section className="mb-8">
+              </div>
+              <div className="font-thin pb-4">{mountainData.reason}</div>
               <div
                 ref={mapElement}
-                className="w-full h-80 rounded-lg overflow-hidden shadow-inner bg-gray-100"
-              >
-                {/* 네이버 지도 API를 적용할 컨테이너 */}
-              </div>
-            </section>
-            <div className="flex justify-between items-center mt-6 space-y-4 md:space-y-0 md:space-x-4">
-              {locationButtonType !== "user" && (
-                <button
-                  onClick={() => {
-                    getCurPosition(true);
-                    setLocationButtonType("user");
-                  }}
-                  className="px-6 py-2 border border-gray-300 rounded-md text-gray-900 transition hover:bg-gray-100"
-                >
-                  지금 내 위치
-                </button>
-              )}
-              {locationButtonType !== "peak" && (
-                <button
-                  onClick={() => {
-                    setMapAndMarkerAndCourse();
-                    setLocationButtonType("peak");
-                  }}
-                  className="px-6 py-2 border border-gray-300 rounded-md text-gray-900 transition hover:bg-gray-100 "
-                >
-                  산으로 떠나기
-                </button>
-              )}
-              <button
-                onClick={() => isPeak && handleClickPeakHunter()}
-                className={`px-6 py-2 rounded-md transition ${
-                  isPeak
-                    ? "bg-sky-500 text-white hover:bg-sky-600 "
-                    : "bg-gray-400 text-white cursor-not-allowed "
-                }`}
-              >
-                등산 완료
-              </button>
-            </div>
-
-            {/* 업데이트 정보 */}
-            {/* <section className="text-center">
-              <p className="text-sm text-gray-500">
-                마지막 업데이트:{" "}
-                {mountainData.updatedAt
-                  ? toFormattedDate(mountainData.updatedAt)
-                  : "정보 없음"}
-              </p>
-            </section> */}
-          </>
-        )}
-        {courseList.length > 0 && (
-          <div className="pt-10">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-light text-gray-900">추천 코스</h2>
-              <p className="text-xs text-gray-500">🚶 거리 ⛰ 상승고도</p>
-            </div>
-            <p className="mt-2 text-xs text-gray-500 font-light">
-              코스 번호는 사용자 편의를 위해 임의로 설정한 값으로 실제 코스명과
-              다를 수 있습니다.
-            </p>
-            <div className="mt-4 space-y-3">
-              {courseList.map((item, i) => (
-                <div
-                  key={i}
-                  onClick={() => handleClickCourse(item)}
-                  className={`flex items-center p-3 rounded-lg border border-gray-200 transition 
-            hover:shadow hover:bg-gray-50 ${
-              selectedCourse === i + 1 ? "bg-gray-100" : ""
-            }`}
-                >
-                  <span className="w-20 pl-3 text-lg font-light text-gray-900">
-                    {item} 코스
-                  </span>
-                  {courseStats[i] && (
-                    <span className="flex items-center text-xs text-gray-600 ml-4 space-x-4">
-                      <div className="w-20 flex justify-between">
-                        <span>🚶</span>
-                        <span>{courseStats[i].distance.toFixed(1)} km</span>
-                      </div>
-                      <div className="w-24 flex justify-between">
-                        <span>⛰</span>
-                        <span>{courseStats[i].elevation.toFixed(0)} m</span>
-                      </div>
-                    </span>
+                className={`w-full ${
+                  isMobile() ? "h-[300px]" : "h-[360px]"
+                } rounded-lg overflow-hidden shadow-inner`}
+              />
+              <div className="flex justify-between">
+                <div>
+                  {locationButtonType !== "user" && (
+                    <div className="mt-4">
+                      <button
+                        onClick={() => {
+                          getCurPosition(true);
+                          // setSelectedCourse(0);
+                          setLocationButtonType("user");
+                        }}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 transition"
+                      >
+                        내 위치
+                      </button>
+                    </div>
+                  )}
+                  {locationButtonType !== "peak" && (
+                    <div className="mt-4">
+                      <button
+                        onClick={() => {
+                          setMapAndMarkerAndCourse();
+                          setLocationButtonType("peak");
+                        }}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 transition"
+                      >
+                        산으로
+                      </button>
+                    </div>
                   )}
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </main>
 
-      {/* Footer */}
-      <footer className="py-4 text-center text-gray-500 text-xs border-t border-gray-200">
-        Created by Songtak.
-      </footer>
-
+                <div className="mt-4">
+                  <button
+                    // disabled={!isPeak}
+                    onClick={() => handleClickPeakHunter()}
+                    className={`px-4 py-2 ${
+                      isPeak ? "bg-blue-500" : "bg-gray-500"
+                    } text-white rounded-md shadow-md hover:${
+                      isPeak && "bg-blue-600"
+                    } transition`}
+                  >
+                    등산완료
+                  </button>
+                </div>
+              </div>
+              {courseList.length > 0 && (
+                <div className="pt-10">
+                  <div className="text-2xl justify-between flex">
+                    <div>추천 코스</div>
+                    <div className="text-[1px] ml-2 opacity-75">
+                      🚶 거리 ⛰ 상승고도
+                    </div>
+                  </div>
+                  <div className="font-thin pb-4 text-[10px] text-gray-500">
+                    코스 번호는 사용자 편의를 위해 임의로 설정한 값으로 실제
+                    코스명과 다를 수 있습니다.
+                  </div>
+                  {courseList.map((item, i) => (
+                    <div
+                      key={i}
+                      className={`flex pt-1 pb-1 hover:shadow-md hover:bg-sky-50 cursor-pointer ${
+                        selectedCourse === i + 1 && "bg-sky-100 opacity-95"
+                      } rounded-lg`}
+                      onClick={() => handleClickCourse(item)}
+                    >
+                      <span
+                        style={{ width: "80px" }}
+                        className={`cursor-pointer text-lg ${
+                          selectedCourse === i + 1
+                            ? "text-slate-900"
+                            : "text-slate-500"
+                        } pl-3`}
+                      >
+                        {item} 코스
+                      </span>
+                      {courseStats[i] && (
+                        <span className="flex text-sm text-gray-600 ml-4">
+                          <div
+                            style={{ width: "80px" }}
+                            className="flex justify-between"
+                          >
+                            <div>🚶</div>
+                            <div>{courseStats[i].distance.toFixed(1)} km</div>
+                          </div>
+                          <div className="pl-4"></div>
+                          <div
+                            className="flex pl-4 justify-between"
+                            style={{ width: "90px" }}
+                          >
+                            <div>⛰</div>
+                            <div>{courseStats[i].elevation.toFixed(0)} m</div>
+                          </div>
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+        <div className="font-thin pt-4 text-xs opacity-70">
+          <span>⚠️ 산 정보에 일부 오차가 있을 수 있습니다. </span>
+          <span
+            className="text-blue-600 font-bold cursor-pointer underline"
+            onClick={() => {}}
+          >
+            알려주시면
+          </span>
+          <span> 빠르게 반영하겠습니다!</span>
+        </div>
+      </div>
       <Toast
         isOpen={isOpenToast}
         message={toastMessage}
         duration={3000}
-        onClose={() => setIsOpenToast(false)}
+        color={toastColor}
+        onClose={() => {
+          setIsOpenToast(false);
+        }}
       />
     </div>
   );

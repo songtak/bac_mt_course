@@ -165,17 +165,16 @@ const SignUpPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-start justify-center bg-white py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-6">
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center text-gray-600 hover:text-gray-800 mb-6"
+          className="flex items-center text-gray-500 hover:text-gray-700 transition mb-6"
         >
           <ArrowLeft className="w-5 h-5 mr-2" />
         </button>
-        <h1 className="text-3xl font-bold text-gray-800">회원가입</h1>
-
-        <form className="space-y-4">
+        <h1 className="text-3xl font-light text-gray-900">회원가입</h1>
+        <form className="space-y-5" onSubmit={handleSubmit}>
           <input
             type="text"
             name="name"
@@ -183,34 +182,33 @@ const SignUpPage: React.FC = () => {
             maxLength={20}
             value={formData.name}
             onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded-md"
+            className="w-full px-4 py-3 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200"
           />
-
-          <div className="flex space-x-2">
+          <div className="flex space-x-3">
             <input
               type="email"
               name="email"
               placeholder="이메일"
               value={formData.email}
               onChange={handleChange}
-              className="flex-1 p-3 border border-gray-300 rounded-md"
+              className="flex-1 px-4 py-3 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200"
             />
             <button
               type="button"
               onClick={() => checkDuplicate("email", formData.email)}
               disabled={isLoading || isEmailChecked || formData.email === ""}
-              className={`px-4 py-2 ${
+              className={`px-4 py-3 rounded-md transition ${
                 isLoading || isEmailChecked || formData.email === ""
-                  ? "bg-gray-300"
-                  : "bg-blue-500"
-              }  text-white rounded-md`}
+                  ? "bg-gray-200 text-gray-500"
+                  : "bg-blue-500 text-white hover:bg-blue-600"
+              }`}
             >
               중복 확인
             </button>
           </div>
           <span className="text-xs text-gray-500">{emailSuccessMessage}</span>
           <span className="text-xs text-red-500">{emailErrorMessage}</span>
-          <div className="flex space-x-2">
+          <div className="flex space-x-3">
             <input
               type="text"
               name="nickname"
@@ -218,7 +216,7 @@ const SignUpPage: React.FC = () => {
               value={formData.nickname}
               onChange={handleChange}
               maxLength={40}
-              className="flex-1 p-3 border border-gray-300 rounded-md"
+              className="flex-1 px-4 py-3 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200"
             />
             <button
               type="button"
@@ -226,31 +224,30 @@ const SignUpPage: React.FC = () => {
               disabled={
                 isLoading || isNicknameChecked || formData.nickname === ""
               }
-              className={`px-4 py-2 ${
+              className={`px-4 py-3 rounded-md transition ${
                 isLoading || isNicknameChecked || formData.nickname === ""
-                  ? "bg-gray-300"
-                  : "bg-blue-500"
-              }  text-white rounded-md`}
+                  ? "bg-gray-200 text-gray-500"
+                  : "bg-blue-500 text-white hover:bg-blue-600"
+              }`}
             >
               중복 확인
             </button>
           </div>
-          <span className="text-xs text-gray-500 ">
+          <span className="text-xs text-gray-500">
             {nicknameSuccessMessage}
           </span>
-          <span className="text-xs text-red-500 ">{nicknameErrorMessage}</span>
-
+          <span className="text-xs text-red-500">{nicknameErrorMessage}</span>
           <input
             type="password"
             name="password"
             placeholder="비밀번호"
             value={formData.password}
             onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded-md"
             maxLength={12}
+            className="w-full px-4 py-3 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200"
           />
           {formData.password.length > 0 && formData.password.length < 6 && (
-            <span className="text-xs text-red-500 ">
+            <span className="text-xs text-red-500">
               비밀번호는 6자리 이상 12자리 이하만 가능합니다.
             </span>
           )}
@@ -261,26 +258,35 @@ const SignUpPage: React.FC = () => {
             value={formData.confirmPassword}
             onChange={handleChange}
             maxLength={12}
-            className="w-full p-3 border border-gray-300 rounded-md"
+            className="w-full px-4 py-3 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200"
           />
           {formData.confirmPassword.length > 0 &&
             formData.password !== formData.confirmPassword && (
-              <span className="text-xs text-red-500 ">
+              <span className="text-xs text-red-500">
                 비밀번호가 같지 않습니다.
               </span>
             )}
-
           <button
             type="submit"
             disabled={!isFormValid() || isLoading}
-            onClick={handleSubmit}
-            className={`w-full py-3 ${
-              isFormValid() ? "bg-blue-500" : "bg-gray-300"
-            }  text-white rounded-md`}
+            className={`w-full py-3 rounded-md transition focus:outline-none ${
+              isFormValid() && !isLoading
+                ? "bg-blue-500 text-white hover:bg-blue-600"
+                : "bg-gray-200 text-gray-500"
+            }`}
+          >
+            {isLoading ? "로그인 중..." : "회원가입"}
+          </button>
+        </form>
+        <p className="text-xs text-gray-500">
+          계정이 없으신가요?{" "}
+          <button
+            onClick={() => navigate("/sign-up")}
+            className="text-blue-500 underline transition hover:text-blue-600"
           >
             회원가입
           </button>
-        </form>
+        </p>
       </div>
     </div>
   );

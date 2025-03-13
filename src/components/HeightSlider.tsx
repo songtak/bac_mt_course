@@ -100,7 +100,7 @@ const DualRangeSlider: React.FC<HeightSliderProps> = ({
 
   return (
     <div>
-      <label className="block text-sm font-bold text-gray-700 mb-2">
+      <label className="block text-sm font-bold text-gray-700 ">
         <span>높이 </span>
         <span className="text-xs font-light">
           ({minVal}m ~ {maxVal}m)

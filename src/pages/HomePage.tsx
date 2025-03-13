@@ -1,34 +1,83 @@
 import { useNavigate } from "react-router-dom";
-import { Mountain } from "lucide-react";
-import { jsonToGpx, jsonData } from "../utils/helpers";
 
 function HomePage() {
   const navigate = useNavigate();
 
-  // console.log("jsonToGpx", jsonToGpx(jsonData));
-
   return (
-    <div className="min-h-screen flex flex-col">
-      <main className="flex-1 flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-green-50">
-        <h1 className="text-4xl md:text-6xl font-bold text-gray-800 mb-8">
+    <div
+      className="min-h-screen bg-cover bg-center animate-pan flex flex-col"
+      style={{
+        backgroundImage:
+          "url('https://songtak.github.io/bac_mt_course/assets/images/wallpaper.jpg')",
+        backgroundSize: "auto 100%", // 배경을 확대해서 움직임 효과를 부각시킴
+      }}
+    >
+      {/* Header */}
+      <header className="flex justify-between items-center px-8 py-6 border-b border-gray-200 bg-white">
+        <h1
+          className="text-3xl font-light text-gray-900 cursor-pointer"
+          onClick={() => navigate("/")}
+        >
           봉우리 헌터
         </h1>
+        <nav className="space-x-6 font-light">
+          <button
+            onClick={() => navigate("/list")}
+            className="text-gray-600 hover:text-gray-800 transition"
+          >
+            봉우리 목록
+          </button>
+          <button
+            onClick={() => navigate("/map")}
+            className="text-gray-600 hover:text-gray-800 transition"
+          >
+            내 위치
+          </button>
+        </nav>
+      </header>
 
-        <button
-          onClick={() => navigate("/list")}
-          className="group relative w-32 h-32 rounded-full bg-white shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center overflow-hidden"
-        >
-          <div className="absolute inset-0 bg-gradient-to-br from-green-400 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          <span className="text-4xl relative z-10 group-hover:scale-110 transition-transform duration-300">
-            ⛰️
-          </span>
-        </button>
+      {/* Hero Section */}
+      <main className="flex flex-1 flex-col justify-center items-center px-8 bg-white/70 ">
+        <div className="max-w-xl text-center">
+          <h2 className="text-3xl md:text-4xl font-light text-gray-800 mb-4">
+            당신의 모든 산행이 이곳에
+          </h2>
+          <p className="text-gray-600 mb-10">
+            전국의 명산을 발견하고 나만의 등산 히스토리를 완성하세요.
+          </p>
+        </div>
+        <div className="flex space-x-8">
+          <button
+            onClick={() => navigate("/list")}
+            className="px-8 py-3 bg-white text-gray-900 text-lg font-medium rounded-lg border border-gray-300 shadow-sm hover:bg-gray-50 transition-all duration-300"
+          >
+            지금 떠나기
+          </button>
+        </div>
       </main>
 
-      {/* <footer className="bg-white py-4 text-center shadow-lg">
-        <p className="text-gray-600">한국등산-트레킹지원센터 정보 제공</p>
-        https://www.komount.or.kr
-      </footer> */}
+      {/* Footer */}
+      <footer className="py-4 text-center text-gray-500 text-sm bg-white">
+        Created by Songtak.
+      </footer>
+
+      {/* Background animation CSS */}
+      <style>{`
+        @keyframes pan {
+          0% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+          100% {
+            background-position: 0% 50%;
+          }
+        }
+        .animate-pan {
+          animation: pan 200s linear infinite;
+        }
+      `}</style>
     </div>
   );
 }
