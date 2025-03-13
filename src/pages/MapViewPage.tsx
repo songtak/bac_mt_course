@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Share, BookmarkIcon } from "lucide-react";
+import {
+  ArrowLeft,
+  Share,
+  BookmarkIcon,
+  MessageCircleQuestionIcon,
+} from "lucide-react";
 import { parseGpx } from "../utils/gpxParser";
 import { createNumberList, isMobile } from "../utils/helpers";
 import dayjs from "dayjs";
@@ -498,13 +503,28 @@ function MapViewPage() {
   }, [mountainId]);
 
   /** ================================================================================ */
+  const openExternalLink = () => {
+    window.open(
+      "https://www.instagram.com/sn9tk",
+      "_blank",
+      "noopener,noreferrer"
+    );
+  };
+  /** ================================================================================ */
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-cover bg-center animate-pan flex flex-col">
+      {/* <div className="min-h-screen bg-white"> */}
       {/* Header */}
       <header className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => {
+            if (window.history.state && window.history.state.idx > 0) {
+              navigate(-1);
+            } else {
+              navigate("/list");
+            }
+          }}
           className="flex items-center text-gray-600 hover:text-gray-800 transition"
         >
           <ArrowLeft className="w-5 h-5 mr-2" />
@@ -528,7 +548,7 @@ function MapViewPage() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-6 py-8">
+      <main className="flex-grow container mx-auto px-6 py-8">
         {!mountainData ? (
           <div className="text-center text-gray-500 mt-40">
             산 정보를 불러오는 중입니다...
@@ -537,27 +557,48 @@ function MapViewPage() {
           <>
             {/* 산 정보 섹션 */}
             <section className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900">
-                {mountainData.name}
-              </h1>
-              <p className="text-gray-600 mt-2 text-lg">
-                {mountainData.height} m
-              </p>
-              <div className="mt-2 flex items-center space-x-2">
+              {/* <div className="mb-2 flex items-center space-x-2 mb-2">
                 {mountainData.capital && (
-                  <span className="inline-block bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">
+                  <span className="inline-block bg-gray-100 text-gray-700 text-[10px] px-2 py-[2px] rounded">
                     {mountainData.capital}
                   </span>
                 )}
                 {mountainData.isBac && (
-                  <span className="inline-block bg-sky-100 text-sky-700 text-xs px-2 py-1 rounded">
+                  <span className="inline-block bg-sky-100 text-sky-700 text-[10px] px-2 py-[2px] rounded ml-2">
+                    100대 명산
+                  </span>
+                )}
+              </div> */}
+              <div className="flex">
+                <h1 className="text-3xl font-bold text-gray-900">
+                  {mountainData.name}
+                </h1>
+                <p className="text-gray-600 mt-2 text-lg ml-2">
+                  {mountainData.height} m
+                </p>
+              </div>
+              <div className="mt-2 flex items-center space-x-2 mb-2">
+                {mountainData.capital && (
+                  <span className="inline-block bg-gray-100 text-gray-700 text-[10px] px-2 py-[2px] rounded">
+                    {mountainData.capital}
+                  </span>
+                )}
+                {mountainData.isBac && (
+                  <span className="inline-block bg-sky-100 text-sky-700 text-[10px] px-2 py-[2px] rounded ml-2">
                     100대 명산
                   </span>
                 )}
               </div>
-              <p className="text-gray-500 text-sm mt-3">
-                {mountainData.address}
-              </p>
+
+              <div className="flex justify-between">
+                <p className="text-gray-500 text-sm mt-3">
+                  {mountainData.address}
+                </p>
+                {/* <MessageCircleQuestionIcon className="items-end justify-end mt-4 hover:cursor-pointer" />
+                <div className="absolute z-10 top-full mt-2 left-1/2 transform -translate-x-1/2 w-48 p-2 bg-gray-800 text-white text-xs rounded shadow-lg">
+                  여기에 툴팁 내용 입력
+                </div> */}
+              </div>
             </section>
 
             {/* 지도 섹션 */}
@@ -593,8 +634,9 @@ function MapViewPage() {
                 </button>
               )}
               <button
+                style={{ marginTop: "0px" }}
                 onClick={() => isPeak && handleClickPeakHunter()}
-                className={`px-6 py-2 rounded-md transition ${
+                className={`px-6 py-2 rounded-md transition mt-[0px] ${
                   isPeak
                     ? "bg-sky-500 text-white hover:bg-sky-600 "
                     : "bg-gray-400 text-white cursor-not-allowed "
@@ -631,7 +673,7 @@ function MapViewPage() {
                   key={i}
                   onClick={() => handleClickCourse(item)}
                   className={`flex items-center p-3 rounded-lg border border-gray-200 transition 
-            hover:shadow hover:bg-gray-50 ${
+            hover:shadow hover:bg-gray-50 hover:cursor-pointer ${
               selectedCourse === i + 1 ? "bg-gray-100" : ""
             }`}
                 >
@@ -658,9 +700,16 @@ function MapViewPage() {
       </main>
 
       {/* Footer */}
-      <footer className="py-4 text-center text-gray-500 text-xs border-t border-gray-200">
-        Created by Songtak.
-      </footer>
+      {/* <footer className="py-4 text-center text-gray-500 text-xs border-t border-gray-200">
+        <div
+          className="hover:cursor-pointer font-light"
+          onClick={() => {
+            openExternalLink();
+          }}
+        >
+          Created by Songtak.
+        </div>
+      </footer> */}
 
       <Toast
         isOpen={isOpenToast}

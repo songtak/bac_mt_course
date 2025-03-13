@@ -158,7 +158,7 @@ function MapPage() {
             circleRef.current = new naver.maps.Circle({
               map: mapRef.current,
               center: newPosition,
-              radius: 5000, // 5km
+              radius: 10000, // 5km
               strokeColor: "#0000FF", // 파란색 외곽선
               strokeOpacity: 0.5,
               strokeWeight: 2,
@@ -280,22 +280,37 @@ function MapPage() {
       console.error("이 브라우저는 Geolocation을 지원하지 않습니다.");
     }
   };
+  /** ================================================================================ */
+  const openExternalLink = () => {
+    window.open(
+      "https://www.instagram.com/sn9tk",
+      "_blank",
+      "noopener,noreferrer"
+    );
+  };
+  /** ================================================================================ */
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-cover bg-center animate-pan flex flex-col">
       {/* Header */}
       <header className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => {
+            if (window.history.state && window.history.state.idx > 0) {
+              navigate(-1);
+            } else {
+              navigate("/list");
+            }
+          }}
           className="flex items-center text-gray-500 hover:text-gray-700 transition"
         >
           <ArrowLeft className="w-5 h-5 mr-2" />
-          <span className="text-sm">뒤로</span>
+          <span className="text-sm">내 주변 봉우리</span>
         </button>
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-6 py-8">
+      <main className="flex-grow container mx-auto px-6 py-8">
         <>
           {/* 산 정보 섹션 (필요 시 추가) */}
 
@@ -316,7 +331,7 @@ function MapPage() {
           <section>
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-light text-gray-900 mb-4">
-                내 주변 봉우리{" "}
+                주변 봉우리 목록{" "}
               </h2>
               {/* <p className="text-xs text-gray-500">🚶 거리 ⛰ 상승고도</p> */}
             </div>
@@ -353,9 +368,16 @@ function MapPage() {
       </main>
 
       {/* Footer */}
-      <footer className="py-4 text-center text-gray-500 text-xs border-t border-gray-200">
-        Crafted with precision and care.
-      </footer>
+      {/* <footer className="py-4 text-center text-gray-500 text-xs border-t border-gray-200">
+        <div
+          className="hover:cursor-pointer font-lightr"
+          onClick={() => {
+            openExternalLink();
+          }}
+        >
+          Created by Songtak.
+        </div>
+      </footer> */}
 
       <Toast
         isOpen={isOpenToast}

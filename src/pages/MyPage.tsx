@@ -207,9 +207,7 @@ const MyPage = () => {
               setIsOpenBookmark(!isOpenBookmark);
             }}
           >
-            <h2 className="text-2xl font-light text-gray-900 mb-4">
-              내 북마크
-            </h2>
+            <h2 className="text-2xl font-light text-gray-900 mb-4">북마크</h2>
             {isOpenBookmark ? (
               <ArrowUp className="text-gray-400" size={20} />
             ) : (
@@ -281,7 +279,7 @@ const MyPage = () => {
             }}
           >
             <h2 className="text-2xl font-light text-gray-900 mb-4">
-              내 등산 완료
+              내가 오른 봉우리{" "}
             </h2>
             {isOpenSummit ? (
               <ArrowUp className="text-gray-400" size={20} />

@@ -5,6 +5,7 @@ import SignUpPage from "./SignUpPage";
 import LoginPage from "./LoginPage";
 import MyPage from "./MyPage";
 import MapPage from "./MapPage";
+import RankingPage from "./RankingPage";
 
 export {
   HomePage,
@@ -14,4 +15,5 @@ export {
   LoginPage,
   MyPage,
   MapPage,
+  RankingPage,
 };

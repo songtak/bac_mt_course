@@ -2,7 +2,15 @@ import { useNavigate } from "react-router-dom";
 
 function HomePage() {
   const navigate = useNavigate();
-
+  /** ================================================================================ */
+  const openExternalLink = () => {
+    window.open(
+      "https://www.instagram.com/sn9tk",
+      "_blank",
+      "noopener,noreferrer"
+    );
+  };
+  /** ================================================================================ */
   return (
     <div
       className="min-h-screen bg-cover bg-center animate-pan flex flex-col"
@@ -28,28 +36,28 @@ function HomePage() {
             봉우리 목록
           </button>
           <button
-            onClick={() => navigate("/map")}
+            onClick={() => navigate("/rank")}
             className="text-gray-600 hover:text-gray-800 transition"
           >
-            내 위치
+            헌터 랭킹
           </button>
         </nav>
       </header>
 
       {/* Hero Section */}
-      <main className="flex flex-1 flex-col justify-center items-center px-8 bg-white/70 ">
+      <main className="flex flex-1 flex-col justify-center items-center px-8 bg-black/70 ">
         <div className="max-w-xl text-center">
-          <h2 className="text-3xl md:text-4xl font-light text-gray-800 mb-4">
+          <h2 className="text-[28px] md:text-4xl font-light text-white mb-4">
             당신의 모든 산행이 이곳에
           </h2>
-          <p className="text-gray-600 mb-10">
+          <p className="text-gray-500 mb-10">
             전국의 명산을 발견하고 나만의 등산 히스토리를 완성하세요.
           </p>
         </div>
         <div className="flex space-x-8">
           <button
-            onClick={() => navigate("/list")}
-            className="px-8 py-3 bg-white text-gray-900 text-lg font-medium rounded-lg border border-gray-300 shadow-sm hover:bg-gray-50 transition-all duration-300"
+            onClick={() => navigate("/map")}
+            className="px-8 py-3 bg-white text-gray-500 text-lg font-medium rounded-lg border border-gray-300 shadow-sm hover:bg-gray-50 transition-all duration-300"
           >
             지금 떠나기
           </button>
@@ -57,8 +65,15 @@ function HomePage() {
       </main>
 
       {/* Footer */}
-      <footer className="py-4 text-center text-gray-500 text-sm bg-white">
-        Created by Songtak.
+      <footer className="py-4 text-center text-gray-500 text-xs bg-white font-light">
+        <div
+          className="hover:cursor-pointer"
+          onClick={() => {
+            openExternalLink();
+          }}
+        >
+          Created by Songtak.
+        </div>
       </footer>
 
       {/* Background animation CSS */}

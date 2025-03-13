@@ -76,19 +76,23 @@ const Bookmark = ({ mountainId, bookmarkList, setBookmarkList }: Props) => {
   };
   return (
     <>
-      <div className="text-gray-300 pointer-events-auto">
+      <div className="text-gray-300 pointer-events-auto opacity-70">
         <BookmarkIcon
           color={`${
             hasBookmark
-              ? "rgb(125 211 252 / var(--tw-text-opacity, 1))"
-              : "rgb(209 213 219 / var(--tw-text-opacity, 1))"
+              ? // ? "rgb(65 128 141  / var(--tw-text-opacity, 1))"
+                "rgb(3 105 161 / var(--tw-text-opacity, 1))"
+              : // : "rgb(209 213 219 / var(--tw-text-opacity, 1))"
+                "rgb(3 105 161 / var(--tw-text-opacity, 1))"
           } `}
           size={24}
           strokeWidth={2}
           fill={`${
             hasBookmark
-              ? "rgb(125 211 252 / var(--tw-text-opacity, 1))"
-              : "none"
+              ? "rgb(224 242 254)"
+              : // "rgb(65 128 141)"
+                // ? "rgb(125 211 252 / var(--tw-text-opacity, 1))"
+                "none "
           } `}
           className="cursor-pointer z-10"
           onClick={(e) => {

@@ -9,6 +9,7 @@ import useUserStore from "./stores/useUserStore";
 import { getUserData } from "./services/userApi";
 import AddressSettingPage from "./pages/AddressSettingPage";
 import ExcelUploader from "./pages/ExcelUploader";
+import "./assets/common.css";
 
 function App() {
   const user = useAuth();
@@ -34,6 +35,7 @@ function App() {
         <Route path="/sign-up" element={<PAGES.SignUpPage />} />
         <Route path="/sign-in" element={<PAGES.LoginPage />} />
         <Route path="/my" element={<PAGES.MyPage />} />
+        <Route path="/rank" element={<PAGES.RankingPage />} />
       </Routes>
     </div>
   );

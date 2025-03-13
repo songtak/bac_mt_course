@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowDown, ArrowUp, Search } from "lucide-react";
+import { ArrowDown, ArrowUp, Search, X } from "lucide-react";
 import _ from "lodash";
 import {
   collection,
@@ -433,29 +433,43 @@ const MountainListPage = () => {
       {/* Main Content */}
       <main className="max-w-5xl mx-auto px-5 py-6">
         <div className="flex justify-between">
-          <h2 className="text-2xl font-light text-gray-700 mb-8">
-            봉우리 목록
-          </h2>
-          <div
-            className="text-[14px] h-10 font-light px-6 py-2 border border-gray-300 rounded-md text-gray-900 transition hover:bg-gray-100 hover:cursor-pointer"
-            onClick={() => {
-              navigate("/map");
-            }}
-          >
-            내 주변 봉우리 찾기
+          <div className="flex justify-between">
+            <h2 className="text-2xl font-light text-gray-700 mb-8">
+              봉우리 목록
+            </h2>
+            <div
+              className={`h-10 w-10 justify-center inline-flex items-center p-1 border font-light  border-gray-300 rounded-full hover:cursor-pointer hover:bg-gray-100 ml-2 ${
+                isFilterShow && "bg-gray-100"
+              }`}
+              onClick={() => setIsFilterShow(!isFilterShow)}
+            >
+              <Search className="text-gray-400" size={20} />
+            </div>
+          </div>
+          <div className="flex">
+            <div
+              className="text-[14px] h-10 font-light px-4 py-2 border border-gray-300 rounded-md text-gray-900 transition hover:bg-gray-100 hover:cursor-pointer mr-2"
+              onClick={() => {
+                navigate("/rank");
+              }}
+            >
+              헌터 랭킹
+            </div>
+
+            <div
+              className="text-[14px] h-10 font-light px-4 py-2 border border-gray-300 rounded-md text-gray-900 transition hover:bg-gray-100 hover:cursor-pointer"
+              onClick={() => {
+                navigate("/map");
+              }}
+            >
+              내 주변 봉우리 찾기
+            </div>
           </div>
         </div>
 
         {/* 검색 필터 섹션 */}
-        <div
-          className={`bg-white/95  rounded-xl shadow-sm p-6 mb-4 border transition duration-300 ${
-            !isFilterShow && "cursor-pointer"
-          }`}
-          onClick={() => {
-            !isFilterShow && setIsFilterShow(true);
-          }}
-        >
-          <div
+
+        {/* <div
             className="flex justify-between items-center"
             onClick={() => setIsFilterShow(!isFilterShow)}
           >
@@ -465,10 +479,26 @@ const MountainListPage = () => {
             ) : (
               <ArrowDown className="text-gray-400" size={20} />
             )}
-          </div>
+          </div> */}
 
-          {isFilterShow && (
-            <div className="mt-6">
+        {isFilterShow && (
+          <div
+            className={`bg-white/95  rounded-xl shadow-lg p-6 mb-4 border transition duration-300 ${
+              !isFilterShow && "cursor-pointer"
+            }`}
+            onClick={() => {
+              !isFilterShow && setIsFilterShow(true);
+            }}
+          >
+            <X
+              className="text-gray-400 float-end mb-4 hover:cursor-pointer"
+              size={24}
+              onClick={() => {
+                isFilterShow && setIsFilterShow(false);
+              }}
+            />
+
+            <div className="mt-4">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 {/* 도시 필터 */}
                 <div>
@@ -565,15 +595,15 @@ const MountainListPage = () => {
                   </button>
                   <button
                     onClick={handleClickSearch}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md shadow-sm hover:bg-blue-700 transition"
+                    className="px-4 py-2 bg-blue-500 text-white rounded-md shadow-sm hover:bg-sky-700 transition"
                   >
                     검색
                   </button>
                 </div>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {mountainList.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
