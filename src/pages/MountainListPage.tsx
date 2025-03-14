@@ -432,35 +432,30 @@ const MountainListPage = () => {
 
       {/* Main Content */}
       <main className="max-w-5xl mx-auto px-5 py-6">
-        <div className="flex justify-between">
-          <div className="flex justify-between">
-            <h2 className="text-2xl font-light text-gray-700 mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+          <div className="flex ">
+            <h2 className="text-2xl font-light text-gray-700 mb-4 sm:mb-0">
               봉우리 목록
             </h2>
             <div
-              className={`h-10 w-10 justify-center inline-flex items-center p-1 border font-light  border-gray-300 rounded-full hover:cursor-pointer hover:bg-gray-100 ml-2 ${
-                isFilterShow && "bg-gray-100"
+              className={`mt-[6px] h-6 w-6 inline-flex items-center justify-center p-1 border border-gray-300 rounded-full hover:cursor-pointer hover:bg-gray-100 ml-2 ${
+                isFilterShow ? "bg-gray-100" : ""
               }`}
               onClick={() => setIsFilterShow(!isFilterShow)}
             >
-              <Search className="text-gray-400" size={20} />
+              <Search className="text-gray-400" size={16} />
             </div>
           </div>
-          <div className="flex">
+          <div className="flex mt-4 sm:mt-0">
             <div
               className="text-[14px] h-10 font-light px-4 py-2 border border-gray-300 rounded-md text-gray-900 transition hover:bg-gray-100 hover:cursor-pointer mr-2"
-              onClick={() => {
-                navigate("/rank");
-              }}
+              onClick={() => navigate("/rank")}
             >
               헌터 랭킹
             </div>
-
             <div
               className="text-[14px] h-10 font-light px-4 py-2 border border-gray-300 rounded-md text-gray-900 transition hover:bg-gray-100 hover:cursor-pointer"
-              onClick={() => {
-                navigate("/map");
-              }}
+              onClick={() => navigate("/map")}
             >
               내 주변 봉우리 찾기
             </div>

@@ -46,12 +46,12 @@ const RankingPage = () => {
       <main className="flex-grow container mx-auto px-6 py-8">
         {/* 주간 헌터 랭킹  */}
         <div>
-          <div className="bg-white border rounded-xl shadow-sm  divide-y divide-gray-200">
-            <div className="flex justify-between px-2 mt-4">
-              <div className="text-2xl font-light text-gray-900 mb-6">
+          <div className="bg-white border rounded-xl shadow-sm divide-y divide-gray-200">
+            <div className="flex flex-col sm:flex-row justify-between sm:items-end px-2 mt-4 min-h-[3rem]">
+              <div className="text-2xl font-light text-gray-900">
                 🏆 주간 헌터 랭킹 – 최다 등산
               </div>
-              <span className="font-light text-sm justify-end pt-[16px] text-gray-500 h-10">
+              <span className="font-light text-sm text-gray-500 mt-auto sm:mt-0">
                 ( {getWeekRange()} )
               </span>
             </div>
@@ -68,8 +68,9 @@ const RankingPage = () => {
             ))}
           </div>
         </div>
-        {/*  주간 헌터 랭킹 */}
+        {/* 주간 헌터 랭킹 */}
       </main>
+
       {/* <footer className="py-4 text-center text-xs text-gray-500">
         Created with precision.
       </footer> */}
