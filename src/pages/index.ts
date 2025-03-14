@@ -6,6 +6,7 @@ import LoginPage from "./LoginPage";
 import MyPage from "./MyPage";
 import MapPage from "./MapPage";
 import RankingPage from "./RankingPage";
+import MarkerMapPage from "./MarkerMapPage";
 
 export {
   HomePage,
@@ -16,4 +17,5 @@ export {
   MyPage,
   MapPage,
   RankingPage,
+  MarkerMapPage,
 };

@@ -48,10 +48,10 @@ const RankingPage = () => {
         <div>
           <div className="bg-white border rounded-xl shadow-sm divide-y divide-gray-200">
             <div className="flex flex-col sm:flex-row justify-between sm:items-end px-2 mt-4 min-h-[3rem]">
-              <div className="text-2xl font-light text-gray-900">
+              <div className="text-2xl font-light text-gray-900 pb-4">
                 🏆 주간 헌터 랭킹 – 최다 등산
               </div>
-              <span className="font-light text-sm text-gray-500 mt-auto sm:mt-0">
+              <span className="font-light text-sm text-gray-500 mt-auto sm:mt-0 pb-1 text-end">
                 ( {getWeekRange()} )
               </span>
             </div>

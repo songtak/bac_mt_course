@@ -38,7 +38,7 @@ const Toast: React.FC<ToastProps> = ({
 
   return ReactDOM.createPortal(
     <div
-      className={`fixed top-12 left-1/2 transform -translate-x-1/2 w-72 transition-opacity duration-300 bg-black bg-opacity-70 backdrop-blur-md px-4 py-2 rounded-md shadow-md ${
+      className={`fixed top-12 left-1/2 transform -translate-x-1/2 w-72 transition-opacity duration-300 bg-black bg-opacity-40 backdrop-blur-md px-4 py-2 rounded-md shadow-md ${
         isOpen ? "opacity-100" : "opacity-0"
       }`}
     >

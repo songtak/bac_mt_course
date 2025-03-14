@@ -36,6 +36,7 @@ function App() {
         <Route path="/sign-in" element={<PAGES.LoginPage />} />
         <Route path="/my" element={<PAGES.MyPage />} />
         <Route path="/rank" element={<PAGES.RankingPage />} />
+        <Route path="/map-marker" element={<PAGES.MarkerMapPage />} />
       </Routes>
     </div>
   );

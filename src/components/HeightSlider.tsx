@@ -101,9 +101,9 @@ const DualRangeSlider: React.FC<HeightSliderProps> = ({
   return (
     <div>
       <label className="block text-sm font-bold text-gray-700 ">
-        <span>높이 </span>
+        {/* <span>높이 </span> */}
         <span className="text-xs font-light">
-          ({minVal}m ~ {maxVal}m)
+          ( {minVal}m ~ {maxVal}m )
         </span>
       </label>
       <div className="relative w-full h-8">
@@ -116,14 +116,14 @@ const DualRangeSlider: React.FC<HeightSliderProps> = ({
         />
         {/* 최소 thumb */}
         <div
-          className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white border-2 border-blue-500 rounded-full cursor-pointer"
+          className="absolute top-1/2 -translate-y-1/2 w-5 h-5 bg-white border-2 border-blue-500 rounded-full cursor-pointer"
           style={{ left: `${getPercent(minVal)}%`, zIndex: 3 }}
           onMouseDown={handleMouseDown("min")}
           onTouchStart={handleTouchStart("min")}
         />
         {/* 최대 thumb */}
         <div
-          className="absolute top-1/2 left-10 -translate-y-1/2 w-4 h-4 bg-white border-2 border-blue-500 rounded-full cursor-pointer"
+          className="absolute top-1/2 left-10 -translate-y-1/2 w-5 h-5 bg-white border-2 border-blue-500 rounded-full cursor-pointer"
           style={{ left: `${getPercent(maxVal - 50)}%`, zIndex: 4 }}
           onMouseDown={handleMouseDown("max")}
           onTouchStart={handleTouchStart("max")}

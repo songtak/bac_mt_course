@@ -1,6 +1,7 @@
 import dayjs from "dayjs";
 import { kor1 } from "../assets/kor1";
 import { kor2 } from "../assets/kor2";
+import "dayjs/locale/ko"; // 한국어 locale 임포트
 
 type Kor1Type = {
   id: number;

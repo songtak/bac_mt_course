@@ -37,6 +37,9 @@ import { db, auth } from "../utils/firebaseConfig";
 import useUserStore from "../stores/useUserStore";
 import Bookmark from "../components/Bookmark";
 import Toast from "../components/Toast";
+import * as BADGE from "../components/Badges/index";
+import Header from "../components/Header";
+import * as BUTTON from "../components/Buttons/index";
 
 interface NaverMap {
   setCenter: (latlng: naver.maps.LatLng) => void;
@@ -93,7 +96,10 @@ function MapViewPage() {
   const [locationButtonType, setLocationButtonType] = useState<"peak" | "user">(
     "peak"
   );
+  /** 정산 도착 여부 */
   const [isPeak, setIsPeak] = useState<boolean>(false);
+  /** 등산 완료 */
+  const [isDone, setIsDone] = useState<boolean>(false);
   const [weatherEmojiList, setWeatherEmojiList] = useState<string[]>([]);
   const [weatherList, setWeatherList] = useState<any[]>([]);
   const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
@@ -174,6 +180,7 @@ function MapViewPage() {
       setToastMessage("봉우리 사냥 완료! ⛰️🔫");
       setToastColor("blue");
       setIsOpenToast(true);
+      setIsDone(true);
     } catch (error) {
       console.error("등산 기록 저장 실패:", error);
     }
@@ -264,12 +271,16 @@ function MapViewPage() {
         map: map,
         icon: {
           content: `<div style="
-            width:24px;
-            height:24px;
-            background:#007AFF;
-            border-radius:50%;
-            border:3px solid white;
-          "></div>`,
+          width:18px;
+          height:18px;
+          background:#FCD34D; /* Tailwind yellow-300와 유사한 색상 */
+          border-radius:50%;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          border:1px solid white;
+          box-shadow:0 0 8px rgba(0,0,0,0.2);
+        ">⛰️</div>`,
           anchor: new naver.maps.Point(12, 12),
         },
       });
@@ -357,13 +368,13 @@ function MapViewPage() {
               map: mapRef.current,
               icon: {
                 content: `<div style="
-                  width:24px;
-                  height:24px;
-                  background:#ff3b30;
-                  border-radius:50%;
-                  border:3px solid white;
-                  box-shadow:0px 0px 10px rgba(0,0,0,0.3);
-                "></div>`,
+                width:12px;
+                height:12px;
+                // background: #ff3b30;
+                // border-radius:50%;
+                // border:1px solid #ffffff;
+                // box-shadow:0px 0px 10px rgba(0,0,0,0.3);
+              ">📍</div>`,
                 anchor: new naver.maps.Point(12, 12),
               },
             });
@@ -415,13 +426,13 @@ function MapViewPage() {
         map: mapRef.current,
         icon: {
           content: `<div style="
-            width:24px;
-            height:24px;
-            background:#ff3b30;
-            border-radius:50%;
-            border:3px solid white;
-            box-shadow:0px 0px 10px rgba(0,0,0,0.3);
-          "></div>`,
+          width:12px;
+          height:12px;
+          // background: #ff3b30;
+          // border-radius:50%;
+          // border:1px solid #ffffff;
+          // box-shadow:0px 0px 10px rgba(0,0,0,0.3);
+        ">📍</div>`,
           anchor: new naver.maps.Point(12, 12),
         },
       });
@@ -503,6 +514,7 @@ function MapViewPage() {
   }, [mountainId]);
 
   /** ================================================================================ */
+
   const openExternalLink = () => {
     window.open(
       "https://www.instagram.com/sn9tk",
@@ -510,45 +522,51 @@ function MapViewPage() {
       "noopener,noreferrer"
     );
   };
+
   /** ================================================================================ */
 
   return (
     <div className="min-h-screen bg-cover bg-center animate-pan flex flex-col">
       {/* <div className="min-h-screen bg-white"> */}
       {/* Header */}
-      <header className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-        <button
-          onClick={() => {
-            if (window.history.state && window.history.state.idx > 0) {
-              navigate(-1);
-            } else {
-              navigate("/list");
-            }
-          }}
-          className="flex items-center text-gray-600 hover:text-gray-800 transition"
-        >
-          <ArrowLeft className="w-5 h-5 mr-2" />
-          <span className="text-sm">뒤로</span>
-        </button>
-        <div className="flex items-center space-x-4">
+      <Header
+        left={
           <button
-            onClick={handleShare}
-            className="text-gray-600 hover:text-gray-800 transition"
+            onClick={() => {
+              if (window.history.state && window.history.state.idx > 0) {
+                navigate(-1);
+              } else {
+                navigate("/list");
+              }
+            }}
+            className="flex items-center text-gray-600 hover:text-gray-800 transition"
           >
-            <Share size={20} />
+            <ArrowLeft className="w-5 h-5 mr-2" />
           </button>
-          <div onClick={(e) => e.stopPropagation()} className="cursor-pointer">
-            <Bookmark
-              mountainId={Number(mountainId)}
-              bookmarkList={bookmarkList}
-              setBookmarkList={setBookmarkList}
-            />
-          </div>
-        </div>
-      </header>
+        }
+        right={
+          <nav className="space-x-6">
+            {!userStore.isLogin ? (
+              <span
+                onClick={() => navigate("/sign-in")}
+                className="cursor-pointer font-light text-gray-900 transition hover:underline"
+              >
+                로그인
+              </span>
+            ) : (
+              <span
+                onClick={() => navigate("/my")}
+                className="cursor-pointer font-light text-gray-900 transition hover:underline"
+              >
+                {userStore.userInfo?.nickname} 🦖
+              </span>
+            )}
+          </nav>
+        }
+      />
 
       {/* Main Content */}
-      <main className="flex-grow container mx-auto px-6 py-8">
+      <main className="flex-grow w-full max-w-screen-lg mx-auto px-6 py-8">
         {!mountainData ? (
           <div className="text-center text-gray-500 mt-40">
             산 정보를 불러오는 중입니다...
@@ -569,29 +587,47 @@ function MapViewPage() {
                   </span>
                 )}
               </div> */}
-              <div className="flex">
-                <h1 className="text-3xl font-bold text-gray-900">
-                  {mountainData.name}
-                </h1>
-                <p className="text-gray-600 mt-2 text-lg ml-2">
-                  {mountainData.height} m
-                </p>
-              </div>
-              <div className="mt-2 flex items-center space-x-2 mb-2">
-                {mountainData.capital && (
-                  <span className="inline-block bg-gray-100 text-gray-700 text-[10px] px-2 py-[2px] rounded">
-                    {mountainData.capital}
-                  </span>
-                )}
-                {mountainData.isBac && (
-                  <span className="inline-block bg-sky-100 text-sky-700 text-[10px] px-2 py-[2px] rounded ml-2">
-                    100대 명산
-                  </span>
-                )}
+              <div className="flex justify-between">
+                <div>
+                  <div className="flex">
+                    <h1 className="text-3xl text-gray-900">
+                      {mountainData.name}
+                    </h1>
+                    <p className="text-gray-500 mt-2 text-lg ml-2">
+                      {mountainData.height} m
+                    </p>
+                  </div>
+                  <div className="mt-2 flex items-center space-x-2 mb-2">
+                    {mountainData.capital && (
+                      <BADGE.CapitalBadge capital={mountainData.capital} />
+                    )}
+                    {mountainData.isBac && <BADGE.IsBacBadge />}
+                  </div>
+                </div>
+                <div className="pt-2">
+                  <div className="flex items-center space-x-4">
+                    <button
+                      onClick={handleShare}
+                      className="text-gray-600 hover:text-gray-800 transition"
+                    >
+                      <Share size={20} />
+                    </button>
+                    <div
+                      onClick={(e) => e.stopPropagation()}
+                      className="cursor-pointer"
+                    >
+                      <Bookmark
+                        mountainId={Number(mountainId)}
+                        bookmarkList={bookmarkList}
+                        setBookmarkList={setBookmarkList}
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div className="flex justify-between">
-                <p className="text-gray-500 text-sm mt-3">
+                <p className="text-gray-500 text-sm font-light">
                   {mountainData.address}
                 </p>
                 {/* <MessageCircleQuestionIcon className="items-end justify-end mt-4 hover:cursor-pointer" />
@@ -602,7 +638,7 @@ function MapViewPage() {
             </section>
 
             {/* 지도 섹션 */}
-            <section className="mb-8">
+            <section className="mb-5">
               <div
                 ref={mapElement}
                 className="w-full h-80 rounded-lg overflow-hidden shadow-inner bg-gray-100"
@@ -610,40 +646,42 @@ function MapViewPage() {
                 {/* 네이버 지도 API를 적용할 컨테이너 */}
               </div>
             </section>
-            <div className="flex justify-between items-center mt-6 space-y-4 md:space-y-0 md:space-x-4">
+
+            <div className="flex justify-between items-center ">
+              <BUTTON.NaverMapButton
+                name={mountainData.name}
+                latitude={mountainData.latitude}
+                longitude={mountainData.longitude}
+              />
+
               {locationButtonType !== "user" && (
-                <button
-                  onClick={() => {
-                    getCurPosition(true);
-                    setLocationButtonType("user");
-                  }}
-                  className="px-6 py-2 border border-gray-300 rounded-md text-gray-900 transition hover:bg-gray-100"
-                >
-                  지금 내 위치
-                </button>
+                <BUTTON.BorderButton
+                  content={
+                    <span
+                      onClick={() => {
+                        getCurPosition(true);
+                        setLocationButtonType("user");
+                      }}
+                    >
+                      지금 내 위치
+                    </span>
+                  }
+                />
               )}
               {locationButtonType !== "peak" && (
-                <button
-                  onClick={() => {
-                    setMapAndMarkerAndCourse();
-                    setLocationButtonType("peak");
-                  }}
-                  className="px-6 py-2 border border-gray-300 rounded-md text-gray-900 transition hover:bg-gray-100 "
-                >
-                  산으로 떠나기
-                </button>
+                <BUTTON.BorderButton
+                  content={
+                    <span
+                      onClick={() => {
+                        setMapAndMarkerAndCourse();
+                        setLocationButtonType("peak");
+                      }}
+                    >
+                      산으로 떠나기
+                    </span>
+                  }
+                />
               )}
-              <button
-                style={{ marginTop: "0px" }}
-                onClick={() => isPeak && handleClickPeakHunter()}
-                className={`px-6 py-2 rounded-md transition mt-[0px] ${
-                  isPeak
-                    ? "bg-sky-500 text-white hover:bg-sky-600 "
-                    : "bg-gray-400 text-white cursor-not-allowed "
-                }`}
-              >
-                등산 완료
-              </button>
             </div>
 
             {/* 업데이트 정보 */}
@@ -700,16 +738,41 @@ function MapViewPage() {
       </main>
 
       {/* Footer */}
-      {/* <footer className="py-4 text-center text-gray-500 text-xs border-t border-gray-200">
-        <div
-          className="hover:cursor-pointer font-light"
-          onClick={() => {
-            openExternalLink();
-          }}
-        >
-          Created by Songtak.
+      {/* <footer className="py-4 text-center text-gray-500 text-xs border-t border-gray-200"> */}
+      <footer className="py-4 text-center">
+        <div className="flex items-center mt-4 justify-center">
+          <BUTTON.FillButton
+            content={
+              <span
+                className="text-base leading-[31px] font-light"
+                onClick={() => isPeak && handleClickPeakHunter()}
+              >
+                {isPeak && isDone && "등산 완료 ✨"}
+                {isPeak && !isDone && "봉우리 도착!"}
+                {!isPeak && !isDone && "봉우리로 향하는 중..."}
+              </span>
+            }
+            style={`
+
+                ${
+                  isPeak &&
+                  isDone &&
+                  "animate-shake bg-green-500 text-white cursor-not-allowed hover:cursor-default hover:bg-gray-400 pl-10 pr-7 py-10"
+                }
+                ${
+                  isPeak &&
+                  !isDone &&
+                  "bg-sky-500 text-white hover:bg-blue-500 pl-10 pr-7 py-10"
+                }
+                ${
+                  !isPeak &&
+                  !isDone &&
+                  "bg-gray-300 text-white cursor-not-allowed hover:cursor-default hover:bg-gray-400 px-10 py-10"
+                }
+                `}
+          />
         </div>
-      </footer> */}
+      </footer>
 
       <Toast
         isOpen={isOpenToast}

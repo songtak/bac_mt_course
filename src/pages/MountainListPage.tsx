@@ -29,6 +29,10 @@ import {
   calculate3DDistance,
   isWithinMeters,
 } from "../utils/geoHeplers";
+import * as BADGE from "../components/Badges/index";
+import * as BUTTON from "../components/Buttons/index";
+import Header from "../components/Header";
+
 const cities = [
   "강원특별자치도",
   "경기도",
@@ -404,37 +408,43 @@ const MountainListPage = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="flex justify-between items-center px-8 py-6 border-b border-gray-200">
-        <h1
-          className="text-3xl font-light text-gray-900 cursor-pointer"
-          onClick={() => navigate("/")}
-        >
-          봉우리 헌터
-        </h1>
-        <nav className="space-x-6">
-          {!userStore.isLogin ? (
-            <span
-              onClick={() => navigate("/sign-in")}
-              className="cursor-pointer font-light text-gray-900 transition hover:underline"
-            >
-              로그인
-            </span>
-          ) : (
-            <span
-              onClick={() => navigate("/my")}
-              className="cursor-pointer font-light text-gray-900 transition hover:underline"
-            >
-              {userStore.userInfo?.nickname} 🦖
-            </span>
-          )}
-        </nav>
-      </header>
+      <Header
+        left={
+          <h1
+            className="text-lg font-light text-gray-900 cursor-pointer"
+            onClick={() => navigate("/")}
+          >
+            봉우리 헌터
+          </h1>
+        }
+        right={
+          <nav className="space-x-6">
+            {!userStore.isLogin ? (
+              <span
+                onClick={() => navigate("/sign-in")}
+                className="cursor-pointer font-light text-gray-900 transition hover:underline"
+              >
+                로그인
+              </span>
+            ) : (
+              <span
+                onClick={() => navigate("/my")}
+                className="cursor-pointer font-light text-gray-900 transition hover:underline"
+              >
+                {userStore.userInfo?.nickname} 🦖
+              </span>
+            )}
+          </nav>
+        }
+      />
 
       {/* Main Content */}
       <main className="max-w-5xl mx-auto px-5 py-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+        {/* @헌터 랭킹 버튼 추가시 이거 써야함 :  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10"> */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10">
+          {" "}
           <div className="flex ">
-            <h2 className="text-2xl font-light text-gray-700 mb-4 sm:mb-0">
+            <h2 className="text-2xl font-light text-gray-700 sm:mb-0 h-8">
               봉우리 목록
             </h2>
             <div
@@ -446,15 +456,22 @@ const MountainListPage = () => {
               <Search className="text-gray-400" size={16} />
             </div>
           </div>
-          <div className="flex mt-4 sm:mt-0">
-            <div
-              className="text-[14px] h-10 font-light px-4 py-2 border border-gray-300 rounded-md text-gray-900 transition hover:bg-gray-100 hover:cursor-pointer mr-2"
+          {/* @헌터 랭킹 버튼 추가시 이거 써야함 :  <div className="flex mt-3 sm:mt-0 h-8"> */}
+          <div className="flex mt-3 sm:mt-0 h-8">
+            {/* <div
+              className="text-[12px] h-8 font-light px-4 py-[4.5px] border  border-gray-300 rounded-md text-gray-600 transition hover:bg-gray-100 hover:cursor-pointer mr-2"
               onClick={() => navigate("/rank")}
             >
               헌터 랭킹
+            </div> */}
+            <div
+              className="text-[12px] h-8 font-light px-4 py-[4.5px] border border-gray-300 rounded-md text-gray-600 transition hover:bg-gray-100 hover:cursor-pointer mr-2"
+              onClick={() => navigate("/map-marker")}
+            >
+              지도로 보기
             </div>
             <div
-              className="text-[14px] h-10 font-light px-4 py-2 border border-gray-300 rounded-md text-gray-900 transition hover:bg-gray-100 hover:cursor-pointer"
+              className="text-[12px] h-8 font-light px-4 py-[4.5px] border border-gray-300 rounded-md text-gray-600 transition hover:bg-gray-100 hover:cursor-pointer"
               onClick={() => navigate("/map")}
             >
               내 주변 봉우리 찾기
@@ -478,7 +495,7 @@ const MountainListPage = () => {
 
         {isFilterShow && (
           <div
-            className={`bg-white/95  rounded-xl shadow-lg p-6 mb-4 border transition duration-300 ${
+            className={`relative bg-white/95  rounded-xl shadow-lg p-6 mb-4 border transition duration-300 ${
               !isFilterShow && "cursor-pointer"
             }`}
             onClick={() => {
@@ -486,7 +503,7 @@ const MountainListPage = () => {
             }}
           >
             <X
-              className="text-gray-400 float-end mb-4 hover:cursor-pointer"
+              className="absolute top-4 right-4  text-gray-400 mb-4 hover:cursor-pointer"
               size={24}
               onClick={() => {
                 isFilterShow && setIsFilterShow(false);
@@ -507,9 +524,11 @@ const MountainListPage = () => {
                     id="cityFilter"
                     value={cityFilter}
                     onChange={(e) => setCityFilter(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 font-light border text-sm border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="">모든 도시</option>
+                    <option value="" className="font-light">
+                      모든 도시
+                    </option>
                     {cities.map((city) => (
                       <option key={city} value={city}>
                         {city}
@@ -545,7 +564,7 @@ const MountainListPage = () => {
                       placeholder="산 이름 입력"
                       value={nameFilter}
                       onChange={(e) => setNameFilter(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 font-light border text-sm border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     <Search
                       className="absolute right-3 top-2.5 text-gray-400"
@@ -564,7 +583,7 @@ const MountainListPage = () => {
                       className="mr-2 cursor-pointer"
                     />
                     <span
-                      className="text-sm cursor-pointer"
+                      className="text-sm cursor-pointer font-light"
                       onClick={() => setIsBacFilter(!isBacFilter)}
                     >
                       100대 명산
@@ -582,18 +601,31 @@ const MountainListPage = () => {
                   개의 산 검색됨
                 </div>
                 <div className="mt-4 md:mt-0 flex space-x-4">
-                  <button
+                  <BUTTON.BorderButton
+                    content={
+                      <span
+                        onClick={resetFilters}
+                        // className="px-4 py-2 border border-gray-200 text-gray-600 rounded-md shadow-sm hover:bg-gray-50 transition"
+                      >
+                        필터 초기화
+                      </span>
+                    }
+                  />
+                  {/* <button
                     onClick={resetFilters}
                     className="px-4 py-2 border border-gray-200 text-gray-600 rounded-md shadow-sm hover:bg-gray-50 transition"
                   >
                     필터 초기화
-                  </button>
-                  <button
+                  </button> */}
+                  <BUTTON.FillButton
+                    content={<span onClick={handleClickSearch}>검색</span>}
+                  />
+                  {/* <button
                     onClick={handleClickSearch}
                     className="px-4 py-2 bg-blue-500 text-white rounded-md shadow-sm hover:bg-sky-700 transition"
                   >
                     검색
-                  </button>
+                  </button> */}
                 </div>
               </div>
             </div>
@@ -623,9 +655,15 @@ const MountainListPage = () => {
                 {/* 산 정보 영역에만 패딩 적용 */}
                 <div className="p-4">
                   <div className="flex justify-between items-center">
-                    <h3 className="text-xl font-light text-gray-900">
+                    <div className="text-xl font-light text-gray-900">
                       {mountain.name}
-                    </h3>
+                      <span className="text-base pl-2 text-gray-500">
+                        {mountain.height}m
+                      </span>
+                    </div>
+                    {/* <div className="text-gray-600 mt-2">
+                      
+                      </div> */}
                     <div
                       className="pointer-events-auto"
                       onClick={(e) => e.stopPropagation()}
@@ -637,21 +675,14 @@ const MountainListPage = () => {
                       />
                     </div>
                   </div>
-                  <p className="text-gray-600 mt-2">{mountain.height}m</p>
                   <p className="text-gray-500 text-sm mt-1">
                     {mountain.address}
                   </p>
-                  <div className="mt-3">
+                  <div className="mt-1">
                     {mountain.capital && (
-                      <span className="inline-block bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">
-                        {mountain.capital}
-                      </span>
+                      <BADGE.CapitalBadge capital={mountain.capital} />
                     )}
-                    {mountain.isBac && (
-                      <span className="inline-block bg-sky-100 text-sky-700 text-xs px-2 py-1 rounded ml-2">
-                        100대 명산
-                      </span>
-                    )}
+                    {mountain.isBac && <BADGE.IsBacBadge />}
                   </div>
                 </div>
               </div>

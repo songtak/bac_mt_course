@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import Header from "../components/Header";
 
 function HomePage() {
   const navigate = useNavigate();
@@ -21,28 +22,32 @@ function HomePage() {
       }}
     >
       {/* Header */}
-      <header className="flex justify-between items-center px-8 py-6 border-b border-gray-200 bg-white">
-        <h1
-          className="text-3xl font-light text-gray-900 cursor-pointer"
-          onClick={() => navigate("/")}
-        >
-          봉우리 헌터
-        </h1>
-        <nav className="space-x-6 font-light">
-          <button
-            onClick={() => navigate("/list")}
-            className="text-gray-600 hover:text-gray-800 transition"
+      <Header
+        left={
+          <h1
+            className="text-lg font-light text-gray-900 cursor-pointer"
+            onClick={() => navigate("/")}
           >
-            봉우리 목록
-          </button>
-          <button
+            봉우리 헌터
+          </h1>
+        }
+        right={
+          <nav className="space-x-6 font-light">
+            <button
+              onClick={() => navigate("/list")}
+              className="text-gray-600 hover:text-gray-800 transition"
+            >
+              목록
+            </button>
+            {/* <button
             onClick={() => navigate("/rank")}
             className="text-gray-600 hover:text-gray-800 transition"
           >
             헌터 랭킹
-          </button>
-        </nav>
-      </header>
+          </button> */}
+          </nav>
+        }
+      />
 
       {/* Hero Section */}
       <main className="flex flex-1 flex-col justify-center items-center px-8 bg-black/70 ">
@@ -50,14 +55,14 @@ function HomePage() {
           <h2 className="text-[28px] md:text-4xl font-light text-white mb-4">
             당신의 모든 산행이 이곳에
           </h2>
-          <p className="text-gray-500 mb-10">
+          <p className="text-gray-500 mb-10 font-light">
             전국의 명산을 발견하고 나만의 등산 히스토리를 완성하세요.
           </p>
         </div>
         <div className="flex space-x-8">
           <button
             onClick={() => navigate("/map")}
-            className="px-8 py-3 bg-white text-gray-500 text-lg font-medium rounded-lg border border-gray-300 shadow-sm hover:bg-gray-50 transition-all duration-300"
+            className="px-8 py-3 bg-white text-gray-500 text-lg font-light tracking-wide rounded-lg border border-gray-300 shadow-sm hover:bg-gray-50 transition-all duration-300"
           >
             지금 떠나기
           </button>
