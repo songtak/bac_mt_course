@@ -2,18 +2,10 @@ import React, { useEffect, useRef, useState } from "react";
 // firebaseData.json 파일은 산 데이터 배열을 포함하고 있어야 합니다.
 import firebaseData from "../../public/firebaseData.json";
 import Header from "../components/Header";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import useUserStore from "../stores/useUserStore";
-import {
-  ArrowLeft,
-  Share,
-  BookmarkIcon,
-  MessageCircleQuestionIcon,
-  MapPin,
-  CheckCircle,
-  Compass,
-} from "lucide-react";
-import _ from "lodash";
+import { ArrowLeft } from "lucide-react";
+import _, { debounce } from "lodash";
 import * as BADGE from "../components/Badges/index";
 import {
   doc,
@@ -25,6 +17,8 @@ import {
 } from "firebase/firestore";
 import { auth, db } from "../utils/firebaseConfig";
 import Bookmark from "../components/Bookmark";
+import * as BUTTON from "../components/Buttons/index";
+import LoadingOverlay from "../components/LoadingOverlay";
 
 interface Mountain {
   id: number;
@@ -49,13 +43,21 @@ const MarkerMapPage: React.FC = () => {
   const mapElement = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const markersRef = useRef<naver.maps.Marker[]>([]);
-  const [activeTab, setActiveTab] = useState("mountains");
-  /** 전체 산 */
-  const [isAllMarker, setIsAllMarker] = useState<boolean>(true);
-  /** 북마크 */
-  const [isBookmarkMarker, setIsBookmarkMarker] = useState<boolean>(false);
-  /** 등산 완료 */
-  const [isSummitMarker, setIsSummitMarker] = useState<boolean>(false);
+
+  /** =========================================================== */
+  const [isLoading, setIsLoading] = useState(false);
+
+  /** 선택한 타입 */
+  const [selectedType, setSelectedType] = useState<
+    "all" | "bookmark" | "summit"
+  >("all");
+
+  // /** 전체 산 */
+  // const [isAllMarker, setIsAllMarker] = useState<boolean>(true);
+  // /** 북마크 */
+  // const [isBookmarkMarker, setIsBookmarkMarker] = useState<boolean>(false);
+  // /** 등산 완료 */
+  // const [isSummitMarker, setIsSummitMarker] = useState<boolean>(false);
 
   /** 클릭한 산 */
   const [selectedMountain, setSelectedMountain] = useState<
@@ -73,8 +75,6 @@ const MarkerMapPage: React.FC = () => {
   >([]);
 
   const [summitMountainIds, setSummitMountainIds] = useState<number[]>([]);
-
-  console.log("bookmarkMountainList", bookmarkMountainList);
 
   /** ======================================================================== */
 
@@ -186,32 +186,47 @@ const MarkerMapPage: React.FC = () => {
 
   /** ======================================================================== */
 
-  useEffect(() => {
+  const initMap = () => {
+    if (!mapElement.current) return;
+    const centerLat = 36.0;
+    const centerLng = 127.5;
+
+    const mapOptions = {
+      center: new naver.maps.LatLng(centerLat, centerLng),
+      zoom: 7,
+      mapTypeControl: true,
+    };
+
+    mapRef.current = new naver.maps.Map(mapElement.current, mapOptions);
+    console.log("지도 초기화 완료:", mapRef.current);
+  };
+
+  const updateMarkers = debounce(() => {
     if (!mapRef.current) return;
 
-    // 기존 마커 모두 삭제
-    markersRef.current.forEach((marker) => marker.setMap(null));
+    // 기존 마커 모두 삭제 (for 루프 사용)
+    const markers = markersRef.current;
+    for (let i = 0, len = markers.length; i < len; i++) {
+      markers[i].setMap(null);
+    }
     markersRef.current = [];
 
-    // 표시할 데이터 배열과 마커 색상을 결정합니다.
+    // 선택한 데이터에 따라 마커 색상과 데이터 설정
     let dataToShow: Mountain[] = [];
     let markerColor = "#3b82f6"; // 기본 파란색
 
-    if (isAllMarker) {
-      // 북마크 플래그 활성화: firebaseData를 사용 (북마크 산 목록)
-      dataToShow = firebaseData; // firebaseData는 import한 JSON 데이터
-      markerColor = "#3b82f6"; // 기본 파란색
-    } else if (isSummitMarker) {
-      // 등산 완료 플래그 활성화: summitMountainDetailList 사용
+    if (selectedType === "all") {
+      dataToShow = firebaseData;
+      markerColor = "#3b82f6";
+    } else if (selectedType === "summit") {
       dataToShow = summitMountainDetailList;
-      markerColor = "#F59E0B"; // 앰버 색상
-    } else if (isBookmarkMarker) {
-      // 전체 산 플래그 활성화: bookmarkMountainList 사용 (또는 원하는 전체 산 데이터 배열)
+      markerColor = "#F59E0B";
+    } else if (selectedType === "bookmark") {
       dataToShow = bookmarkMountainList;
-      markerColor = "#10B981"; // 에메랄드 색상
+      markerColor = "#10B981";
     }
 
-    // 선택한 데이터 배열에 대해 마커 생성
+    // 새로운 마커 생성
     dataToShow.forEach((mountain: Mountain) => {
       const position = new naver.maps.LatLng(
         mountain.latitude,
@@ -222,35 +237,47 @@ const MarkerMapPage: React.FC = () => {
         map: mapRef.current,
         icon: {
           content: `<div style="
-          width:8px;
-          height:8px;
-          background:${markerColor};
-          border-radius:50%;
-          border:1px solid white;
-          box-shadow: 0 0 8px rgba(0,0,0,0.2);
-        "></div>`,
+            width:8px;
+            height:8px;
+            background:${markerColor};
+            border-radius:50%;
+            border:1px solid white;
+            box-shadow: 0 0 8px rgba(0,0,0,0.2);
+          "></div>`,
           anchor: new naver.maps.Point(10, 10),
         },
       });
-
-      // 예시: 마커 클릭 시 해당 산의 상세 페이지로 이동
       naver.maps.Event.addListener(marker, "click", () => {
-        // navigate(`/map-detail/${mountain.id}`);
         setSelectedMountain(mountain);
       });
-
       markersRef.current.push(marker);
     });
-  }, [
-    isAllMarker,
-    isBookmarkMarker,
-    isSummitMarker,
-    bookmarkMountainList,
-    summitMountainDetailList,
-  ]);
+  }, 300);
 
-  console.log("summitMountainIds", summitMountainIds);
-  console.log("selectedMountain", selectedMountain);
+  // useEffect 내부에 debounce 함수로 감싸기:
+  useEffect(() => {
+    updateMarkers();
+
+    // cleanup debounce on unmount or dependency change
+    return () => {
+      updateMarkers.cancel();
+    };
+  }, [selectedType]);
+
+  useEffect(() => {
+    // setIsLoading(true);
+
+    if (mapElement.current) {
+      // 기존 맵 인스턴스가 있으면 컨테이너 내용을 초기화
+      mapElement.current.innerHTML = "";
+      console.log(" 새로운 맵 인스턴스 생성");
+
+      // 새로운 맵 인스턴스 생성
+      initMap();
+      // 선택된 타입에 따른 마커 업데이트 함수 호출
+      updateMarkers(); // updateMarkers는 기존에 debounce로 래핑한 마커 업데이트 함수
+    }
+  }, [selectedType]);
 
   return (
     <div className="min-h-screen bg-cover bg-center animate-pan flex flex-col">
@@ -281,7 +308,7 @@ const MarkerMapPage: React.FC = () => {
             ) : (
               <span
                 onClick={() => navigate("/my")}
-                className="cursor-pointer font-light text-gray-900 transition hover:underline"
+                className="cursor-pointer  text-gray-900 transition hover:underline"
               >
                 {userStore.userInfo?.nickname} 🦖
               </span>
@@ -289,12 +316,49 @@ const MarkerMapPage: React.FC = () => {
           </nav>
         }
       />
-      <main className="flex-grow w-full max-w-screen-lg mx-auto px-6 py-8">
-        <div ref={mapElement} className="h-[70vh] " />
+      <main className="flex-grow w-full max-w-screen-lg mx-auto px-6 py-4">
+        <div className="max-w-md mx-auto mb-4 text-gray-700 font-light">
+          <div className="flex border  border-gray-200 rounded-lg overflow-hidden">
+            <div
+              className={`flex-1  px-4 pb-1 text-center border-r border-gray-200 ${
+                selectedType === "all" ? "bg-blue-500 text-white" : ""
+              }`}
+              onClick={() => {
+                setSelectedType("all");
+              }}
+            >
+              <span className="text-sm">전국 산</span>
+            </div>
+            <div
+              className={`flex-1  px-4 pb-1 text-center border-r border-gray-200 ${
+                selectedType === "bookmark"
+                  ? "bg-[#10B981] text-white"
+                  : "bg-white text-gray-700"
+              }`}
+              onClick={() => {
+                setSelectedType("bookmark");
+              }}
+            >
+              <span className="text-sm">북마크</span>
+            </div>
+            <div
+              className={`flex-1  px-4 pb-1 text-center border-r border-gray-200 ${
+                selectedType === "summit" ? "bg-[#F59E0B] text-white" : ""
+              }`}
+              onClick={() => {
+                setSelectedType("summit");
+              }}
+            >
+              <span className="text-sm">등산 완료</span>
+            </div>
+          </div>
+        </div>
+        <div ref={mapElement} className="h-[60vh] " />
         {!_.isUndefined(selectedMountain) && (
           <div
+            key={selectedMountain.id} // key를 사용해 리렌더링 시 애니메이션 실행
             onClick={() => navigate(`/map-detail/${selectedMountain.id}`)}
-            className="mt-6 bg-white flex justify-between border border-gray-150 rounded-2xl shadow-sm p-4 hover:shadow-md transition cursor-pointer mx-3"
+            className="mt-4 bg-white flex justify-between border border-gray-150 rounded-2xl shadow-sm p-4 hover:shadow-md transition cursor-pointer  animate-slide-down"
           >
             <div>
               <div className="flex justify-between items-center">
@@ -326,8 +390,24 @@ const MarkerMapPage: React.FC = () => {
             </div>
           </div>
         )}
-      </main>
 
+        <style>{`
+  @keyframes slideDown {
+    0% {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .animate-slide-down {
+    animation: slideDown 0.5s ease;
+  }
+`}</style>
+      </main>
+      {isLoading && <LoadingOverlay />}
       {/* 지도 하단 이벤트 버튼 그룹 */}
       {/* <section className="max-w-5xl mx-auto px-5 py-6">
         <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6">

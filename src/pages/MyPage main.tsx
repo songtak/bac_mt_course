@@ -35,14 +35,6 @@ const MyPage = () => {
   >([]);
   const [summitMountainIds, setSummitMountainIds] = useState<number[]>([]);
 
-  // console.log(
-  //   "summitMountainList",
-  //   // summitMountainList[0]?.createdAt
-  //   toFormattedDate(summitMountainList[3]?.createdAt)
-  // );
-
-  console.log("summitMountainDetailList", summitMountainDetailList);
-
   /** ============================================================================== */
 
   /** 내 북마크 목록 취득 */
@@ -116,7 +108,6 @@ const MyPage = () => {
       setSummitMountainList(Array.from(summitMountain));
       setSummitMountainIds(Array.from(mountainIds));
       getMountainsByIds(Array.from(mountainIds));
-      console.log(" Array.from(mountainIds)", Array.from(mountainIds));
 
       return Array.from(mountainIds);
     } catch (error) {

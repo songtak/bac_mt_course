@@ -18,10 +18,16 @@ export default {
           "75%": { transform: "translateX(-2px) scale(1.03)" },
           "100%": { transform: "translateX(0) scale(1)" },
         },
+        pan: {
+          "0%": { backgroundPosition: "center" },
+          "50%": { backgroundPosition: "top" },
+          "100%": { backgroundPosition: "center" },
+        },
       },
       animation: {
         "arrow-shake": "arrowShake 0.5s ease-in-out",
         shake: "shake 0.5s ease-in-out 0s 3",
+        pan: "pan 30s linear infinite",
       },
     },
   },

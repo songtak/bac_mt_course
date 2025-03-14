@@ -3,6 +3,8 @@ import { kor1 } from "../assets/kor1";
 import { kor2 } from "../assets/kor2";
 import "dayjs/locale/ko"; // 한국어 locale 임포트
 
+dayjs.locale("ko");
+
 type Kor1Type = {
   id: number;
   name: string;
@@ -62,9 +64,9 @@ export const toggleValue = (arr: number[], value: any): number[] => {
 export const toFormattedDate = (timestamp: {
   seconds: number;
   nanoseconds: number;
-}): string => {
+}): any => {
   const ms = timestamp.seconds * 1000 + timestamp.nanoseconds / 1e6;
-  return dayjs(ms).format("YYYY.MM.DD HH:mm");
+  return dayjs(ms);
 };
 
 /** =================================================================================== */

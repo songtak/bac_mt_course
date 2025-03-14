@@ -7,7 +7,7 @@ import {
   MessageCircleQuestionIcon,
 } from "lucide-react";
 import { parseGpx } from "../utils/gpxParser";
-import { createNumberList, isMobile } from "../utils/helpers";
+import { createNumberList, toFormattedDate } from "../utils/helpers";
 import dayjs from "dayjs";
 import _ from "lodash";
 import { getMountainWeather } from "../services/weatherApi";
@@ -21,6 +21,8 @@ import {
   calculate3DDistance,
   isWithinMeters,
 } from "../utils/geoHeplers";
+import "dayjs/locale/ko"; // 한국어 locale 임포트
+
 import {
   doc,
   getDoc,
@@ -32,6 +34,7 @@ import {
   orderBy,
   limit,
   serverTimestamp,
+  Timestamp,
 } from "firebase/firestore";
 import { db, auth } from "../utils/firebaseConfig";
 import useUserStore from "../stores/useUserStore";
@@ -74,6 +77,8 @@ function MapViewPage() {
   const userStore = useUserStore();
   const { mountainId } = useParams();
   const navigate = useNavigate();
+  dayjs.locale("ko");
+
   const mapRef = useRef<NaverMap | null>(null);
   const mapElement = useRef<HTMLDivElement | NaverMap>(null);
   const polylineRef = useRef<naver.maps.Polyline | null>(null);
@@ -97,15 +102,19 @@ function MapViewPage() {
     "peak"
   );
   /** 정산 도착 여부 */
-  const [isPeak, setIsPeak] = useState<boolean>(false);
+  const [isPeak, setIsPeak] = useState<boolean>(true);
   /** 등산 완료 */
   const [isDone, setIsDone] = useState<boolean>(false);
+
   const [weatherEmojiList, setWeatherEmojiList] = useState<string[]>([]);
   const [weatherList, setWeatherList] = useState<any[]>([]);
   const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
 
   /**  */
   const [bookmarkList, setBookmarkList] = useState<number[]>([]);
+
+  /** 등산 완료 시간 */
+  const [summitTime, setSummitTime] = useState<any>();
 
   // Firebase에서 mountainId로 산 정보 불러오기
   const [mountainData, setMountainData] = useState<Mountain | null>(null);
@@ -177,7 +186,7 @@ function MapViewPage() {
       // summit 컬렉션에 새 문서를 추가합니다.
       const docRef = await addDoc(collection(db, "summit"), summitLog);
       console.log("등산 기록이 저장되었습니다. 문서 ID:", docRef.id);
-      setToastMessage("봉우리 사냥 완료! ⛰️🔫");
+      setToastMessage("봉우리 사냥 완료! 🔫");
       setToastColor("blue");
       setIsOpenToast(true);
       setIsDone(true);
@@ -245,8 +254,6 @@ function MapViewPage() {
   // 지도 초기화 및 산 마커
   const setMapAndMarkerAndCourse = (courseId: number = 0) => {
     if (!mapElement.current || !mountainData) return;
-
-    console.log("courseId", courseId);
 
     const mapOptions = {
       center: new naver.maps.LatLng(
@@ -388,6 +395,58 @@ function MapViewPage() {
     );
   };
 
+  /** 12시간 이내 등산 완료한 목록 취득 */
+  const getRecentSummits = async (): Promise<any[]> => {
+    const user = auth.currentUser;
+    if (!user || !user.email) {
+      console.error("로그인된 사용자가 없습니다.");
+      return [];
+    }
+
+    // 현재 시간으로부터 12시간 전을 계산
+    const twelveHoursAgo = Timestamp.fromDate(
+      new Date(Date.now() - 12 * 3600 * 1000)
+    );
+
+    try {
+      const q = query(
+        collection(db, "summit"),
+        where("email", "==", user.email),
+        where("createdAt", ">=", twelveHoursAgo),
+        orderBy("createdAt", "desc")
+      );
+
+      const querySnapshot = await getDocs(q);
+      const summits = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      const matchSummit = summits.find(
+        (summit: any) => summit.mountainId === Number(mountainId)
+      );
+      if (!_.isUndefined(matchSummit)) {
+        setIsDone(true);
+        setSummitTime(
+          dayjs(toFormattedDate(matchSummit?.createdAt)).format(
+            "YYYY.MM.DD (dd) A hh:mm"
+          )
+        );
+      }
+
+      return summits;
+    } catch (error) {
+      console.error("최근 등산 기록 가져오기 실패:", error);
+      return [];
+    }
+  };
+
+  // setIsDone()
+
+  useEffect(() => {
+    getRecentSummits();
+  }, [user]);
+
   /** ================================================================================ */
 
   useEffect(() => {
@@ -415,7 +474,7 @@ function MapViewPage() {
       console.log("🎉 목표 지점 도착!");
       setIsPeak(true);
     } else {
-      setIsPeak(false);
+      // setIsPeak(false);
     }
 
     if (markerRef.current) {
@@ -556,7 +615,7 @@ function MapViewPage() {
             ) : (
               <span
                 onClick={() => navigate("/my")}
-                className="cursor-pointer font-light text-gray-900 transition hover:underline"
+                className="cursor-pointer  text-gray-900 transition hover:underline"
               >
                 {userStore.userInfo?.nickname} 🦖
               </span>
@@ -739,7 +798,21 @@ function MapViewPage() {
 
       {/* Footer */}
       {/* <footer className="py-4 text-center text-gray-500 text-xs border-t border-gray-200"> */}
-      <footer className="py-4 text-center">
+      <footer className="py-4 text-center relative inline-block">
+        {isPeak && !isDone && (
+          <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 bg-gray-500/55 text-white text-xs px-4 py-2 rounded shadow font-light">
+            <div>봉우리에 도착했습니다.</div>
+            <div>버튼을 눌러 기록을 남겨보세요!</div>
+          </div>
+        )}
+        {isDone && (
+          <>
+            <div className="text-gray-500 font-light text-xs">
+              봉우리 도착 시각
+            </div>
+            <div className="text-gray-500 font-light text-sm">{summitTime}</div>
+          </>
+        )}
         <div className="flex items-center mt-4 justify-center">
           <BUTTON.FillButton
             content={
@@ -757,12 +830,12 @@ function MapViewPage() {
                 ${
                   isPeak &&
                   isDone &&
-                  "animate-shake bg-green-500 text-white cursor-not-allowed hover:cursor-default hover:bg-gray-400 pl-10 pr-7 py-10"
+                  "animate-shake !bg-green-500 text-white cursor-not-allowed hover:cursor-default hover:bg-gray-400 pl-10 pr-7 py-10"
                 }
                 ${
                   isPeak &&
                   !isDone &&
-                  "bg-sky-500 text-white hover:bg-blue-500 pl-10 pr-7 py-10"
+                  "bg-sky-500 text-white hover:bg-blue-500 pl-10 pr-10 py-10 animate-shake"
                 }
                 ${
                   !isPeak &&

@@ -134,11 +134,83 @@ const MountainListPage = () => {
     }
   };
 
+  /** 사용자 위치 정보 취득 */
+  const getUserLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          // naver.maps.LatLng 객체 생성 (필요시)
+          const myLatLng = new naver.maps.LatLng(lat, lng);
+          // console.log("내 위치:", lat, lng);
+          // 여기서 myLatLng을 사용해 추가 로직을 작성할 수 있습니다.
+          getNearbyMountains(lat, lng);
+        },
+        (error) => {
+          console.error("위치 정보를 가져오지 못했습니다.", error);
+        }
+      );
+    } else {
+      console.error("이 브라우저는 Geolocation을 지원하지 않습니다.");
+    }
+  };
+
+  const getNearbyMountains = async (
+    userLat: number,
+    userLon: number,
+    radiusInKm: number = 5
+  ) => {
+    // 반경에 따른 위도/경도 차이 계산
+    const latDelta = radiusInKm / 111; // 약 5km에 해당하는 위도 차이
+    const lonDelta = radiusInKm / (111 * Math.cos(userLat * (Math.PI / 180))); // 경도 차이는 위도에 따라 달라짐
+
+    const minLat = userLat - latDelta;
+    const maxLat = userLat + latDelta;
+    const minLon = userLon - lonDelta;
+    const maxLon = userLon + lonDelta;
+
+    // 산 문서에는 'latitude'와 'longitude' 필드가 있어야 합니다.
+    const mountainsRef = collection(db, "mountains");
+    const q = query(
+      mountainsRef,
+      where("latitude", ">=", minLat),
+      where("latitude", "<=", maxLat),
+      where("longitude", ">=", minLon),
+      where("longitude", "<=", maxLon)
+    );
+
+    const querySnapshot = await getDocs(q);
+    const results = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    // 클라이언트 사이드에서 정확한 거리 계산 후 필터링 (isWithinMeters 함수 사용)
+    const nearbyMountains = results.filter((mountain: any) =>
+      isWithinMeters(
+        userLat,
+        userLon,
+        mountain.latitude,
+        mountain.longitude,
+        radiusInKm
+      )
+    );
+
+    console.log("nearbyMountains", nearbyMountains);
+
+    return nearbyMountains;
+  };
+
   useEffect(() => {
     if (user && user.email) {
       getUserBookmarks();
     }
   }, [user]);
+
+  useEffect(() => {
+    getUserLocation();
+  }, [navigator.geolocation]);
 
   /** ================================================================================ */
 
@@ -165,20 +237,17 @@ const MountainListPage = () => {
       constraints.push(where("isBac", "==", true));
     }
     if (searchFilters.name.trim()) {
-      // 이름 검색 조건이 있으면 이름 조건을 사용하고, 그 후 높이 내림차순 정렬을 추가
       constraints.push(
         where("name", ">=", searchFilters.name),
         where("name", "<=", searchFilters.name + "\uf8ff")
       );
       constraints.push(orderBy("name"));
-      constraints.push(orderBy("height", "desc"));
     } else {
-      // 이름 검색 조건이 없으면 높이 범위 조건과 높이 내림차순 정렬 적용
       constraints.push(
         where("height", ">=", searchFilters.height[0]),
         where("height", "<=", searchFilters.height[1])
       );
-      constraints.push(orderBy("height", "desc"));
+      constraints.push(orderBy("height"));
     }
 
     if (paginate && lastVisible) {
@@ -187,37 +256,6 @@ const MountainListPage = () => {
     constraints.push(limit(30));
     return query(baseQuery, ...constraints);
   };
-
-  // const buildQuery = (paginate: boolean = false) => {
-  //   const baseQuery = collection(db, "mountains");
-  //   const constraints: any[] = [];
-
-  //   if (searchFilters.city) {
-  //     constraints.push(where("capital", "==", searchFilters.city));
-  //   }
-  //   if (searchFilters.isBac) {
-  //     constraints.push(where("isBac", "==", true));
-  //   }
-  //   if (searchFilters.name.trim()) {
-  //     constraints.push(
-  //       where("name", ">=", searchFilters.name),
-  //       where("name", "<=", searchFilters.name + "\uf8ff")
-  //     );
-  //     constraints.push(orderBy("name"));
-  //   } else {
-  //     constraints.push(
-  //       where("height", ">=", searchFilters.height[0]),
-  //       where("height", "<=", searchFilters.height[1])
-  //     );
-  //     constraints.push(orderBy("height"));
-  //   }
-
-  //   if (paginate && lastVisible) {
-  //     constraints.push(startAfter(lastVisible));
-  //   }
-  //   constraints.push(limit(30));
-  //   return query(baseQuery, ...constraints);
-  // };
 
   // 검색 조건에 맞는 총 결과 갯수 취득
   const fetchResultCount = async () => {
@@ -371,21 +409,12 @@ const MountainListPage = () => {
       {/* Header */}
       <Header
         left={
-          <div
-            className="text-lg font-light text-gray-900 cursor-pointer w-20 y-20"
+          <h1
+            className="text-lg font-light text-gray-900 cursor-pointer"
             onClick={() => navigate("/")}
           >
-            {/* 봉우리 헌터 */}
-            <img
-              src="https://songtak.github.io/bac_mt_course/assets/images/logo_2.png"
-              alt="봉우리헌터 로고"
-              style={{
-                filter:
-                  "invert(43%) sepia(5%) saturate(0%) hue-rotate(179deg) brightness(110%) contrast(80%)",
-              }}
-              // style={{ filter: "grayscale(100%) brightness(75%)" }}
-            />
-          </div>
+            봉우리 헌터
+          </h1>
         }
         right={
           <nav className="space-x-6">
@@ -399,7 +428,7 @@ const MountainListPage = () => {
             ) : (
               <span
                 onClick={() => navigate("/my")}
-                className="cursor-pointer  text-gray-900 transition hover:underline"
+                className="cursor-pointer font-light text-gray-900 transition hover:underline"
               >
                 {userStore.userInfo?.nickname} 🦖
               </span>
@@ -614,7 +643,7 @@ const MountainListPage = () => {
                 <div className="h-48 overflow-hidden rounded-t-xl">
                   <img
                     src={`${
-                      mountain.isBac && mountain.name !== "백운산"
+                      mountain.isBac
                         ? `https://songtak.github.io/bac_mt_course/assets/bac_img/${mountain.name}.jpeg`
                         : "https://songtak.github.io/bac_mt_course/assets/images/thumb.png"
                     }`}

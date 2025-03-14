@@ -69,9 +69,6 @@ function MapPage() {
     Mountain | undefined
   >();
 
-  console.log("selectedMountain", selectedMountain);
-  console.log("mountainData", mountainData);
-
   // 현재 위치 상태 (초기값은 0,0 → 이후 getCurPosition에서 업데이트)
   const [currentMyLocation, setCurrentMyLocation] = useState({
     lat: 0,
@@ -117,7 +114,6 @@ function MapPage() {
       )
     );
 
-    console.log("nearbyMountains", nearbyMountains);
     // @ts-ignore
     setMountainData(results);
   };
@@ -352,7 +348,7 @@ function MapPage() {
             ) : (
               <span
                 onClick={() => navigate("/my")}
-                className="cursor-pointer font-light text-gray-900 transition hover:underline"
+                className="cursor-pointer text-gray-900 transition hover:underline"
               >
                 {userStore.userInfo?.nickname} 🦖
               </span>

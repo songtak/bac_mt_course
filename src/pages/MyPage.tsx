@@ -39,15 +39,6 @@ const MyPage = () => {
   >([]);
   const [summitMountainIds, setSummitMountainIds] = useState<number[]>([]);
 
-  // console.log(
-  //   "summitMountainList",
-  //   // summitMountainList[0]?.createdAt
-  //   toFormattedDate(summitMountainList[3]?.createdAt)
-  // );
-
-  console.log("summitMountainList", summitMountainList);
-  console.log("summitMountainDetailList", summitMountainDetailList);
-
   const totalHeight = summitMountainList.reduce((acc, summit) => {
     // summitMountainList의 각 요소에는 mountainId가 있음
     // summitMountainDetailList에서 mountainId와 일치하는 산 정보 찾기
@@ -57,8 +48,6 @@ const MyPage = () => {
     // detail이 존재하면 그 산의 height를 누적, 없으면 0
     return acc + (detail ? detail.height : 0);
   }, 0);
-
-  console.log("totalHeight", totalHeight);
 
   /** ============================================================================== */
 
@@ -133,7 +122,6 @@ const MyPage = () => {
       setSummitMountainList(Array.from(summitMountain));
       setSummitMountainIds(Array.from(mountainIds));
       getMountainsByIds(Array.from(mountainIds));
-      console.log(" Array.from(mountainIds)", Array.from(mountainIds));
 
       return Array.from(mountainIds);
     } catch (error) {
@@ -374,15 +362,15 @@ const MyPage = () => {
                               {detail?.isBac && <BADGE.IsBacBadge />}
                             </div>
                           </div>
-                          <div className="text-right">
-                            <div className="text-[14px] font-[200] text-gray-500">
+                          <div className="text-right mt-[17px]">
+                            <div className="text-[13px] font-[200] text-gray-500">
                               {dayjs(toFormattedDate(summit.createdAt)).format(
                                 "YYYY.MM.DD (dd)"
                               )}
                             </div>
-                            <div className="text-[14px] font-[200] text-gray-500">
+                            <div className="text-[13px] font-[200] text-gray-500">
                               {dayjs(toFormattedDate(summit.createdAt)).format(
-                                "hh:mm"
+                                "A hh:mm"
                               )}{" "}
                             </div>
                           </div>

@@ -12,24 +12,51 @@ function HomePage() {
     );
   };
   /** ================================================================================ */
+  // <div
+  //   className="min-h-screen bg-cover bg-center animate-pan flex flex-col"
+  //   style={{
+  //     backgroundImage:
+  //       "url('https://songtak.github.io/bac_mt_course/assets/images/wallpaper.jpg')",
+  //     backgroundSize: "auto 100%",
+  //   }}
+  // >
   return (
     <div
-      className="min-h-screen bg-cover bg-center animate-pan flex flex-col"
+      className="min-h-screen bg-center animate-pan flex flex-col"
       style={{
         backgroundImage:
           "url('https://songtak.github.io/bac_mt_course/assets/images/wallpaper.jpg')",
-        backgroundSize: "auto 100%", // 배경을 확대해서 움직임 효과를 부각시킴
+        backgroundSize: "cover",
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: "center top", // 필요에 따라 조정
       }}
     >
+      {/* 콘텐츠 */}
+
       {/* Header */}
       <Header
         left={
-          <h1
-            className="text-lg font-light text-gray-900 cursor-pointer"
+          <div
+            className="text-lg font-light text-gray-900 cursor-pointer w-20 y-20"
             onClick={() => navigate("/")}
           >
-            봉우리 헌터
-          </h1>
+            {/* 봉우리 헌터 */}
+            <img
+              src="https://songtak.github.io/bac_mt_course/assets/images/logo_2.png"
+              alt="봉우리헌터 로고"
+              style={{
+                filter:
+                  "invert(43%) sepia(5%) saturate(0%) hue-rotate(179deg) brightness(110%) contrast(80%)",
+              }}
+              // style={{ filter: "grayscale(100%) brightness(75%)" }}
+            />
+          </div>
+          // <h1
+          //   className="text-lg font-light text-gray-900 cursor-pointer"
+          //   onClick={() => navigate("/")}
+          // >
+          //   봉우리 헌터
+          // </h1>
         }
         right={
           <nav className="space-x-6 font-light">
