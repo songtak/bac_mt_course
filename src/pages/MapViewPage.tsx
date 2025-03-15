@@ -102,7 +102,7 @@ function MapViewPage() {
     "peak"
   );
   /** 정산 도착 여부 */
-  const [isPeak, setIsPeak] = useState<boolean>(true);
+  const [isPeak, setIsPeak] = useState<boolean>(false);
   /** 등산 완료 */
   const [isDone, setIsDone] = useState<boolean>(false);
 
@@ -474,7 +474,7 @@ function MapViewPage() {
       console.log("🎉 목표 지점 도착!");
       setIsPeak(true);
     } else {
-      // setIsPeak(false);
+      setIsPeak(false);
     }
 
     if (markerRef.current) {
