@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowDown, ArrowUp, Search, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Search, X, ChevronDown } from "lucide-react";
 import _ from "lodash";
 import {
   collection,
@@ -399,9 +399,10 @@ const MountainListPage = () => {
             ) : (
               <span
                 onClick={() => navigate("/my")}
-                className="cursor-pointer  text-gray-900 transition hover:underline"
+                className="font-light cursor-pointer text-gray-900 transition hover:underline"
               >
-                {userStore.userInfo?.nickname} 🦖
+                <span className="text-gray-500 text-sm">예비 사냥꾼 </span>
+                {userStore.userInfo?.nickname}
               </span>
             )}
           </nav>

@@ -9,11 +9,15 @@ import useUserStore from "./stores/useUserStore";
 import { getUserData } from "./services/userApi";
 import AddressSettingPage from "./pages/AddressSettingPage";
 import ExcelUploader from "./pages/ExcelUploader";
+import usePreviousLocation from "./utils/hooks/usePreviousLocation";
+import useCommonStore from "./stores/useCommonStore";
 import "./assets/common.css";
 
 function App() {
   const user = useAuth();
   const userStore = useUserStore();
+  const previousLocation = usePreviousLocation();
+  const commonStore = useCommonStore();
 
   useEffect(() => {
     if (!_.isNull(user)) {
@@ -21,6 +25,12 @@ function App() {
       getUserData();
     }
   }, [user]);
+
+  useEffect(() => {
+    return () => {
+      commonStore.setPrevLocation(previousLocation);
+    };
+  }, [previousLocation]);
 
   return (
     <div>

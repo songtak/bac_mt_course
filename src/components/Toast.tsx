@@ -42,7 +42,9 @@ const Toast: React.FC<ToastProps> = ({
         isOpen ? "opacity-100" : "opacity-0"
       }`}
     >
-      <span className="text-white text-sm text-center">{message}</span>
+      <span className="text-white text-sm text-center font-light">
+        {message}
+      </span>
     </div>,
     document.getElementById("toast") as HTMLElement
   );

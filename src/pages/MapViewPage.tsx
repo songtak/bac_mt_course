@@ -615,9 +615,10 @@ function MapViewPage() {
             ) : (
               <span
                 onClick={() => navigate("/my")}
-                className="cursor-pointer  text-gray-900 transition hover:underline"
+                className="font-light cursor-pointer text-gray-900 transition hover:underline"
               >
-                {userStore.userInfo?.nickname} 🦖
+                <span className="text-gray-500 text-sm">예비 사냥꾼 </span>
+                {userStore.userInfo?.nickname}
               </span>
             )}
           </nav>
@@ -817,10 +818,19 @@ function MapViewPage() {
           <BUTTON.FillButton
             content={
               <span
-                className="text-base leading-[31px] font-light"
-                onClick={() => isPeak && handleClickPeakHunter()}
+                className="text-base leading-[22px] font-light"
+                onClick={() => {
+                  isPeak && handleClickPeakHunter();
+                  if (isDone) {
+                    setToastMessage(
+                      "마지막 등산 기록 후 12시간이 지나야 새 기록을 저장할 수 있습니다."
+                    );
+                    setToastColor("orange");
+                    setIsOpenToast(true);
+                  }
+                }}
               >
-                {isPeak && isDone && "등산 완료 ✨"}
+                {isDone && "등산 완료 ✨"}
                 {isPeak && !isDone && "봉우리 도착!"}
                 {!isPeak && !isDone && "봉우리로 향하는 중..."}
               </span>
@@ -828,19 +838,18 @@ function MapViewPage() {
             style={`
 
                 ${
-                  isPeak &&
                   isDone &&
-                  "animate-shake !bg-green-500 text-white cursor-not-allowed hover:cursor-default hover:bg-gray-400 pl-10 pr-7 py-10"
+                  "animate-shake !bg-green-500 text-white cursor-not-allowed hover:cursor-default hover:bg-gray-400 pl-10 pr-7 py-8"
                 }
                 ${
                   isPeak &&
                   !isDone &&
-                  "bg-sky-500 text-white hover:bg-blue-500 pl-10 pr-10 py-10 animate-shake"
+                  "bg-sky-500 text-white hover:bg-blue-500 pl-10 pr-10 py-8 animate-shake"
                 }
                 ${
                   !isPeak &&
                   !isDone &&
-                  "bg-gray-300 text-white cursor-not-allowed hover:cursor-default hover:bg-gray-400 px-10 py-10"
+                  "bg-gray-300 text-white cursor-not-allowed hover:cursor-default hover:bg-gray-400 px-10 py-8"
                 }
                 `}
           />

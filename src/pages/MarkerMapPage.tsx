@@ -308,9 +308,10 @@ const MarkerMapPage: React.FC = () => {
             ) : (
               <span
                 onClick={() => navigate("/my")}
-                className="cursor-pointer  text-gray-900 transition hover:underline"
+                className="font-light cursor-pointer text-gray-900 transition hover:underline"
               >
-                {userStore.userInfo?.nickname} 🦖
+                <span className="text-gray-500 text-sm">예비 사냥꾼 </span>
+                {userStore.userInfo?.nickname}
               </span>
             )}
           </nav>

@@ -209,7 +209,10 @@ const MyPage = () => {
       <main className="max-w-3xl mx-auto px-4 pt-8 ">
         {/* 북마크 목록 섹션 */}
         <section className="mb-4 font-light ml-auto text-right">
-          <div className="text-3xl mb-4">{userStore.userInfo?.nickname} </div>
+          <div className="text-3xl mb-1">{userStore.userInfo?.nickname} </div>
+          <div className="mb-4 text-gray-500 hover:cursor-pointer underline">
+            예비 사냥꾼
+          </div>
           <div className="flex justify-between">
             <div className="my-3">
               <div className="font-extrabold text-xl">
@@ -239,7 +242,7 @@ const MyPage = () => {
             className="flex justify-between items-center p-2 hover:cursor-pointer pb-4"
             onClick={() => setIsOpenBookmark(!isOpenBookmark)}
           >
-            <h2 className="text-2xl font-light text-gray-900">
+            <h2 className="text-xl font-light text-gray-900">
               북마크{" "}
               <span className="text-gray-400 text-lg">
                 {bookmarkMountainList.length}
@@ -260,18 +263,18 @@ const MyPage = () => {
                       <div
                         key={bookmark.id}
                         onClick={() => navigate(`/map-detail/${bookmark.id}`)}
-                        className="flex justify-between bg-white border border-gray-150 rounded-2xl shadow-sm p-4 hover:shadow-md transition cursor-pointer"
+                        className="flex justify-between bg-white border border-gray-150 rounded-2xl shadow-sm pt-2 pb-3 px-4 hover:shadow-md transition cursor-pointer"
                       >
                         <div>
                           <div className="flex justify-between items-center">
-                            <h3 className="text-xl font-light text-gray-900">
+                            <h3 className="text-lg font-light text-gray-900">
                               {bookmark.name}{" "}
-                              <span className="text-[14px] font-[200]">
+                              <span className="text-[14px] font-[200] text-gray-500">
                                 {bookmark.height}m
                               </span>
                             </h3>
                           </div>
-                          <div className="flex items-center space-x-2 mt-2">
+                          <div className="flex items-center space-x-2">
                             <BADGE.CapitalBadge capital={bookmark.capital} />
                             {(bookmark.hasBac || bookmark.isBac) && (
                               <BADGE.IsBacBadge />
@@ -315,7 +318,7 @@ const MyPage = () => {
             className="flex justify-between items-center p-2 hover:cursor-pointer"
             onClick={() => setIsOpenSummit(!isOpenSummit)}
           >
-            <h2 className="text-2xl font-light text-gray-900">
+            <h2 className="text-xl font-light text-gray-900">
               내가 오른 봉우리
               <span className="text-gray-400  text-lg">
                 {" "}
@@ -343,11 +346,11 @@ const MyPage = () => {
                           onClick={() =>
                             navigate(`/map-detail/${summit.mountainId}`)
                           }
-                          className="flex justify-between bg-white border border-gray-150 rounded-2xl shadow-sm p-4 hover:shadow-md transition cursor-pointer"
+                          className="flex justify-between bg-white border border-gray-150 rounded-2xl shadow-sm pt-2 pb-3 px-4 hover:shadow-md transition cursor-pointer"
                         >
                           <div className="">
                             <div className="flex justify-between items-center">
-                              <h3 className="text-xl font-light text-gray-900">
+                              <h3 className="text-lg font-light text-gray-900">
                                 {detail?.name}{" "}
                                 <span className="text-[14px] font-[200] text-gray-500">
                                   {detail?.height}m
@@ -355,20 +358,20 @@ const MyPage = () => {
                               </h3>
                             </div>
 
-                            <div className="flex items-center space-x-2 mt-2">
+                            <div className="flex items-center space-x-2">
                               <BADGE.CapitalBadge capital={detail.capital} />
 
                               {/* 100대 명산 여부 */}
                               {detail?.isBac && <BADGE.IsBacBadge />}
                             </div>
                           </div>
-                          <div className="text-right mt-[17px]">
-                            <div className="text-[13px] font-[200] text-gray-500">
+                          <div className="text-right mt-[6px]">
+                            <div className="text-[10px] font-[200] text-gray-500">
                               {dayjs(toFormattedDate(summit.createdAt)).format(
                                 "YYYY.MM.DD (dd)"
                               )}
                             </div>
-                            <div className="text-[13px] font-[200] text-gray-500">
+                            <div className="text-[10px] font-[200] text-gray-500">
                               {dayjs(toFormattedDate(summit.createdAt)).format(
                                 "A hh:mm"
                               )}{" "}

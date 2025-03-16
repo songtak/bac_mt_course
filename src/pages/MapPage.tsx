@@ -1,33 +1,16 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Share, ArrowUp, ArrowDown, ArrowRight } from "lucide-react";
-import {
-  doc,
-  getDoc,
-  collection,
-  addDoc,
-  getDocs,
-  query,
-  where,
-  orderBy,
-  limit,
-  serverTimestamp,
-} from "firebase/firestore";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import { db, auth } from "../utils/firebaseConfig";
 import useUserStore from "../stores/useUserStore";
-import Bookmark from "../components/Bookmark";
 import Toast from "../components/Toast";
-import { toFormattedDate } from "../utils/helpers";
 import _ from "lodash";
-import {
-  customParseGpx,
-  calculateElevationGain,
-  calculate3DDistance,
-  isWithinMeters,
-} from "../utils/geoHeplers";
+import { isWithinMeters } from "../utils/geoHeplers";
 import * as BADGE from "../components/Badges/index";
 import * as BUTTON from "../components/Buttons/index";
 import Header from "../components/Header";
+import useCommonStore from "../stores/useCommonStore";
 
 interface Mountain {
   id: string;
@@ -53,6 +36,8 @@ interface SummitLog {
 function MapPage() {
   const navigate = useNavigate();
   const userStore = useUserStore();
+  const commonStore = useCommonStore();
+
   const mapRef = useRef<any>(null);
   const mapElement = useRef<HTMLDivElement | null>(null);
   const markerRef = useRef<naver.maps.Marker | null>(null); // 내 위치 마커
@@ -314,6 +299,7 @@ function MapPage() {
       "noopener,noreferrer"
     );
   };
+
   /** ================================================================================ */
 
   return (
@@ -324,7 +310,9 @@ function MapPage() {
         left={
           <button
             onClick={() => {
-              if (window.history.state && window.history.state.idx > 0) {
+              if (commonStore.prevLocation?.pathname === "/") {
+                navigate("/list");
+              } else if (window.history.state && window.history.state.idx > 0) {
                 navigate(-1);
               } else {
                 navigate("/list");
@@ -348,9 +336,10 @@ function MapPage() {
             ) : (
               <span
                 onClick={() => navigate("/my")}
-                className="cursor-pointer text-gray-900 transition hover:underline"
+                className="font-light cursor-pointer text-gray-900 transition hover:underline"
               >
-                {userStore.userInfo?.nickname} 🦖
+                <span className="text-gray-500 text-sm">예비 사냥꾼 </span>
+                {userStore.userInfo?.nickname}
               </span>
             )}
           </nav>

@@ -82,18 +82,16 @@ function HomePage() {
           <h2 className="text-[28px] md:text-4xl font-light text-white mb-4">
             당신의 모든 산행이 이곳에
           </h2>
-          <p className="text-gray-500 mb-10 font-light">
+          <p className="text-gray-300 mb-10 font-thin">
             전국의 명산을 발견하고 나만의 등산 히스토리를 완성하세요.
           </p>
         </div>
-        <div className="flex space-x-8">
-          <button
-            onClick={() => navigate("/map")}
-            className="px-8 py-3 bg-white text-gray-500 text-lg font-light tracking-wide rounded-lg border border-gray-300 shadow-sm hover:bg-gray-50 transition-all duration-300"
-          >
-            지금 떠나기
-          </button>
-        </div>
+        <button
+          onClick={() => navigate("/map")}
+          className="px-8 py-3 bg-white/50 text-white text-lg font-light tracking-wide rounded-lg   shadow-sm transition-all duration-300 transform hover:scale-105"
+        >
+          지금 떠나기
+        </button>
       </main>
 
       {/* Footer */}
