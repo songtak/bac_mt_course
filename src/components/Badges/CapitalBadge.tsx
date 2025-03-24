@@ -6,7 +6,7 @@ interface Props {
 
 const CapitalBadge = ({ capital }: Props) => {
   return (
-    <span className="inline-block bg-gray-100 text-gray-700 text-[10px] px-2 pb-[2px] pt-[1px] rounded">
+    <span className="inline-block bg-main-blue-200 text-white text-[8px] px-2 pb-[2px] pt-[1px] rounded-[14px]">
       {capital}
     </span>
   );

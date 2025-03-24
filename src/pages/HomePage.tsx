@@ -21,108 +21,130 @@ function HomePage() {
   //   }}
   // >
   return (
-    <div
-      className="min-h-screen bg-center animate-pan flex flex-col"
-      style={{
-        backgroundImage:
-          "url('https://songtak.github.io/bac_mt_course/assets/images/wallpaper.jpg')",
-        backgroundSize: "cover",
-        backgroundRepeat: "no-repeat",
-        backgroundPosition: "center top", // 필요에 따라 조정
-      }}
-    >
-      {/* 콘텐츠 */}
+    <div className="max-w-md mx-auto p-4 space-y-6 text-gray-800 bg-white">
+      {/* 상단 로고 & 유저 */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-light italic">
+            Peak<span className="font-bold not-italic">Hunter</span>
+          </h1>
+          <p className="text-xs mt-1">당신의 모든 산행이 이곳에</p>
+        </div>
+        <div className="text-right">
+          <p className="text-sm font-semibold">송탁</p>
+          <p className="text-xs text-gray-400">새내기 사냥꾼</p>
+        </div>
+      </div>
 
-      {/* Header */}
-      <Header
-        left={
-          <div
-            className="text-lg font-light text-gray-900 cursor-pointer w-20 y-20"
-            onClick={() => navigate("/")}
-          >
-            {/* 봉우리 헌터 */}
-            <img
-              src="https://songtak.github.io/bac_mt_course/assets/images/logo_2.png"
-              alt="봉우리헌터 로고"
-              style={{
-                filter:
-                  "invert(43%) sepia(5%) saturate(0%) hue-rotate(179deg) brightness(110%) contrast(80%)",
-              }}
-              // style={{ filter: "grayscale(100%) brightness(75%)" }}
-            />
+      {/* 검색창 */}
+      <div className="relative">
+        <input
+          type="text"
+          placeholder="찾고 있는 산이 있나요?"
+          className="w-full rounded-full bg-gray-100 pl-10 pr-4 py-2 focus:outline-none"
+        />
+        <svg
+          className="absolute left-3 top-2.5 w-5 h-5 text-gray-400"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1016.65 16.65z"
+          />
+        </svg>
+      </div>
+
+      {/* 오늘의 산 & 등산하기 */}
+      <div className="flex gap-3">
+        <div className="flex-1 rounded-2xl overflow-hidden relative">
+          <img
+            src="https://source.unsplash.com/featured/?mountain"
+            alt="산"
+            className="w-full h-24 object-cover"
+          />
+          <div className="absolute inset-0 bg-black/30 flex flex-col justify-end p-3 text-white">
+            <p className="text-xs">오늘의 산</p>
+            <p className="text-base font-semibold">가리왕산</p>
           </div>
-          // <h1
-          //   className="text-lg font-light text-gray-900 cursor-pointer"
-          //   onClick={() => navigate("/")}
-          // >
-          //   봉우리 헌터
-          // </h1>
-        }
-        right={
-          <nav className="space-x-6 font-light">
-            <button
-              onClick={() => navigate("/list")}
-              className="text-gray-600 hover:text-gray-800 transition"
-            >
-              목록
-            </button>
-            {/* <button
-            onClick={() => navigate("/rank")}
-            className="text-gray-600 hover:text-gray-800 transition"
-          >
-            헌터 랭킹
-          </button> */}
-          </nav>
-        }
-      />
-
-      {/* Hero Section */}
-      <main className="flex flex-1 flex-col justify-center items-center px-8 bg-black/70 ">
-        <div className="max-w-xl text-center">
-          <h2 className="text-[28px] md:text-4xl font-light text-white mb-4">
-            당신의 모든 산행이 이곳에
-          </h2>
-          <p className="text-gray-300 mb-10 font-thin">
-            전국의 명산을 발견하고 나만의 등산 히스토리를 완성하세요.
-          </p>
         </div>
-        <button
-          onClick={() => navigate("/map")}
-          className="px-8 py-3 bg-white/50 text-white text-lg font-light tracking-wide rounded-lg   shadow-sm transition-all duration-300 transform hover:scale-105"
-        >
-          지금 떠나기
+        <button className="flex-1 bg-green-400 text-white rounded-2xl text-lg font-semibold flex items-center justify-center">
+          등산하기
         </button>
-      </main>
+      </div>
 
-      {/* Footer */}
-      <footer className="py-4 text-center text-gray-500 text-xs bg-white font-light">
-        <div
-          className="hover:cursor-pointer"
-          onClick={() => {
-            openExternalLink();
-          }}
-        >
-          Created by Songtak.
+      {/* 주간 날씨 */}
+      <div className="bg-blue-50 rounded-full px-4 py-3 flex items-center justify-between overflow-auto text-xs text-gray-600">
+        <p className="font-semibold">감악산</p>
+        <div className="flex gap-3 ml-4 whitespace-nowrap">
+          {["수", "목", "금", "토", "일"].map((day) => (
+            <div key={day} className="flex flex-col items-center">
+              <p>{day}</p>
+              <p>☁️</p>
+              <p>13°C</p>
+            </div>
+          ))}
         </div>
-      </footer>
+      </div>
 
-      {/* Background animation CSS */}
-      <style>{`
-        @keyframes pan {
-          0% {
-            background-position: 0% 50%;
-          }
-          50% {
-            background-position: 100% 50%;
-          }
-          100% {
-            background-position: 0% 50%;
-          }
-        }
-        .animate-pan {
-          animation: pan 200s linear infinite;
-        }
-      `}</style>
+      {/* 산 리스트 */}
+      <div>
+        <div className="flex justify-between items-center mb-2">
+          <p className="text-sm font-semibold">산 리스트</p>
+          <span className="text-gray-400 text-sm">›</span>
+        </div>
+        <div className="flex gap-3 overflow-x-auto">
+          {/* 반복되는 카드 */}
+          {[
+            {
+              name: "감악산",
+              height: "684.7 m",
+              image: "https://source.unsplash.com/featured/?mountain,1",
+              tags: ["★ 4.3", "경기도", "100대 명산"],
+            },
+            {
+              name: "지리산",
+              height: "1,450 m",
+              image: "https://source.unsplash.com/featured/?mountain,2",
+              tags: ["★ 4.3", "경상남도", "100대 명산"],
+            },
+          ].map((mountain, idx) => (
+            <div
+              key={idx}
+              className="min-w-[140px] rounded-2xl overflow-hidden relative"
+            >
+              <img
+                src={mountain.image}
+                alt={mountain.name}
+                className="w-full h-40 object-cover"
+              />
+              <div className="absolute inset-0 bg-black/30 p-3 text-white flex flex-col justify-end">
+                <p className="text-sm font-semibold">{mountain.name}</p>
+                <p className="text-xs">{mountain.height}</p>
+                <div className="flex gap-1 flex-wrap text-xs mt-1">
+                  {mountain.tags.map((tag, tagIdx) => (
+                    <span
+                      key={tagIdx}
+                      className={`px-2 rounded-full ${
+                        tag.includes("★")
+                          ? "bg-green-500 text-white"
+                          : tag.includes("도")
+                          ? "bg-blue-200 text-blue-800"
+                          : "bg-yellow-200 text-yellow-800"
+                      }`}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

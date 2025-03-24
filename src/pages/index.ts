@@ -7,6 +7,9 @@ import MyPage from "./MyPage";
 import MapPage from "./MapPage";
 import RankingPage from "./RankingPage";
 import MarkerMapPage from "./MarkerMapPage";
+import MainPage from "./MainPage";
+import MyLocationPage from "./MyLocationPage";
+import BookmarkPage from "./BookmarkPage";
 
 export {
   HomePage,
@@ -18,4 +21,7 @@ export {
   MapPage,
   RankingPage,
   MarkerMapPage,
+  MainPage,
+  MyLocationPage,
+  BookmarkPage,
 };

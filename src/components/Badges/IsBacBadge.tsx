@@ -7,7 +7,7 @@ interface Props {
 const IsBacBadge = ({ style }: Props) => {
   return (
     <span
-      className={` bg-sky-100 text-sky-700 text-[10px] px-2 pb-[2px] pt-[1px] rounded ml-2 ${style}`}
+      className={` bg-[#F8EEBB] text-[#A48A06] text-[8px] px-2 pb-[2px] pt-[1px] rounded-[14px] ml-2 ${style}`}
     >
       100대 명산
     </span>

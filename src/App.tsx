@@ -12,6 +12,7 @@ import ExcelUploader from "./pages/ExcelUploader";
 import usePreviousLocation from "./utils/hooks/usePreviousLocation";
 import useCommonStore from "./stores/useCommonStore";
 import "./assets/common.css";
+import CommonLayout from "./components/CommonLayout";
 
 function App() {
   const user = useAuth();
@@ -37,16 +38,21 @@ function App() {
       <ScrollToTop />
       <Routes>
         {/* <Route path="/" element={<ExcelUploader />} /> */}
-        <Route path="/" element={<PAGES.HomePage />} />
+        <Route element={<CommonLayout />}>
+          <Route path="/" element={<PAGES.MainPage />} />
+          <Route path="/my-location" element={<PAGES.MyLocationPage />} />
+          <Route path="/bookmark" element={<PAGES.BookmarkPage />} />
+        </Route>
+
         <Route path="/gpx" element={<GPXExporter />} />
         <Route path="/list" element={<PAGES.MountainListPage />} />
         <Route path="/map-detail/:mountainId" element={<PAGES.MapViewPage />} />
         <Route path="/map" element={<PAGES.MapPage />} />
         <Route path="/sign-up" element={<PAGES.SignUpPage />} />
-        <Route path="/sign-in" element={<PAGES.LoginPage />} />
         <Route path="/my" element={<PAGES.MyPage />} />
         <Route path="/rank" element={<PAGES.RankingPage />} />
         <Route path="/map-marker" element={<PAGES.MarkerMapPage />} />
+        {/* <Route path="/" element={<PAGES.MainPage />} /> */}
       </Routes>
     </div>
   );
