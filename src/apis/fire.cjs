@@ -5,6 +5,10 @@ const admin = require("firebase-admin");
 const { FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY } =
   process.env;
 
+console.log("1. FIREBASE_PROJECT_ID", FIREBASE_PROJECT_ID);
+console.log("2. FIREBASE_CLIENT_EMAIL", FIREBASE_CLIENT_EMAIL);
+console.log("3. FIREBASE_PRIVATE_KEY", FIREBASE_PRIVATE_KEY);
+
 if (!FIREBASE_PROJECT_ID || !FIREBASE_CLIENT_EMAIL || !FIREBASE_PRIVATE_KEY) {
   console.error("❌ Firebase 환경변수가 누락되었습니다.");
   console.error("🔥 DEBUG ENV");

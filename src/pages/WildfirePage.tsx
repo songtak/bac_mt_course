@@ -244,7 +244,7 @@ const WildfireMapPage = () => {
   return (
     <div className="min-h-screen bg-white text-gray-900">
       <main className="w-full max-w-screen-lg mx-auto px-4 py-8">
-        <h1 className="text-2xl font-semibold mb-4">🔥 산불 현황 지도</h1>
+        <h1 className="text-2xl font-semibold mb-4">산불 현황 지도</h1>
 
         {/* 지도 */}
         <NaverMap data={wildfireData} />
