@@ -70,6 +70,7 @@ const db = admin.firestore();
     console.log("⏳ 데이터 기다리는 중...");
     await new Promise((resolve) => setTimeout(resolve, 4000));
     console.log("⏱ 대기 완료");
+    console.log("ddddd", fireData);
 
     await browser.close();
 
