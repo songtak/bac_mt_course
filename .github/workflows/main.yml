@@ -1,20 +1,20 @@
-name: wildfire-crawl
+name: Wildfire Data Crawler
 
 on:
-  workflow_dispatch:  # 수동 실행 버튼
   schedule:
-    - cron: "1 * * * *"  # 매 시 정각 + 1분 (UTC 기준)
+    - cron: "1 * * * *"
+  workflow_dispatch:
 
 jobs:
-  run-script:
+  crawl-and-upload:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: "20"
 
@@ -22,8 +22,8 @@ jobs:
         run: npm install
 
       - name: Run wildfire crawler
-        run: node src/apis/fire.cjs
         env:
           FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
           FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
           FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+        run: node src/apis/fire.cjs

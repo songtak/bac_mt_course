@@ -17,6 +17,7 @@
     "dayjs": "^1.11.13",
     "express": "^4.21.2",
     "firebase": "^11.4.0",
+    "firebase-admin": "^13.2.0",
     "framer-motion": "^12.5.0",
     "fs": "0.0.1-security",
     "fs-extra": "^11.3.0",
