@@ -1,215 +1,34 @@
 // components/WildfireMapPage.tsx
 import React, { useEffect, useRef, useState } from "react";
 import dayjs from "dayjs";
+import { db } from "../utils/firebaseConfig";
+import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
 
-const mockData = [
-  {
-    frfrLctnXcrd: "127.7900949352501",
-    frfrPrgrsStcd: "02",
-    frfrOccrrTpcd: "05",
-    frfrStepIssuCd: "03",
-    frfrPotfrRt: 90,
-    frfrSttmnDt: "20250321",
-    frfrSttmnHms: "152639",
-    frfrInfoId: "358944",
-    frfrOccrrStcd: "31",
-    frfrLctnYcrd: "35.25520095257454",
-    frfrSttmnLctnXcrd: "127.79009493524893",
-    frfrSttmnLctnYcrd: "35.25520095224756",
-    frfrSttmnAddr: "경상남도 산청군 시천면 신천리",
-    frfrPrgrsStcdNm: "진화중",
-    frfrSttmnAddrDe: "경상남도 산청군 시천면 신천리 산 39임",
-    frfrFrngDtm: "2025-03-21 15:26:39",
-    frfrStepIssuNm: "산불 3단계",
-    lgdngCd: "4886036030",
-  },
-  {
-    frfrLctnXcrd: "128.5992098110805",
-    frfrPrgrsStcd: "02",
-    frfrOccrrTpcd: "05",
-    frfrStepIssuCd: "03",
-    frfrPotfrRt: 68,
-    frfrSttmnDt: "20250322",
-    frfrSttmnHms: "112414",
-    frfrInfoId: "359264",
-    frfrOccrrStcd: "31",
-    frfrLctnYcrd: "36.369282214858096",
-    frfrSttmnLctnXcrd: "128.5992098110749",
-    frfrSttmnLctnYcrd: "36.36928221465283",
-    frfrSttmnAddr: "경상북도 의성군 안평면 괴산리",
-    frfrPrgrsStcdNm: "진화중",
-    frfrSttmnAddrDe: "경상북도 의성군 안평면 괴산리 산61임",
-    frfrFrngDtm: "2025-03-22 11:24:14",
-    frfrStepIssuNm: "산불 3단계",
-    lgdngCd: "4773046035",
-  },
-  {
-    frfrLctnXcrd: "129.25549939262694",
-    frfrPrgrsStcd: "02",
-    frfrOccrrTpcd: "05",
-    frfrStepIssuCd: "03",
-    frfrPotfrRt: 98,
-    frfrSttmnDt: "20250322",
-    frfrSttmnHms: "121201",
-    frfrInfoId: "359324",
-    frfrOccrrStcd: "31",
-    frfrLctnYcrd: "35.40452836805859",
-    frfrSttmnLctnXcrd: "129.25549939255046",
-    frfrSttmnLctnYcrd: "35.404528367750466",
-    frfrSttmnAddr: "울산광역시 울주군 온양읍 운화리",
-    frfrPrgrsStcdNm: "진화중",
-    frfrSttmnAddrDe: "울산광역시 울주군 온양읍 운화리 산50임",
-    frfrFrngDtm: "2025-03-22 12:12:01",
-    frfrStepIssuNm: "산불 3단계",
-    lgdngCd: "3171025629",
-  },
-  {
-    frfrLctnXcrd: "128.45183950685484",
-    frfrPrgrsStcd: "02",
-    frfrOccrrTpcd: "05",
-    frfrStepIssuCd: "00",
-    frfrPotfrRt: 66,
-    frfrSttmnDt: "20250322",
-    frfrSttmnHms: "143938",
-    frfrInfoId: "360084",
-    frfrOccrrStcd: "31",
-    frfrLctnYcrd: "36.41211998986555",
-    frfrSttmnLctnXcrd: "128.4518395068514",
-    frfrSttmnLctnYcrd: "36.412119989665044",
-    frfrSttmnAddr: "경상북도 의성군 안계면 양곡리",
-    frfrPrgrsStcdNm: "진화중",
-    frfrSttmnAddrDe: "경상북도 의성군 안계면 양곡리 산83-19 임",
-    frfrFrngDtm: "2025-03-22 14:39:38",
-    frfrStepIssuNm: "초기 대응",
-    lgdngCd: "4773043037",
-  },
-  {
-    frfrLctnXcrd: "128.50335885436792",
-    frfrPrgrsStcd: "03",
-    frfrOccrrTpcd: "05",
-    frfrStepIssuCd: "00",
-    frfrPotfrRt: 100,
-    frfrSttmnDt: "20250326",
-    frfrSttmnHms: "192939",
-    frfrInfoId: "363764",
-    frfrOccrrStcd: "31",
-    frfrLctnYcrd: "35.766901247959446",
-    frfrSttmnLctnXcrd: "128.50335885436309",
-    frfrSttmnLctnYcrd: "35.76690124768663",
-    frfrSttmnAddr: "대구광역시 달성군 옥포읍 기세리",
-    potfrCmpleDtm: "2025-03-27 08:00:00",
-    frfrPrgrsStcdNm: "진화완료",
-    frfrSttmnAddrDe: "대구광역시 대구광역시 달성군 옥포읍 기세리 산157임",
-    frfrFrngDtm: "2025-03-26 19:29:39",
-    frfrStepIssuNm: "초기 대응",
-    lgdngCd: "2771026226",
-  },
-  {
-    frfrLctnXcrd: "127.55865000000037",
-    frfrPrgrsStcd: "02",
-    frfrOccrrTpcd: "05",
-    frfrStepIssuCd: "02",
-    frfrPotfrRt: 70,
-    frfrSttmnDt: "20250326",
-    frfrSttmnHms: "212237",
-    frfrInfoId: "363804",
-    frfrOccrrStcd: "31",
-    frfrLctnYcrd: "35.961100000504324",
-    frfrSttmnLctnXcrd: "127.55865000000018",
-    frfrSttmnLctnYcrd: "35.96110000025217",
-    frfrSttmnAddr: "전북특별자치도 무주군 부남면 대소리",
-    frfrPrgrsStcdNm: "진화중",
-    frfrSttmnAddrDe: "전북특별자치도 무주군 부남면 대소리 819-1 도",
-    frfrFrngDtm: "2025-03-26 21:22:37",
-    frfrStepIssuNm: "산불 2단계",
-    lgdngCd: "5273035022",
-  },
-  {
-    frfrLctnXcrd: "126.47050187963781",
-    frfrPrgrsStcd: "03",
-    frfrOccrrTpcd: "05",
-    frfrStepIssuCd: "00",
-    frfrPotfrRt: 100,
-    frfrSttmnDt: "20250326",
-    frfrSttmnHms: "234240",
-    frfrInfoId: "363884",
-    frfrOccrrStcd: "31",
-    frfrLctnYcrd: "36.952504113846516",
-    frfrSttmnLctnXcrd: "126.47050187964139",
-    frfrSttmnLctnYcrd: "36.95250411371088",
-    frfrSttmnAddr: "충청남도 서산시 대산읍 운산리",
-    potfrCmpleDtm: "2025-03-27 00:32:00",
-    frfrPrgrsStcdNm: "진화완료",
-    frfrSttmnAddrDe: "충청남도 서산시 대산읍 운산리 86-44 임",
-    frfrFrngDtm: "2025-03-26 23:42:40",
-    frfrStepIssuNm: "초기 대응",
-    lgdngCd: "4421025029",
-  },
-  {
-    frfrLctnXcrd: "128.52778209652755",
-    frfrPrgrsStcd: "05",
-    frfrOccrrTpcd: "05",
-    frfrStepIssuCd: "00",
-    frfrPotfrRt: 100,
-    frfrSttmnDt: "20250327",
-    frfrSttmnHms: "074044",
-    frfrInfoId: "363885",
-    frfrOccrrStcd: "31",
-    frfrLctnYcrd: "36.02503043308222",
-    frfrSttmnLctnXcrd: "128.52778209652269",
-    frfrSttmnLctnYcrd: "36.025030432837724",
-    frfrSttmnAddr: "경상북도 칠곡군 동명면 가천리",
-    potfrCmpleDtm: "2025-03-27 08:25:00",
-    frfrPrgrsStcdNm: "산불외종료",
-    frfrSttmnAddrDe: "경상북도 칠곡군 동명면 가천리 805 답",
-    frfrFrngDtm: "2025-03-27 07:40:44",
-    frfrStepIssuNm: "초기 대응",
-    lgdngCd: "4785032032",
-  },
-  {
-    frfrLctnXcrd: "126.26148857661053",
-    frfrPrgrsStcd: "05",
-    frfrOccrrTpcd: "05",
-    frfrStepIssuCd: "00",
-    frfrPotfrRt: 0,
-    frfrSttmnDt: "20250327",
-    frfrSttmnHms: "150347",
-    frfrInfoId: "364224",
-    frfrOccrrStcd: "31",
-    frfrLctnYcrd: "36.80115371736462",
-    frfrSttmnLctnXcrd: "126.26148857661941",
-    frfrSttmnLctnYcrd: "36.80115371721087",
-    frfrSttmnAddr: "충청남도 태안군 원북면 대기리",
-    potfrCmpleDtm: "2025-03-27 15:15:00",
-    frfrPrgrsStcdNm: "산불외종료",
-    frfrSttmnAddrDe: "충청남도 태안군 원북면 대기리 2-3 임",
-    frfrFrngDtm: "2025-03-27 15:03:47",
-    frfrStepIssuNm: "초기 대응",
-    lgdngCd: "4482535027",
-  },
-  {
-    frfrLctnXcrd: "128.5060498651676",
-    frfrPrgrsStcd: "02",
-    frfrOccrrTpcd: "01",
-    frfrStepIssuCd: "00",
-    frfrPotfrRt: 0,
-    frfrSttmnDt: "20250327",
-    frfrSttmnHms: "161314",
-    frfrInfoId: "364284",
-    frfrOccrrStcd: "61",
-    frfrLctnYcrd: "36.220720205211755",
-    frfrSttmnLctnXcrd: "128.50260931550508",
-    frfrOccrrPbmrl: 4.2,
-    frfrSttmnLctnYcrd: "36.22110477819571",
-    frfrPrgrsStcdNm: "진화중",
-    frfrOccrrWndrcCd: "북북서",
-    frfrSttmnAddrDe: "대구광역시 군위군 소보면 평호리 산15임",
-    frfrFrngDtm: "2025-03-27 16:13:14",
-    frfrStepIssuNm: "초기 대응",
-  },
-];
+// 🔥 단계별 마커 색상 설정
+const getMarkerColor = (progress: string, step: string) => {
+  if (progress !== "진화중") return "skyblue"; // 🔵 진화중 아닌 경우
+  if (step === "초기 대응") return "pink";
+  if (step.includes("1")) return "yellow";
+  if (step.includes("2")) return "orange";
+  if (step.includes("3")) return "red";
+  return "skyblue";
+};
+// 🔢 숫자 텍스트 추출 (1단계/2단계/3단계 → 1/2/3)
+const getMarkerText = (progress: string, step: string) => {
+  if (progress !== "진화중") return "-"; // 🔵 진화중 아닌 경우
+  if (step === "초기 대응") return "!";
+  const matched = step.match(/(\d)/);
+  return matched ? matched[1] : "-";
+};
 
-const NaverMap = ({ data }: { data: typeof mockData }) => {
+// 🗺️ 지도 컴포넌트
+const NaverMap = ({
+  data,
+  onSelect,
+}: {
+  data: any[];
+  onSelect: (item: any) => void;
+}) => {
   const mapRef = useRef(null);
 
   useEffect(() => {
@@ -219,61 +38,151 @@ const NaverMap = ({ data }: { data: typeof mockData }) => {
         zoom: 7,
       });
 
-      data.forEach((item) => {
-        const position = new window.naver.maps.LatLng(
-          parseFloat(item.frfrLctnYcrd),
-          parseFloat(item.frfrLctnXcrd)
-        );
-        new window.naver.maps.Marker({
-          position,
-          map,
-          title: item.frfrSttmnAddr,
-        });
-      });
+      if (data.length > 0) {
+        const bounds = new window.naver.maps.LatLngBounds();
+
+        data
+          .slice()
+          .reverse()
+          .forEach((item: any) => {
+            const lat = parseFloat(item.frfrLctnYcrd);
+            const lng = parseFloat(item.frfrLctnXcrd);
+            const position = new window.naver.maps.LatLng(lat, lng);
+            const stepText = getMarkerText(
+              item.frfrPrgrsStcdNm,
+              item.frfrStepIssuNm || ""
+            );
+            const color = getMarkerColor(
+              item.frfrPrgrsStcdNm,
+              item.frfrStepIssuNm || ""
+            );
+
+            const markerContent = `
+              <div style="
+                background: ${color};
+                border-radius: 50%;
+                width: 28px;
+                height: 28px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 14px;
+                font-weight: bold;
+                color: black;
+                border: 1.5px solid white;
+                box-shadow: 0 0 4px rgba(0,0,0,0.2);
+                cursor: pointer;
+              ">
+                ${stepText}
+              </div>
+            `;
+
+            const marker = new window.naver.maps.Marker({
+              position,
+              map,
+              icon: {
+                content: markerContent,
+                anchor: new window.naver.maps.Point(14, 14),
+              },
+            });
+
+            window.naver.maps.Event.addListener(marker, "click", () => {
+              onSelect(item);
+            });
+
+            bounds.extend(position);
+          });
+
+        map.fitBounds(bounds);
+      }
     } else {
       console.error("네이버 지도 API가 로드되지 않았습니다.");
     }
-  }, [data]);
+  }, [data, onSelect]);
 
   return <div ref={mapRef} style={{ width: "100%", height: "500px" }} />;
 };
 
+// 🔥 산불 현황 페이지
 const WildfireMapPage = () => {
-  const [wildfireData, setWildfireData] = useState(mockData);
+  const [wildfireData, setWildfireData] = useState([]);
+  const [selectedFire, setSelectedFire] = useState<any>(null);
+
+  console.log("wildfireData", wildfireData);
+
+  const getLatestWildfireData = async () => {
+    try {
+      const q = query(
+        collection(db, "wildfire_data"),
+        orderBy("createdAt", "desc"),
+        limit(1)
+      );
+
+      const querySnapshot = await getDocs(q);
+      if (querySnapshot.empty) {
+        console.warn("🔥 wildfire_data 컬렉션에 데이터 없음");
+        return;
+      }
+
+      const doc = querySnapshot.docs[0];
+      const rawJson = doc.data().rawJson;
+      const parsedData = JSON.parse(rawJson).fireShowInfoList;
+
+      const priorityOrder: Record<string, number> = {
+        진화중: 1,
+        진화완료: 2,
+        산불외종료: 3,
+      };
+
+      const sorted = parsedData.sort((a: any, b: any) => {
+        const aOrder = priorityOrder[a.frfrPrgrsStcdNm] || 999;
+        const bOrder = priorityOrder[b.frfrPrgrsStcdNm] || 999;
+        return aOrder - bOrder;
+      });
+
+      setWildfireData(sorted);
+    } catch (error) {
+      console.error("🔥 Firebase에서 wildfire 데이터 가져오기 실패:", error);
+    }
+  };
+
+  useEffect(() => {
+    getLatestWildfireData();
+  }, []);
 
   return (
     <div className="min-h-screen bg-white text-gray-900">
       <main className="w-full max-w-screen-lg mx-auto px-4 py-8">
-        <h1 className="text-2xl font-semibold mb-4">산불 현황 지도</h1>
+        <div className="flex">
+          <div className="text-2xl font-semibold mb-4">산불 현황 지도</div>
+          <div className="text-[8px] ml-3">산림청 정보 사용</div>
+        </div>
 
         {/* 지도 */}
-        <NaverMap data={wildfireData} />
+        <NaverMap data={wildfireData} onSelect={setSelectedFire} />
 
-        {/* 목록 */}
-        <section className="mt-8">
-          <h2 className="text-xl font-medium mb-3">🗂 산불 목록</h2>
-          <div className="space-y-4">
-            {wildfireData.map((item, i) => (
-              <div
-                key={i}
-                className="rounded-xl border p-4 shadow-sm hover:shadow-md transition bg-white"
-              >
-                <div className="text-lg font-semibold mb-1">
-                  {item.frfrSttmnAddr}
-                </div>
-                <div className="text-sm text-gray-600">
-                  발생일시: {dayjs(item.frfrFrngDtm).format("YYYY-MM-DD HH:mm")}
-                </div>
-                <div className="text-sm text-gray-600">
-                  상태: {item.frfrPrgrsStcdNm} / 단계: {item.frfrStepIssuNm}
-                </div>
-                <div className="text-xs text-gray-400 mt-1">
-                  ID: {item.frfrInfoId}
-                </div>
+        {/* 선택된 카드 */}
+        {selectedFire && (
+          <section className="mt-8">
+            <h2 className="text-xl font-medium mb-3">선택된 산불 정보</h2>
+            <div className="rounded-xl border p-4 shadow-sm bg-white">
+              <div className="text-lg font-semibold mb-1">
+                {selectedFire.frfrSttmnAddr}
               </div>
-            ))}
-          </div>
-        </section>
+              <div className="text-sm text-gray-600">
+                발생일시:{" "}
+                {dayjs(selectedFire.frfrFrngDtm).format("YYYY-MM-DD HH:mm")}
+              </div>
+              <div className="text-sm text-gray-600">
+                상태: {selectedFire.frfrPrgrsStcdNm} / 단계:{" "}
+                {selectedFire.frfrStepIssuNm}
+              </div>
+              <div className="text-sm text-gray-600">
+                진화율: {selectedFire.frfrPotfrRt}%
+              </div>
+            </div>
+          </section>
+        )}
       </main>
     </div>
   );
