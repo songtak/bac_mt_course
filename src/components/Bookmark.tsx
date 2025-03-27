@@ -114,7 +114,7 @@ const Bookmark = ({ mountainId, bookmarkList, setBookmarkList }: Props) => {
             className="absolute inset-0 bg-gray-800 opacity-75"
             onClick={() => setIsOpenModal(false)}
           ></div>
-          <div className="relative bg-white rounded-lg shadow-lg p-4 z-10 max-w-sm ">
+          <div className="relative bg-main-white rounded-lg shadow-lg p-4 z-10 max-w-sm ">
             <XIcon
               className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 hover:cursor-pointer"
               size={24}
@@ -129,7 +129,7 @@ const Bookmark = ({ mountainId, bookmarkList, setBookmarkList }: Props) => {
               </h2>
               <button
                 onClick={() => navigate("/sign-in")}
-                className="w-full mt-1 px-4 py-2 font-light bg-blue-500 text-white rounded hover:bg-blue-700 transition-colors"
+                className="w-full mt-1 px-4 py-2 font-light bg-blue-500 text-main-white rounded hover:bg-blue-700 transition-colors"
               >
                 로그인하고 북마크하기 🔖
               </button>

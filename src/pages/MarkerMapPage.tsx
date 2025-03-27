@@ -241,7 +241,7 @@ const MarkerMapPage: React.FC = () => {
             height:8px;
             background:${markerColor};
             border-radius:50%;
-            border:1px solid white;
+            border:1px solid main-white;
             box-shadow: 0 0 8px rgba(0,0,0,0.2);
           "></div>`,
           anchor: new naver.maps.Point(10, 10),
@@ -322,7 +322,7 @@ const MarkerMapPage: React.FC = () => {
           <div className="flex border  border-gray-200 rounded-lg overflow-hidden">
             <div
               className={`flex-1  px-4 pb-1 text-center border-r border-gray-200 ${
-                selectedType === "all" ? "bg-blue-500 text-white" : ""
+                selectedType === "all" ? "bg-blue-500 text-main-white" : ""
               }`}
               onClick={() => {
                 setSelectedType("all");
@@ -333,8 +333,8 @@ const MarkerMapPage: React.FC = () => {
             <div
               className={`flex-1  px-4 pb-1 text-center border-r border-gray-200 ${
                 selectedType === "bookmark"
-                  ? "bg-[#10B981] text-white"
-                  : "bg-white text-gray-700"
+                  ? "bg-[#10B981] text-main-white"
+                  : "bg-main-white text-gray-700"
               }`}
               onClick={() => {
                 setSelectedType("bookmark");
@@ -344,7 +344,7 @@ const MarkerMapPage: React.FC = () => {
             </div>
             <div
               className={`flex-1  px-4 pb-1 text-center border-r border-gray-200 ${
-                selectedType === "summit" ? "bg-[#F59E0B] text-white" : ""
+                selectedType === "summit" ? "bg-[#F59E0B] text-main-white" : ""
               }`}
               onClick={() => {
                 setSelectedType("summit");
@@ -359,7 +359,7 @@ const MarkerMapPage: React.FC = () => {
           <div
             key={selectedMountain.id} // key를 사용해 리렌더링 시 애니메이션 실행
             onClick={() => navigate(`/map-detail/${selectedMountain.id}`)}
-            className="mt-4 bg-white flex justify-between border border-gray-150 rounded-2xl shadow-sm p-4 hover:shadow-md transition cursor-pointer  animate-slide-down"
+            className="mt-4 bg-main-white flex justify-between border border-gray-150 rounded-2xl shadow-sm p-4 hover:shadow-md transition cursor-pointer  animate-slide-down"
           >
             <div>
               <div className="flex justify-between items-center">

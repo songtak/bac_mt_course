@@ -1,18 +1,113 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import NavigationBar from "../components/NavigationBar";
-import { Search, MoveRight, ChevronsUpDown, ChevronRight } from "lucide-react";
+import { Search, BookmarkIcon } from "lucide-react";
 import RangeSlider from "../components/RangeSlider";
+import {
+  CapitalBadge,
+  IsBacBadge,
+  RatingBadge,
+  AltitudeBadge,
+} from "../components/Badges";
 
 const MyLocationPage = () => {
+  const [isArrival, setIsArrival] = useState<boolean>(true);
+  // 초기 접힌 위치: 창 높이에서 150px 위 (네비게이션 바 위쪽 영역)
+  const collapsedTopInit =
+    typeof window !== "undefined" ? window.innerHeight - 180 : 600;
+  const [collapsedTop, setCollapsedTop] = useState<number>(collapsedTopInit);
+  const [sheetTop, setSheetTop] = useState<number>(collapsedTop);
+  const sheetRef = useRef<HTMLDivElement>(null);
+
+  // 드래그 시작 시의 Y 좌표와 sheetTop을 저장할 ref
+  const startYRef = useRef<number | null>(null);
+  const initialSheetTopRef = useRef<number>(sheetTop);
+
+  // 창 크기 변경에 따라 collapsedTop 업데이트
+  useEffect(() => {
+    const handleResize = () => {
+      const newCollapsed = window.innerHeight - 150;
+      setCollapsedTop(newCollapsed);
+      if (sheetTop !== 0) {
+        setSheetTop(newCollapsed);
+        initialSheetTopRef.current = newCollapsed;
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [sheetTop]);
+
+  // 포인터/터치 드래그 시작
+  const handleDragStart = (
+    clientY: number,
+    pointerId?: number,
+    e?: React.PointerEvent
+  ) => {
+    startYRef.current = clientY;
+    initialSheetTopRef.current = sheetTop;
+    if (e && pointerId !== undefined) {
+      e.currentTarget.setPointerCapture(pointerId);
+    }
+  };
+
+  // 포인터/터치 드래그 이동
+  const handleDragMove = (clientY: number) => {
+    if (startYRef.current === null) return;
+    const deltaY = clientY - startYRef.current;
+    let newTop = initialSheetTopRef.current + deltaY;
+    if (newTop < 0) newTop = 0;
+    if (newTop > collapsedTop) newTop = collapsedTop;
+    setSheetTop(newTop);
+  };
+
+  // 드래그 종료 후, 시작 위치에서 50px 이상 위로 이동했으면 확장, 아니면 접힘
+  const handleDragEnd = (pointerId?: number, e?: React.PointerEvent) => {
+    if (e && pointerId !== undefined) {
+      e.currentTarget.releasePointerCapture(pointerId);
+    }
+    const dragDelta = initialSheetTopRef.current - sheetTop;
+    if (dragDelta >= 50) {
+      setSheetTop(0);
+    } else {
+      setSheetTop(collapsedTop);
+    }
+    startYRef.current = null;
+  };
+
   return (
     <div>
-      <header className="flex justify-between items-center pt-4 pb-2">
-        <div></div>
-        <div className="w-[46px] h-[46px] text-main-gray-300 bg-white rounded-full flex items-center justify-center shadow-[0_4px_4px_rgba(0,0,0,0.1)]">
+      {/* 상단 헤더 */}
+      <header className="flex justify-between items-center pt-4 pb-2 ">
+        <div>
+          <div className="bg-main-gray-300 h-[28px] rounded-[24px] opacity-65 shadow-[0_4px_4px_rgba(0,0,0,0.3)]">
+            <span className="pl-2 pr-2 text-white">5km</span>
+          </div>
+        </div>
+        <div className="w-[46px] h-[46px] text-main-gray-300 bg-[#F8F8F8] rounded-full flex items-center justify-center shadow-[0_4px_4px_rgba(0,0,0,0.1)]">
           <Search />
         </div>
       </header>
 
+      {/* 도착 여부에 따른 "근처" 팝업 */}
+      {isArrival && (
+        <div className="fixed top-[220px] left-1/2 transform -translate-x-1/2 z-50">
+          <div className="flex justify-center">
+            <div className="px-10 mb-4 w-fit h-[50px] flex items-center justify-center text-center border border-main-gray-100 shadow-[0_4px_4px_rgba(0,0,0,0.2)] rounded-[24px] whitespace-nowrap">
+              <span>감악산</span>&nbsp;
+              <span className="font-light">근처! 오르시겠어요?</span>
+            </div>
+          </div>
+          <div className="flex justify-evenly">
+            <div className="pt-1 font-light text-center h-[36px] w-[80px] bg-main-gray-200 rounded-[24px] shadow-[0_4px_4px_rgba(0,0,0,0.3)]">
+              아니요
+            </div>
+            <div className="pt-1 font-light text-center h-[36px] w-[80px] text-white bg-main-green-200 rounded-[24px] shadow-[0_4px_4px_rgba(0,0,0,0.3)]">
+              출발
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Range Slider */}
       <div className="flex items-end justify-end mt-3">
         <RangeSlider
           min={5}
@@ -22,7 +117,51 @@ const MyLocationPage = () => {
         />
       </div>
 
-      <NavigationBar />
+      {/* Bottom Sheet: 상단만 둥글게, 하단은 고정, NavigationBar보다 한 레이어 아래 */}
+      <div
+        ref={sheetRef}
+        className="fixed w-screen  -mx-6 px-10 bg-main-white rounded-t-[24px] shadow-[0_-4px_4px_rgba(0,0,0,0.1)] transition-all duration-300 ease-in-out"
+        style={{ top: sheetTop, bottom: 0, zIndex: 40 }}
+      >
+        <div
+          className="flex justify-center cursor-pointer"
+          style={{ touchAction: "none" }}
+          onPointerDown={(e) => handleDragStart(e.clientY, e.pointerId, e)}
+          onPointerMove={(e) => handleDragMove(e.clientY)}
+          onPointerUp={(e) => handleDragEnd(e.pointerId, e)}
+          onTouchStart={(e) => handleDragStart(e.touches[0].clientY)}
+          onTouchMove={(e) => handleDragMove(e.touches[0].clientY)}
+          onTouchEnd={handleDragEnd}
+        >
+          <div className="mt-2 w-10 h-[3px] bg-gray-300 rounded-md" />
+        </div>
+        <div className="flex justify-between pt-2 pb-4">
+          <div>
+            <div className="flex mb-2">
+              <div className="text-[24px] font-extralight mr-2">감악산</div>
+              <div className="mt-2">
+                <AltitudeBadge altitude={242} />
+              </div>
+            </div>
+            <div className="flex">
+              <RatingBadge rating={3.4} />
+              <span className="ml-2" />
+              <CapitalBadge capital={"경기도"} />
+              <IsBacBadge />
+            </div>
+          </div>
+          <div>
+            <div className="pt-4 pr-4">
+              <BookmarkIcon />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* NavigationBar를 fixed로 별도 렌더링, z-index 50 */}
+      <div style={{ position: "fixed", bottom: 0, width: "100%", zIndex: 50 }}>
+        <NavigationBar />
+      </div>
     </div>
   );
 };

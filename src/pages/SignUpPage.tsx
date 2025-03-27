@@ -165,7 +165,7 @@ const SignUpPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-start justify-center bg-white py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-start justify-center bg-main-white py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-6">
         <button
           onClick={() => navigate(-1)}
@@ -200,7 +200,7 @@ const SignUpPage: React.FC = () => {
               className={`px-4 py-3 rounded-md transition ${
                 isLoading || isEmailChecked || formData.email === ""
                   ? "bg-gray-200 text-gray-500"
-                  : "bg-blue-500 text-white hover:bg-blue-600"
+                  : "bg-blue-500 text-main-white hover:bg-blue-600"
               }`}
             >
               중복 확인
@@ -227,7 +227,7 @@ const SignUpPage: React.FC = () => {
               className={`px-4 py-3 rounded-md transition ${
                 isLoading || isNicknameChecked || formData.nickname === ""
                   ? "bg-gray-200 text-gray-500"
-                  : "bg-blue-500 text-white hover:bg-blue-600"
+                  : "bg-blue-500 text-main-white hover:bg-blue-600"
               }`}
             >
               중복 확인
@@ -271,7 +271,7 @@ const SignUpPage: React.FC = () => {
             disabled={!isFormValid() || isLoading}
             className={`w-full py-3 rounded-md transition focus:outline-none ${
               isFormValid() && !isLoading
-                ? "bg-blue-500 text-white hover:bg-blue-600"
+                ? "bg-blue-500 text-main-white hover:bg-blue-600"
                 : "bg-gray-200 text-gray-500"
             }`}
           >

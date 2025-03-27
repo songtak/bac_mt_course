@@ -61,7 +61,7 @@ function MainPage() {
 
       {/* 검색 바 */}
       <div className="pt-8">
-        <div className="relative text-main-gray-300 bg-white rounded-full flex items-center h-[44px]  border border-main-gray-100 shadow-[0_4px_4px_rgba(0,0,0,0.1)]">
+        <div className="relative text-main-gray-300 bg-main-white rounded-full flex items-center h-[44px]  border border-main-gray-100 shadow-[0_4px_4px_rgba(0,0,0,0.1)]">
           <Search size={22} className="ml-5" />
           <span className="font-thin text-[14px] ml-3">
             찾고 있는 산이 있나요?
@@ -86,22 +86,24 @@ function MainPage() {
           <div className="absolute inset-0 bg-black bg-opacity-30 flex flex-col justify-end p-3">
             <span className="text-sm text-gray-200 font-thin">오늘의 산</span>
             <div className="flex items-center justify-between">
-              <span className="text-2xl text-white font-medium">가리왕산</span>
-              {/* <MoveRight className="text-sm text-white" /> */}
+              <span className="text-2xl text-main-white font-medium">
+                가리왕산
+              </span>
+              {/* <MoveRight className="text-sm text-main-white" /> */}
             </div>
           </div>
         </div>
         {/* 오른쪽 카드: 등산하기 */}
         <div className="flex-1 h-24 bg-main-green-200 rounded-[24px] shadow flex items-center justify-center">
-          <span className="text-white text-lg font-thin">등 산 하 기</span>
-          {/* <MoveRight className="text-sm text-white" /> */}
+          <span className="text-main-white text-lg font-thin">등 산 하 기</span>
+          {/* <MoveRight className="text-sm text-main-white" /> */}
         </div>
       </div>
 
       {/* 가로 스크롤 날씨 예시 */}
       <div className=" mt-4 ">
         <div className="bg-main-blue-100 h-[60px] bg-opacity-30 rounded-full flex items-center overflow-x-auto justify-between  border border-main-gray-100 shadow-[0_4px_4px_rgba(0,0,0,0.1)]">
-          <div className="ml-4 py-2 font-light text-lg text-main-blue-200 w-[80px] overflow-hidden whitespace-nowrap text-ellipsis">
+          <div className="ml-4 py-2 font-light text-lg text-main-blue-200 w-[80px] overflow-hidden main-whitespace-nowrap text-ellipsis">
             감악산
           </div>
           <div className="flex space-x-4">
@@ -177,8 +179,8 @@ function MainPage() {
                 className="w-full h-full object-cover"
               />
               <div className="absolute p-3 inset-0 bg-black bg-opacity-30 flex flex-col justify-end p-2">
-                <RatingBadge />
-                <div className="text-white text-2xl font-light">
+                <RatingBadge rating={"2.4"} />
+                <div className="text-main-white text-2xl font-light">
                   {mountain.name}
                 </div>
                 <AltitudeBadge altitude={mountain.height} />

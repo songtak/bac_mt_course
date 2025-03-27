@@ -10,6 +10,7 @@ import MarkerMapPage from "./MarkerMapPage";
 import MainPage from "./MainPage";
 import MyLocationPage from "./MyLocationPage";
 import BookmarkPage from "./BookmarkPage";
+import MyInfoPage from "./MyInfoPage";
 
 export {
   HomePage,
@@ -24,4 +25,5 @@ export {
   MainPage,
   MyLocationPage,
   BookmarkPage,
+  MyInfoPage,
 };

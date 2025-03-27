@@ -34,7 +34,7 @@ function App() {
   }, [previousLocation]);
 
   return (
-    <div>
+    <>
       <ScrollToTop />
       <Routes>
         {/* <Route path="/" element={<ExcelUploader />} /> */}
@@ -42,6 +42,7 @@ function App() {
           <Route path="/" element={<PAGES.MainPage />} />
           <Route path="/my-location" element={<PAGES.MyLocationPage />} />
           <Route path="/bookmark" element={<PAGES.BookmarkPage />} />
+          <Route path="/my-info" element={<PAGES.MyInfoPage />} />
         </Route>
 
         <Route path="/gpx" element={<GPXExporter />} />
@@ -54,7 +55,7 @@ function App() {
         <Route path="/map-marker" element={<PAGES.MarkerMapPage />} />
         {/* <Route path="/" element={<PAGES.MainPage />} /> */}
       </Routes>
-    </div>
+    </>
   );
 }
 

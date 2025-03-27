@@ -285,7 +285,7 @@ function MapViewPage() {
           display:flex;
           align-items:center;
           justify-content:center;
-          border:1px solid white;
+          border:1px solid main-white;
           box-shadow:0 0 8px rgba(0,0,0,0.2);
         ">⛰️</div>`,
           anchor: new naver.maps.Point(12, 12),
@@ -586,7 +586,7 @@ function MapViewPage() {
 
   return (
     <div className="min-h-screen bg-cover bg-center animate-pan flex flex-col">
-      {/* <div className="min-h-screen bg-white"> */}
+      {/* <div className="min-h-screen bg-main-white"> */}
       {/* Header */}
       <Header
         left={
@@ -691,7 +691,7 @@ function MapViewPage() {
                   {mountainData.address}
                 </p>
                 {/* <MessageCircleQuestionIcon className="items-end justify-end mt-4 hover:cursor-pointer" />
-                <div className="absolute z-10 top-full mt-2 left-1/2 transform -translate-x-1/2 w-48 p-2 bg-gray-800 text-white text-xs rounded shadow-lg">
+                <div className="absolute z-10 top-full mt-2 left-1/2 transform -translate-x-1/2 w-48 p-2 bg-gray-800 text-main-white text-xs rounded shadow-lg">
                   여기에 툴팁 내용 입력
                 </div> */}
               </div>
@@ -801,7 +801,7 @@ function MapViewPage() {
       {/* <footer className="py-4 text-center text-gray-500 text-xs border-t border-gray-200"> */}
       <footer className="py-4 text-center relative inline-block">
         {isPeak && !isDone && (
-          <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 bg-gray-500/55 text-white text-xs px-4 py-2 rounded shadow font-light">
+          <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 bg-gray-500/55 text-main-white text-xs px-4 py-2 rounded shadow font-light">
             <div>봉우리에 도착했습니다.</div>
             <div>버튼을 눌러 기록을 남겨보세요!</div>
           </div>
@@ -839,17 +839,17 @@ function MapViewPage() {
 
                 ${
                   isDone &&
-                  "animate-shake !bg-green-500 text-white cursor-not-allowed hover:cursor-default hover:bg-gray-400 pl-10 pr-7 py-8"
+                  "animate-shake !bg-green-500 text-main-white cursor-not-allowed hover:cursor-default hover:bg-gray-400 pl-10 pr-7 py-8"
                 }
                 ${
                   isPeak &&
                   !isDone &&
-                  "bg-sky-500 text-white hover:bg-blue-500 pl-10 pr-10 py-8 animate-shake"
+                  "bg-sky-500 text-main-white hover:bg-blue-500 pl-10 pr-10 py-8 animate-shake"
                 }
                 ${
                   !isPeak &&
                   !isDone &&
-                  "bg-gray-300 text-white cursor-not-allowed hover:cursor-default hover:bg-gray-400 px-10 py-8"
+                  "bg-gray-300 text-main-white cursor-not-allowed hover:cursor-default hover:bg-gray-400 px-10 py-8"
                 }
                 `}
           />

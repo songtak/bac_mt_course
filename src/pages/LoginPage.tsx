@@ -72,7 +72,7 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-start justify-center bg-white py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-start justify-center bg-main-white py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-6">
         <button
           onClick={() => navigate(-1)}
@@ -119,7 +119,7 @@ const LoginPage: React.FC = () => {
             className={`w-full py-3 rounded-md shadow-sm transition focus:outline-none ${
               isLoading
                 ? "bg-gray-300 text-gray-700"
-                : "bg-blue-500 text-white hover:bg-blue-600"
+                : "bg-blue-500 text-main-white hover:bg-blue-600"
             }`}
           >
             {isLoading ? "로그인 중..." : "로그인"}

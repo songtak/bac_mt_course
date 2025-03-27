@@ -174,7 +174,7 @@ const MyPage = () => {
   /** ================================================================================ */
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-main-white">
       {/* Header */}
 
       <Header
@@ -263,7 +263,7 @@ const MyPage = () => {
                       <div
                         key={bookmark.id}
                         onClick={() => navigate(`/map-detail/${bookmark.id}`)}
-                        className="flex justify-between bg-white border border-gray-150 rounded-2xl shadow-sm pt-2 pb-3 px-4 hover:shadow-md transition cursor-pointer"
+                        className="flex justify-between bg-main-white border border-gray-150 rounded-2xl shadow-sm pt-2 pb-3 px-4 hover:shadow-md transition cursor-pointer"
                       >
                         <div>
                           <div className="flex justify-between items-center">
@@ -346,7 +346,7 @@ const MyPage = () => {
                           onClick={() =>
                             navigate(`/map-detail/${summit.mountainId}`)
                           }
-                          className="flex justify-between bg-white border border-gray-150 rounded-2xl shadow-sm pt-2 pb-3 px-4 hover:shadow-md transition cursor-pointer"
+                          className="flex justify-between bg-main-white border border-gray-150 rounded-2xl shadow-sm pt-2 pb-3 px-4 hover:shadow-md transition cursor-pointer"
                         >
                           <div className="">
                             <div className="flex justify-between items-center">

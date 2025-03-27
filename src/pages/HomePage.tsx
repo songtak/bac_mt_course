@@ -21,7 +21,7 @@ function HomePage() {
   //   }}
   // >
   return (
-    <div className="max-w-md mx-auto p-4 space-y-6 text-gray-800 bg-white">
+    <div className="max-w-md mx-auto p-4 space-y-6 text-gray-800 bg-main-white">
       {/* 상단 로고 & 유저 */}
       <div className="flex justify-between items-center">
         <div>
@@ -66,12 +66,12 @@ function HomePage() {
             alt="산"
             className="w-full h-24 object-cover"
           />
-          <div className="absolute inset-0 bg-black/30 flex flex-col justify-end p-3 text-white">
+          <div className="absolute inset-0 bg-black/30 flex flex-col justify-end p-3 text-main-white">
             <p className="text-xs">오늘의 산</p>
             <p className="text-base font-semibold">가리왕산</p>
           </div>
         </div>
-        <button className="flex-1 bg-green-400 text-white rounded-2xl text-lg font-semibold flex items-center justify-center">
+        <button className="flex-1 bg-green-400 text-main-white rounded-2xl text-lg font-semibold flex items-center justify-center">
           등산하기
         </button>
       </div>
@@ -79,7 +79,7 @@ function HomePage() {
       {/* 주간 날씨 */}
       <div className="bg-blue-50 rounded-full px-4 py-3 flex items-center justify-between overflow-auto text-xs text-gray-600">
         <p className="font-semibold">감악산</p>
-        <div className="flex gap-3 ml-4 whitespace-nowrap">
+        <div className="flex gap-3 ml-4 main-whitespace-nowrap">
           {["수", "목", "금", "토", "일"].map((day) => (
             <div key={day} className="flex flex-col items-center">
               <p>{day}</p>
@@ -121,7 +121,7 @@ function HomePage() {
                 alt={mountain.name}
                 className="w-full h-40 object-cover"
               />
-              <div className="absolute inset-0 bg-black/30 p-3 text-white flex flex-col justify-end">
+              <div className="absolute inset-0 bg-black/30 p-3 text-main-white flex flex-col justify-end">
                 <p className="text-sm font-semibold">{mountain.name}</p>
                 <p className="text-xs">{mountain.height}</p>
                 <div className="flex gap-1 flex-wrap text-xs mt-1">
@@ -130,7 +130,7 @@ function HomePage() {
                       key={tagIdx}
                       className={`px-2 rounded-full ${
                         tag.includes("★")
-                          ? "bg-green-500 text-white"
+                          ? "bg-green-500 text-main-white"
                           : tag.includes("도")
                           ? "bg-blue-200 text-blue-800"
                           : "bg-yellow-200 text-yellow-800"

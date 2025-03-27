@@ -116,14 +116,14 @@ const DualRangeSlider: React.FC<HeightSliderProps> = ({
         />
         {/* 최소 thumb */}
         <div
-          className="absolute top-1/2 -translate-y-1/2 w-5 h-5 bg-white border-2 border-blue-500 rounded-full cursor-pointer"
+          className="absolute top-1/2 -translate-y-1/2 w-5 h-5 bg-main-white border-2 border-blue-500 rounded-full cursor-pointer"
           style={{ left: `${getPercent(minVal)}%`, zIndex: 3 }}
           onMouseDown={handleMouseDown("min")}
           onTouchStart={handleTouchStart("min")}
         />
         {/* 최대 thumb */}
         <div
-          className="absolute top-1/2 left-10 -translate-y-1/2 w-5 h-5 bg-white border-2 border-blue-500 rounded-full cursor-pointer"
+          className="absolute top-1/2 left-10 -translate-y-1/2 w-5 h-5 bg-main-white border-2 border-blue-500 rounded-full cursor-pointer"
           style={{ left: `${getPercent(maxVal - 50)}%`, zIndex: 4 }}
           onMouseDown={handleMouseDown("max")}
           onTouchStart={handleTouchStart("max")}

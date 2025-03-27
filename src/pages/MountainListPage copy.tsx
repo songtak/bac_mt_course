@@ -405,7 +405,7 @@ const MountainListPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-main-white">
       {/* Header */}
       <Header
         left={
@@ -495,7 +495,7 @@ const MountainListPage = () => {
 
         {isFilterShow && (
           <div
-            className={`relative bg-white/95  rounded-xl shadow-lg p-6 mb-4 border transition duration-300 ${
+            className={`relative bg-main-white/95  rounded-xl shadow-lg p-6 mb-4 border transition duration-300 ${
               !isFilterShow && "cursor-pointer"
             }`}
             onClick={() => {
@@ -622,7 +622,7 @@ const MountainListPage = () => {
                   />
                   {/* <button
                     onClick={handleClickSearch}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-md shadow-sm hover:bg-sky-700 transition"
+                    className="px-4 py-2 bg-blue-500 text-main-white rounded-md shadow-sm hover:bg-sky-700 transition"
                   >
                     검색
                   </button> */}
@@ -638,7 +638,7 @@ const MountainListPage = () => {
               <div
                 key={mountain.id}
                 onClick={() => navigate(`/map-detail/${mountain.id}`)}
-                className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition cursor-pointer"
+                className="bg-main-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition cursor-pointer"
               >
                 {/* 이미지 영역 (카드 상단에 플러시하게) */}
                 <div className="h-48 overflow-hidden rounded-t-xl">
@@ -691,7 +691,7 @@ const MountainListPage = () => {
         ) : (
           isSearched &&
           !loading && (
-            <div className="bg-white rounded-lg shadow-md  transition-shadow duration-300  overflow-hidden ">
+            <div className="bg-main-white rounded-lg shadow-md  transition-shadow duration-300  overflow-hidden ">
               <div className="col-span-3 text-center py-12 text-gray-700">
                 <div className="text-2xl pb-4  font-light">결과가 없어요.</div>
                 <div className="font-light">

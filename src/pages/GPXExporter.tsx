@@ -108,7 +108,7 @@ const GPXExporter: React.FC = () => {
           width: "100%",
           padding: "10px",
           backgroundColor: "blue",
-          color: "white",
+          color: "main-white",
           border: "none",
           cursor: "pointer",
         }}

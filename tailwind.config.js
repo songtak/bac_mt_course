@@ -4,6 +4,8 @@ export default {
   theme: {
     extend: {
       colors: {
+        "main-white": "#F8F8F8",
+        "main-black": "#1E1E1E",
         "main-green-400": "#043F2E",
         "main-green-300": "#2A6F2B",
         "main-green-200": "#78C51C",
@@ -11,6 +13,7 @@ export default {
         "main-blue-300": "#7D9CAA",
         "main-blue-200": "#70A4BB",
         "main-blue-100": "#9DC4D5",
+        "main-gray-400": "#444444",
         "main-gray-300": "#808080",
         "main-gray-200": "#D1D3D4",
         "main-gray-100": "#EFEFEF",

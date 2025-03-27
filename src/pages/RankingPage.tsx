@@ -27,7 +27,7 @@ const RankingPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-main-white flex flex-col">
       <header className="px-6 py-4 border-b border-gray-200 flex items-center">
         <button
           onClick={() => {
@@ -46,7 +46,7 @@ const RankingPage = () => {
       <main className="flex-grow container mx-auto px-6 py-8">
         {/* 주간 헌터 랭킹  */}
         <div>
-          <div className="bg-white border rounded-xl shadow-sm divide-y divide-gray-200">
+          <div className="bg-main-white border rounded-xl shadow-sm divide-y divide-gray-200">
             <div className="flex flex-col sm:flex-row justify-between sm:items-end px-2 mt-4 min-h-[3rem]">
               <div className="text-2xl font-light text-gray-900 pb-4">
                 🏆 주간 헌터 랭킹 – 최다 등산

@@ -1,5 +1,6 @@
 body {
   font-family: "Noto Sans KR", sans-serif;
+  min-height: 100vh;
 
   /* font-family: "Inter", sans-serif; */
   /* background-color: aqua; */
@@ -8,4 +9,12 @@ body {
 html,
 body {
   overflow-x: hidden;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  height: 100%;
 }

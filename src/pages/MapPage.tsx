@@ -239,7 +239,7 @@ function MapPage() {
           display:flex;
           align-items:center;
           justify-content:center;
-          border:1px solid white;
+          border:1px solid main-white;
           box-shadow:0 0 8px rgba(0,0,0,0.2);
         ">⛰️</div>`,
           anchor: new naver.maps.Point(10, 10),
@@ -280,7 +280,7 @@ function MapPage() {
           content: `<div style="
               width:16px;
               height:16px;
-              background: white;
+              background: main-white;
               border-radius:50%;
               border:2px solid #ff3b30;
               box-shadow:0px 0px 10px rgba(0,0,0,0.3);
@@ -443,7 +443,7 @@ function MapPage() {
           onClick={() => {
             navigate("/list");
           }}
-          className="px-6 py-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition duration-300 cursor-pointer text-center"
+          className="px-6 py-4 bg-main-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition duration-300 cursor-pointer text-center"
         >
           <div className="text-lg font-light text-gray-900 mb-1">
             아직 찾지 못한 봉우리가 있나요?

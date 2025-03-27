@@ -85,7 +85,7 @@ const RangeSlider = ({ min = 5, max = 30, initialValue = 15, onChange }) => {
       onTouchStart={handleTouchStart}
     >
       {/* 세로 막대: top-0을 추가하여 항상 맨 위(0)에 고정 */}
-      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 h-[100px] w-3 bg-white rounded-lg shadow-[0_4px_4px_rgba(0,0,0,0.3)]"></div>
+      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 h-[100px] w-3 bg-main-white rounded-lg shadow-[0_4px_4px_rgba(0,0,0,0.3)]"></div>
       {/* 슬라이더 핸들 (동그라미) */}
       <div
         className="absolute left-1/2 transform -translate-x-1/2 bg-main-green-300 rounded-full w-[16px] h-[16px] shadow flex items-center justify-center"

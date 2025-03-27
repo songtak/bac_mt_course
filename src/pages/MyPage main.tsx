@@ -169,7 +169,7 @@ const MyPage = () => {
         <div className="grid grid-cols-1  gap-6 ">
           {/* 지금 등산 중 섹션 - 전체 너비 사용 */}
           {mountainInProgress > 0 && (
-            <section className="bg-white rounded-lg shadow p-4 md:col-span-1">
+            <section className="bg-main-white rounded-lg shadow p-4 md:col-span-1">
               <h2 className="text-xl font-semibold text-gray-800 mb-4">
                 지금 등산 중
               </h2>
@@ -179,7 +179,7 @@ const MyPage = () => {
             </section>
           )}
           {/* 북마크 섹션 */}
-          <section className="bg-white rounded-lg shadow p-4  min-w-[300px]">
+          <section className="bg-main-white rounded-lg shadow p-4  min-w-[300px]">
             <div
               className="flex justify-between items-center text-justify"
               onClick={() => {
@@ -206,7 +206,7 @@ const MyPage = () => {
               )}
             </div>
             {isOpenBookmark && (
-              <div className="mt-4 divide-y divide-gray-200  border-gray-200 rounded-lg bg-white">
+              <div className="mt-4 divide-y divide-gray-200  border-gray-200 rounded-lg bg-main-white">
                 {bookmarkMountainList.map((bookmark: any) => (
                   <div
                     key={bookmark.id}
@@ -260,7 +260,7 @@ const MyPage = () => {
           </section>
 
           {/* 등산 완료 목록 섹션 */}
-          <section className="bg-white rounded-lg shadow p-4">
+          <section className="bg-main-white rounded-lg shadow p-4">
             <div
               className="flex justify-between items-center text-justify"
               onClick={() => {
@@ -287,7 +287,7 @@ const MyPage = () => {
               )}
             </div>
             {isOpenSummit && (
-              <div className="mt-4 divide-y divide-gray-200  border-gray-200 rounded-lg bg-white">
+              <div className="mt-4 divide-y divide-gray-200  border-gray-200 rounded-lg bg-main-white">
                 {summitMountainList.map((summit: any, i: number) => (
                   <div
                     key={i}
