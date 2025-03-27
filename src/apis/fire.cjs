@@ -1,10 +1,30 @@
 const express = require("express");
 const puppeteer = require("puppeteer");
-const { db } = require("../utils/firebaseConfig.cjs"); // cjs 형식 config
-const { doc, setDoc, serverTimestamp } = require("firebase/firestore");
+const admin = require("firebase-admin");
+const {
+  initializeApp,
+  applicationDefault,
+  cert,
+} = require("firebase-admin/app");
+const { getFirestore, Timestamp } = require("firebase-admin/firestore");
 
 const app = express();
 const PORT = 5001;
+
+// 🔐 환경변수 기반 Firebase Admin 초기화
+const serviceAccount = {
+  project_id: process.env.FIREBASE_PROJECT_ID,
+  client_email: process.env.FIREBASE_CLIENT_EMAIL,
+  private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+};
+
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: cert(serviceAccount),
+  });
+}
+
+const db = getFirestore();
 
 app.get("/api/wildfire-crawl", async (req, res) => {
   let browser;
@@ -43,18 +63,10 @@ app.get("/api/wildfire-crawl", async (req, res) => {
       fireData.fireShowInfoList.length === 0
     ) {
       console.warn("❌ 유효한 산불 데이터 없음 (재시도 안함)");
-
-      // Firebase에 실패 로그 저장
-      const failRef = doc(db, "wildfire_logs", new Date().toISOString());
-      await setDoc(failRef, {
-        status: "no-data",
-        createdAt: serverTimestamp(),
-      });
-
       return res.status(404).json({ message: "산불 데이터 없음" });
     }
 
-    // 문서 ID: YYYYMMDD_HH
+    // ✅ Firestore 저장
     const now = new Date();
     const timestampKey = `${now.getFullYear()}${(now.getMonth() + 1)
       .toString()
@@ -63,40 +75,24 @@ app.get("/api/wildfire-crawl", async (req, res) => {
       .toString()
       .padStart(2, "0")}`;
 
-    // 산불 데이터 저장
-    const wildfireRef = doc(db, "wildfire_data", timestampKey);
-    await setDoc(wildfireRef, {
-      rawJson: JSON.stringify(fireData),
-      createdAt: serverTimestamp(),
-    });
-
-    // 로그 저장
-    const logRef = doc(db, "wildfire_logs", now.toISOString());
-    await setDoc(logRef, {
-      status: "success",
-      savedAs: timestampKey,
-      count: fireData.fireShowInfoList.length,
-      createdAt: serverTimestamp(),
-    });
+    await db
+      .collection("wildfire_data")
+      .doc(timestampKey)
+      .set({
+        rawJson: JSON.stringify(fireData),
+        createdAt: Timestamp.now(),
+      });
 
     console.log("✅ Firebase 저장 완료:", timestampKey);
 
-    res.json({
-      savedAs: timestampKey,
+    return res.json({
       count: fireData.fireShowInfoList.length,
+      savedAs: timestampKey,
     });
   } catch (err) {
     console.error("🔥 크롤링 중 예외 발생:", err);
     if (browser) await browser.close();
-
-    const errorRef = doc(db, "wildfire_logs", new Date().toISOString());
-    await setDoc(errorRef, {
-      status: "error",
-      error: err.message,
-      createdAt: serverTimestamp(),
-    });
-
-    res.status(500).json({ error: "크롤링 실패" });
+    return res.status(500).json({ error: "크롤링 실패" });
   }
 });
 
