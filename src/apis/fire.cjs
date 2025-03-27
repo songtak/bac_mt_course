@@ -1,6 +1,13 @@
 const express = require("express");
 const puppeteer = require("puppeteer");
 const admin = require("firebase-admin");
+console.log("🔥 DEBUG ENV");
+console.log("FIREBASE_PROJECT_ID", process.env.FIREBASE_PROJECT_ID);
+console.log("FIREBASE_CLIENT_EMAIL", process.env.FIREBASE_CLIENT_EMAIL);
+console.log(
+  "FIREBASE_PRIVATE_KEY",
+  process.env.FIREBASE_PRIVATE_KEY?.slice(0, 30) + "..."
+); // 민감 정보니까 일부만 출력
 
 const FIREBASE_PROJECT_ID = process.env.FIREBASE_PROJECT_ID;
 const FIREBASE_CLIENT_EMAIL = process.env.FIREBASE_CLIENT_EMAIL;
