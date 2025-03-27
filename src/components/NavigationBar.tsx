@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Home, Compass, Bookmark, User } from "lucide-react"; // 예시 아이콘
 import { useLocation, useNavigate } from "react-router-dom";
 
-type Nav = "main" | "location" | "bookmark" | "my";
+type Nav = "null" | "main" | "location" | "bookmark" | "my";
 interface NavList {
   title: string;
   icon: any;
@@ -46,7 +46,7 @@ const naviMenus: NavList[] = [
 const NavigationBar = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const [selectedNavType, setSelectedNavType] = useState<Nav>("main");
+  const [selectedNavType, setSelectedNavType] = useState<Nav>("null");
 
   /** ========================================================================= */
 

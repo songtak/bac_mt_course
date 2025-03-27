@@ -13,6 +13,7 @@ body {
   width: 100%;
   margin: 0;
   padding: 0;
+  color: #1e1e1e; /* 원하는 색상 코드로 변경 */
 }
 
 #root {
