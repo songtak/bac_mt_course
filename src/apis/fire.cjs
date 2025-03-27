@@ -1,30 +1,31 @@
 const express = require("express");
 const puppeteer = require("puppeteer");
 const admin = require("firebase-admin");
-const {
-  initializeApp,
-  applicationDefault,
-  cert,
-} = require("firebase-admin/app");
-const { getFirestore, Timestamp } = require("firebase-admin/firestore");
 
-const app = express();
-const PORT = 5001;
+const FIREBASE_PROJECT_ID = process.env.FIREBASE_PROJECT_ID;
+const FIREBASE_CLIENT_EMAIL = process.env.FIREBASE_CLIENT_EMAIL;
+const FIREBASE_PRIVATE_KEY = process.env.FIREBASE_PRIVATE_KEY?.replace(
+  /\\n/g,
+  "\n"
+);
 
-// 🔐 환경변수 기반 Firebase Admin 초기화
-const serviceAccount = {
-  project_id: process.env.FIREBASE_PROJECT_ID,
-  client_email: process.env.FIREBASE_CLIENT_EMAIL,
-  private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
-};
-
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: cert(serviceAccount),
-  });
+if (!FIREBASE_PROJECT_ID || !FIREBASE_CLIENT_EMAIL || !FIREBASE_PRIVATE_KEY) {
+  console.error("❌ Firebase 환경변수가 누락되었습니다.");
+  process.exit(1);
 }
 
-const db = getFirestore();
+// Firebase Admin 초기화
+admin.initializeApp({
+  credential: admin.credential.cert({
+    project_id: FIREBASE_PROJECT_ID,
+    client_email: FIREBASE_CLIENT_EMAIL,
+    private_key: FIREBASE_PRIVATE_KEY,
+  }),
+});
+
+const db = admin.firestore();
+const app = express();
+const PORT = 5001;
 
 app.get("/api/wildfire-crawl", async (req, res) => {
   let browser;
@@ -66,7 +67,6 @@ app.get("/api/wildfire-crawl", async (req, res) => {
       return res.status(404).json({ message: "산불 데이터 없음" });
     }
 
-    // ✅ Firestore 저장
     const now = new Date();
     const timestampKey = `${now.getFullYear()}${(now.getMonth() + 1)
       .toString()
@@ -75,13 +75,11 @@ app.get("/api/wildfire-crawl", async (req, res) => {
       .toString()
       .padStart(2, "0")}`;
 
-    await db
-      .collection("wildfire_data")
-      .doc(timestampKey)
-      .set({
-        rawJson: JSON.stringify(fireData),
-        createdAt: Timestamp.now(),
-      });
+    const ref = db.collection("wildfire_data").doc(timestampKey);
+    await ref.set({
+      rawJson: JSON.stringify(fireData),
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
 
     console.log("✅ Firebase 저장 완료:", timestampKey);
 
