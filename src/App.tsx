@@ -41,21 +41,21 @@ function App() {
         {/* <Route path="/" element={<ExcelUploader />} /> */}
         <Route element={<CommonLayout />}>
           {/* <Route path="/" element={<PAGES.MainPage />} /> */}
-          <Route path="/my-location" element={<PAGES.MyLocationPage />} />
+          {/* <Route path="/my-location" element={<PAGES.MyLocationPage />} />
           <Route path="/bookmark" element={<PAGES.BookmarkPage />} />
-          <Route path="/my-info" element={<PAGES.MyInfoPage />} />
+          <Route path="/my-info" element={<PAGES.MyInfoPage />} /> */}
         </Route>
         {/* wildfire */}
         <Route path="/" element={<WildfirePage />} />
 
-        <Route path="/gpx" element={<GPXExporter />} />
+        {/* <Route path="/gpx" element={<GPXExporter />} />
         <Route path="/list" element={<PAGES.MountainListPage />} />
         <Route path="/map-detail/:mountainId" element={<PAGES.MapViewPage />} />
         <Route path="/map" element={<PAGES.MapPage />} />
         <Route path="/sign-up" element={<PAGES.SignUpPage />} />
         <Route path="/my" element={<PAGES.MyPage />} />
         <Route path="/rank" element={<PAGES.RankingPage />} />
-        <Route path="/map-marker" element={<PAGES.MarkerMapPage />} />
+        <Route path="/map-marker" element={<PAGES.MarkerMapPage />} /> */}
         {/* <Route path="/" element={<PAGES.MainPage />} /> */}
       </Routes>
     </>
