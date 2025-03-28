@@ -5,7 +5,7 @@ const CommonLayout = () => {
   return (
     <div className="max-w-md mx-auto   bg-main-white h-full">
       {/* <Header /> */}
-      <main className="p-6 space-y-6 flex-grow bg-main-white h-full">
+      <main className="p-6 space-y-6 flex-grow bg-main-white h-full overflow-auto">
         <Outlet />
       </main>
       {/* <Footer /> */}

@@ -11,6 +11,7 @@ import MainPage from "./MainPage";
 import MyLocationPage from "./MyLocationPage";
 import BookmarkPage from "./BookmarkPage";
 import MyInfoPage from "./MyInfoPage";
+import SearchPage from "./SearchPage";
 
 export {
   HomePage,
@@ -26,4 +27,5 @@ export {
   MyLocationPage,
   BookmarkPage,
   MyInfoPage,
+  SearchPage,
 };

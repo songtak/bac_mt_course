@@ -103,7 +103,7 @@ const MyLocationPage = () => {
             </div>
           </div>
           <div className="flex justify-evenly">
-            <div className="pt-1 font-light text-center h-[36px] w-[80px] bg-main-gray-200 rounded-[24px] shadow-[0_4px_4px_rgba(0,0,0,0.3)]">
+            <div className="pt-1 font-light text-center h-[36px] w-[80px] bg-main-gray-200 rounded-[24px] xf">
               아니요
             </div>
             <div className="pt-1 font-light text-center h-[36px] w-[80px] text-white bg-main-green-200 rounded-[24px] shadow-[0_4px_4px_rgba(0,0,0,0.3)]">
@@ -129,7 +129,7 @@ const MyLocationPage = () => {
       {/* Bottom Sheet: 상단만 둥글게, 하단은 고정, NavigationBar보다 한 레이어 아래 */}
       <div
         ref={sheetRef}
-        className="fixed w-screen -mx-6 px-8 bg-main-white rounded-t-[24px] shadow-[0_-4px_4px_rgba(0,0,0,0.1)] transition-all duration-300 ease-in-out"
+        className="fixed w-full -mx-6 max-w-md	 px-8 bg-white rounded-t-[24px] shadow-[0_-4px_4px_rgba(0,0,0,0.1)] transition-all duration-300 ease-in-out"
         style={{ top: sheetTop, bottom: 0, zIndex: 40 }}
       >
         <div
@@ -146,7 +146,7 @@ const MyLocationPage = () => {
         </div>
         {isExpanded ? (
           <div className="pt-[8px]">
-            <div className="bg-yellow-200 h-[300px] w-screen -mx-8"></div>
+            <div className="bg-yellow-200 h-[300px] -mx-8"></div>
             <div className="mt-4">
               <div className="flex justify-between items-center">
                 <RatingBadge rating={3.4} />
@@ -165,12 +165,24 @@ const MyLocationPage = () => {
                   </div>
                 </div>
                 <div>
-                  <div className="flex items-center justify-center h-[35px] text-[14px] bg-[#03C75A] text-main-white rounded-[24px] w-[66px] text-center">
+                  <div className="flex items-center justify-center h-[35px] text-[14px] bg-[#03C75A] text-main-white rounded-[24px] w-[66px] text-center shadow-[0_4px_4px_rgba(0,0,0,0.1)] ">
                     <span className="font-extrabold mr-1">N</span>
-                    <span className="font-light">지도</span>
+                    <span className="font-light text-[12px]">지도</span>
                   </div>
                 </div>
-                <div></div>
+              </div>
+            </div>
+            <div className="flex mt-2">
+              <CapitalBadge capital={"경기도"} />
+              <IsBacBadge />
+            </div>
+            <div className="text-[18px] font-thin mt-2">
+              경기도 파주시 적성면
+            </div>
+
+            <div className="fixed bottom-6 left-1/2 -translate-x-1/2">
+              <div className="h-[44px] w-[165px] bg-main-green-200 text-main-white rounded-[24px] font-light flex items-center justify-center shadow-[0_4px_4px_rgba(0,0,0,0.1)]">
+                등산 시작
               </div>
             </div>
           </div>

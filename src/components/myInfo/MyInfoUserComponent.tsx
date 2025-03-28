@@ -45,7 +45,7 @@ const mySummitList: any[] = [
 
 const MyInfoUserComponent = () => {
   return (
-    <div>
+    <div className="hide-scrollbar">
       {/* 내 기본 정보 */}
       <div className="  ">
         <div className="relative w-full z-[2]">
@@ -62,7 +62,7 @@ const MyInfoUserComponent = () => {
             </div>
           </div>
         </div>
-        <div className="relative -mt-[24px] h-[124px] p-6 flex justify-between items-end border border-main-gray-100 shadow-[0_4px_4px_rgba(0,0,0,0.2)] rounded-b-[24px]">
+        <div className="relative -mt-[24px] h-[124px] p-6 flex justify-between items-end border bg-white border-main-gray-100 shadow-[0_4px_4px_rgba(0,0,0,0.2)] rounded-b-[24px]">
           <div className="text-right">
             <div className="text-[22px] font-light">6</div>
             <div className="text-[12px] font-light">오른 횟수</div>
@@ -79,7 +79,7 @@ const MyInfoUserComponent = () => {
       </div>
       {/* 메인 컨텐츠 */}
       <div className="mt-4">
-        <div className=" p-4  border border-main-gray-100 shadow-[0_4px_4px_rgba(0,0,0,0.2)] rounded-[24px]">
+        <div className=" p-4  border bg-white border-main-gray-100 shadow-[0_4px_4px_rgba(0,0,0,0.2)] rounded-[24px]">
           <div className="flex  justify-between">
             <div className="p-2 text-[16px] font-extralight">최근 등산</div>
             <ChevronRight color="#808080" />
@@ -154,6 +154,11 @@ const MyInfoUserComponent = () => {
                 )}
               </div>
             ))}
+          </div>
+          <div className="flex justify-center">
+            <div className="font-light mt-4 h-[40px] text-[14px] bg-main-green-200 text-main-white w-[240px] rounded-[24px] flex items-center justify-center shadow-[0_4px_4px_rgba(0,0,0,0.2)]">
+              전체 보기
+            </div>
           </div>
         </div>
       </div>

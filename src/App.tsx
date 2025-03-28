@@ -13,7 +13,6 @@ import usePreviousLocation from "./utils/hooks/usePreviousLocation";
 import useCommonStore from "./stores/useCommonStore";
 import "./assets/common.css";
 import CommonLayout from "./components/CommonLayout";
-import WildfirePage from "./pages/WildfirePage";
 
 function App() {
   const user = useAuth();
@@ -40,13 +39,12 @@ function App() {
       <Routes>
         {/* <Route path="/" element={<ExcelUploader />} /> */}
         <Route element={<CommonLayout />}>
-          {/* <Route path="/" element={<PAGES.MainPage />} /> */}
+          <Route path="/" element={<PAGES.MainPage />} />
           <Route path="/my-location" element={<PAGES.MyLocationPage />} />
           <Route path="/bookmark" element={<PAGES.BookmarkPage />} />
           <Route path="/my-info" element={<PAGES.MyInfoPage />} />
         </Route>
-        {/* wildfire */}
-        <Route path="/" element={<WildfirePage />} />
+        <Route path="/search" element={<PAGES.SearchPage />} />
 
         <Route path="/gpx" element={<GPXExporter />} />
         <Route path="/list" element={<PAGES.MountainListPage />} />

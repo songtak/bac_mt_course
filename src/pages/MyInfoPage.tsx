@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Search } from "lucide-react";
 import NavigationBar from "../components/NavigationBar";
 import useUserStore from "../stores/useUserStore";
@@ -11,27 +11,45 @@ import {
 const MyInfoPage = () => {
   const userStore = useUserStore();
   const user = auth.currentUser;
+  const scrollContainerRef = useRef();
   const [scrollY, setScrollY] = useState(0);
   const [scrolled, setScrolled] = useState(false);
 
+  // useEffect(() => {
+  //   const onScroll = () => {
+  //     const currentY = window.scrollY;
+  //     setScrollY(currentY);
+  //     setScrolled(currentY > 80); // 80px 이상 스크롤 시 scrolled가 true
+  //   };
+  //   window.addEventListener("scroll", onScroll);
+  //   return () => window.removeEventListener("scroll", onScroll);
+  // }, []);
   useEffect(() => {
-    const onScroll = () => {
-      const currentY = window.scrollY;
-      setScrollY(currentY);
-      setScrolled(currentY > 80); // 80px 이상 스크롤 시 scrolled가 true
+    const scrollEl = scrollContainerRef.current;
+    if (!scrollEl) return;
+
+    const handleScroll = () => {
+      const y = scrollEl.scrollTop;
+      setScrollY(y);
+      setScrolled(y > 80);
     };
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
+
+    scrollEl.addEventListener("scroll", handleScroll);
+    return () => scrollEl.removeEventListener("scroll", handleScroll);
   }, []);
 
   // 스크롤이 0일 때는 100px, 80px 이상일 때는 60px로 선형 보간합니다.
-  const ratio = Math.min(scrollY / 80, 1); // 0 ~ 1 사이
+  const ratio = Math.min(scrollY / 70, 1); // 0 ~ 1 사이
+
+  console.log("scrollY", scrollY);
+  console.log("ratio", ratio);
+
   const headerHeight = 100 - 40 * ratio; // 100px -> 60px
 
   return (
-    <div className="h-full mb-[100px]">
+    <div className="h-full mb-[100px] hide-scrollbar">
       <header
-        className={`fixed px-6 top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out flex justify-between items-center ${
+        className={`fixed px-6 pt-[26px] top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out flex justify-between items-center ${
           scrolled
             ? "bg-main-white shadow-[0_4px_4px_rgba(0,0,0,0.1)]"
             : "bg-main-white"
@@ -63,9 +81,13 @@ const MyInfoPage = () => {
       </header>
 
       {/* 고정 헤더로 인한 내용 오버랩 방지를 위해 상단 여백 추가 */}
-      <div className="pt-[100px]">
+      <div
+        className="pt-[100px] pb-[100px] hide-scrollbar"
+        ref={scrollContainerRef}
+      >
         {userStore.isLogin ? <MyInfoUserComponent /> : <MyInfoGuestComponent />}
       </div>
+      <div className="fixed  bottom-0 w-full left-1/2 -translate-x-1/2 h-[88px] bg-main-white shadow-[0_-4px_4px_rgba(0,0,0,0.1)]" />
 
       <NavigationBar />
     </div>

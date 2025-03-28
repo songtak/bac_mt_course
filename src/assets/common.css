@@ -1,9 +1,19 @@
 body {
   font-family: "Noto Sans KR", sans-serif;
   min-height: 100vh;
+  background-color: #f8f8f8;
 
   /* font-family: "Inter", sans-serif; */
   /* background-color: aqua; */
+}
+/* 예: src/index.css 또는 별도 CSS 파일에 추가 */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
 
 html,
