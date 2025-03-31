@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { Search } from "lucide-react";
-import NavigationBar from "../components/NavigationBar";
-import useUserStore from "../stores/useUserStore";
-import { auth } from "../utils/firebaseConfig";
+import NavigationBar from "../../components/NavigationBar";
+import useUserStore from "../../stores/useUserStore";
+import { auth } from "../../utils/firebaseConfig";
 import {
   MyInfoGuestComponent,
   MyInfoUserComponent,
-} from "../components/myInfo";
+  SummitListComponent,
+  SummitDetailComponent,
+} from "../../components/myInfo";
 
 const MyInfoPage = () => {
   const userStore = useUserStore();
@@ -14,6 +16,10 @@ const MyInfoPage = () => {
   const scrollContainerRef = useRef();
   const [scrollY, setScrollY] = useState(0);
   const [scrolled, setScrolled] = useState(false);
+
+  /** =========================================================================== */
+
+  /** =========================================================================== */
 
   // useEffect(() => {
   //   const onScroll = () => {
@@ -24,6 +30,7 @@ const MyInfoPage = () => {
   //   window.addEventListener("scroll", onScroll);
   //   return () => window.removeEventListener("scroll", onScroll);
   // }, []);
+  /** =========================================================================== */
   useEffect(() => {
     const scrollEl = scrollContainerRef.current;
     if (!scrollEl) return;
@@ -41,10 +48,8 @@ const MyInfoPage = () => {
   // 스크롤이 0일 때는 100px, 80px 이상일 때는 60px로 선형 보간합니다.
   const ratio = Math.min(scrollY / 70, 1); // 0 ~ 1 사이
 
-  console.log("scrollY", scrollY);
-  console.log("ratio", ratio);
-
   const headerHeight = 100 - 40 * ratio; // 100px -> 60px
+  /** =========================================================================== */
 
   return (
     <div className="h-full mb-[100px] hide-scrollbar">

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   CapitalBadge,
   IsBacBadge,
@@ -6,6 +6,17 @@ import {
   AltitudeBadge,
 } from "../Badges";
 import { Search, MoveRight, ChevronsUpDown, ChevronRight } from "lucide-react";
+import useComponentStore from "../../stores/useComponentStore";
+
+import {
+  SummitListComponent,
+  SummitDetailComponent,
+  SummitDetailCard,
+  SummitShareComponent,
+  SummitShareMap,
+  SummitSharePicture,
+  SummitResult,
+} from "./index";
 
 const mySummitList: any[] = [
   {
@@ -44,8 +55,32 @@ const mySummitList: any[] = [
 ];
 
 const MyInfoUserComponent = () => {
+  const componentStore = useComponentStore();
+  /** summitList, summitDetail, summitShare */
+  console.log("componentStore", componentStore.openfullModal);
+
   return (
     <div className="hide-scrollbar">
+      {componentStore.isOpenFullModal("summitList") && <SummitListComponent />}
+      {componentStore.isOpenFullModal("summitShareMap") && <SummitShareMap />}
+      {componentStore.isOpenFullModal("summitResult") && <SummitResult />}
+      {componentStore.isOpenFullModal("summitSharePicture") && (
+        <SummitSharePicture />
+      )}
+      {componentStore.isOpenFullModal("summitDetail") && (
+        <SummitDetailComponent
+          onClose={() => {
+            componentStore.setOpenFullModal("");
+          }}
+        />
+      )}
+      {componentStore.isOpenFullModal("summitShare") && (
+        <SummitShareComponent
+          onClose={() => {
+            componentStore.setOpenFullModal("");
+          }}
+        />
+      )}
       {/* 내 기본 정보 */}
       <div className="  ">
         <div className="relative w-full z-[2]">
@@ -82,81 +117,32 @@ const MyInfoUserComponent = () => {
         <div className=" p-4  border bg-white border-main-gray-100 shadow-[0_4px_4px_rgba(0,0,0,0.2)] rounded-[24px]">
           <div className="flex  justify-between">
             <div className="p-2 text-[16px] font-extralight">최근 등산</div>
-            <ChevronRight color="#808080" />
+            <ChevronRight
+              color="#808080"
+              onClick={() => {
+                componentStore.setOpenFullModal("summitList");
+              }}
+            />
           </div>
           <div>
             {mySummitList.map((item, i) => (
-              <div
+              <SummitDetailCard
+                detail={item}
                 key={i}
-                className=" p-4  mt-4 border border-main-gray-100 shadow-[0_4px_4px_rgba(0,0,0,0.2)] rounded-[24px]"
-              >
-                <div className="flex  justify-between mb-4">
-                  <div className="flex  justify-between">
-                    <span className="text-[22px] font-extralight mr-2">
-                      {item.name}
-                    </span>
-                    <span className="mt-2">
-                      <AltitudeBadge altitude={item.altitude} />
-                    </span>
-                  </div>
-                  <div className="flex items-center">
-                    <RatingBadge rating={2.5} />
-                    <span className="w-1"></span>
-                    <CapitalBadge capital="경기도" />
-                  </div>
-                </div>
-
-                <div className="flex">
-                  <img
-                    src={`../public/assets/images/wallpaper.jpg`}
-                    alt={item.name}
-                    className="w-[56px] h-[42px] rounded-[4px] mr-3"
-                  />
-                  <div>
-                    <div className="text-[14px] font-thin">2025.03.19</div>
-                    <div className="text-[12px] font-thin text-main-gray-300">
-                      수요일 오전 등산
-                    </div>
-                  </div>
-                </div>
-                <div className="flex justify-between mt-4">
-                  <div className="text-right">
-                    <div className="font-extralight">1,032 m</div>
-                    <div className="text-[12px] font-thin text-main-gray-300">
-                      거리
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-extralight">534.2 m</div>
-                    <div className="text-[12px] font-thin text-main-gray-300">
-                      상승 고도
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-extralight">1:02:13</div>
-                    <div className="text-[12px] font-thin text-main-gray-300">
-                      시간
-                    </div>
-                  </div>
-                </div>
-
-                {item.badges.length > 0 && (
-                  <>
-                    <div className="border border-main-gray-100 mt-2 mb-2" />
-                    <div>
-                      {item.badges.map((badge, index) => (
-                        <span key={index} className="mr-4">
-                          {badge.icon}
-                        </span>
-                      ))}
-                    </div>
-                  </>
-                )}
-              </div>
+                onClick={() => {
+                  componentStore.setOpenFullModal("summitDetail");
+                  // setIsOpenSummitDetail(true);
+                }}
+              />
             ))}
           </div>
           <div className="flex justify-center">
-            <div className="font-light mt-4 h-[40px] text-[14px] bg-main-green-200 text-main-white w-[240px] rounded-[24px] flex items-center justify-center shadow-[0_4px_4px_rgba(0,0,0,0.2)]">
+            <div
+              className="font-light mt-4 h-[40px] text-[14px] bg-main-green-200 text-main-white w-[240px] rounded-[24px] flex items-center justify-center shadow-[0_4px_4px_rgba(0,0,0,0.2)]"
+              onClick={() => {
+                componentStore.setOpenFullModal("summitList");
+              }}
+            >
               전체 보기
             </div>
           </div>

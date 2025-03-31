@@ -6,6 +6,7 @@ interface HeaderProps {
   left?: React.ReactNode;
   center?: React.ReactNode;
   right?: React.ReactNode;
+  disableSearch?: boolean;
 }
 
 // ${
@@ -14,13 +15,17 @@ interface HeaderProps {
 //     : "bg-main-white"
 // }
 
-const Header: React.FC<HeaderProps> = ({ left }) => {
+const Header: React.FC<HeaderProps> = ({
+  left,
+  right,
+  disableSearch = false,
+}) => {
   const navigate = useNavigate();
 
   return (
     <header
       className={`fixed px-6 pt-[26px] top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out flex justify-between items-center bg-main-white`}
-      style={{ height: `80px` }}
+      style={{ height: `100px` }}
     >
       {/* 왼쪽: 로고/타이틀 */}
       <div>
@@ -39,16 +44,19 @@ const Header: React.FC<HeaderProps> = ({ left }) => {
             </>
           )} */}
       </div>
+      <div>{right}</div>
       {/* 오른쪽: 사용자 정보 (아이콘은 항상 수직 중앙) */}
-      <div className="flex items-center">
-        <div className="w-[46px] h-[46px] text-main-gray-300 bg-white rounded-full flex items-center justify-center shadow-[0_4px_4px_rgba(0,0,0,0.1)]">
-          <Search
-            onClick={() => {
-              navigate("/search");
-            }}
-          />
+      {!disableSearch && (
+        <div className="flex items-center">
+          <div className="w-[46px] h-[46px] text-main-gray-300 bg-white rounded-full flex items-center justify-center shadow-[0_4px_4px_rgba(0,0,0,0.1)]">
+            <Search
+              onClick={() => {
+                navigate("/search");
+              }}
+            />
+          </div>
         </div>
-      </div>
+      )}
     </header>
   );
 };

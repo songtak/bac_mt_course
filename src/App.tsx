@@ -13,6 +13,7 @@ import usePreviousLocation from "./utils/hooks/usePreviousLocation";
 import useCommonStore from "./stores/useCommonStore";
 import "./assets/common.css";
 import CommonLayout from "./components/CommonLayout";
+import * as MYPAGE from "./pages/myInfo";
 
 function App() {
   const user = useAuth();
@@ -45,6 +46,7 @@ function App() {
           <Route path="/my-info" element={<PAGES.MyInfoPage />} />
         </Route>
         <Route path="/search" element={<PAGES.SearchPage />} />
+        <Route path="/share" element={<MYPAGE.SummitSharePage />} />
 
         <Route path="/gpx" element={<GPXExporter />} />
         <Route path="/list" element={<PAGES.MountainListPage />} />

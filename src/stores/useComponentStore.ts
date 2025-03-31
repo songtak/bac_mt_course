@@ -11,6 +11,12 @@ interface Props {
   setOpenModal: (content: any, title?: string) => void;
   setCloseModal: () => void;
   modalContent: JSX.Element | undefined;
+  /** full-view  */
+  openfullModal: string[];
+  setOpenFullModal: (openfullModal: string) => void;
+  isOpenFullModal: (modal: string) => boolean;
+  closefullModal: (modals: string[]) => void;
+
   /** Loading */
   isLoading: boolean;
   setIsLoading: (isLoading: boolean) => void;
@@ -39,7 +45,7 @@ interface Props {
     errorModalContent: string;
   }) => void;
 }
-const componentStore = create<Props>()((set) => ({
+const useComponentStore = create<Props>()((set, get) => ({
   /** ===[ Modal ]================================================================ */
   isOpenModal: false,
   modalTitle: undefined,
@@ -55,6 +61,24 @@ const componentStore = create<Props>()((set) => ({
       isOpenModal: false,
       modalContent: undefined,
       modalTitle: undefined,
+    }));
+  },
+  /** ===[ Full Modal ]================================================================ */
+  openfullModal: [],
+  setOpenFullModal: (modal: string) => {
+    set((state) => {
+      const exists = state.openfullModal.includes(modal);
+      return {
+        openfullModal: exists
+          ? state.openfullModal.filter((m) => m !== modal)
+          : [...state.openfullModal, modal],
+      };
+    });
+  },
+  isOpenFullModal: (modal: string) => get().openfullModal.includes(modal),
+  closefullModal: (modals: string[]) => {
+    set((state) => ({
+      openfullModal: state.openfullModal.filter((m) => !modals.includes(m)),
     }));
   },
   /** ===[ Loading ]================================================================ */
@@ -113,7 +137,7 @@ const componentStore = create<Props>()((set) => ({
     })),
 }));
 
-const set = componentStore.setState;
+const set = useComponentStore.setState;
 
 export const setIsLoading = (isLoading: boolean) =>
   set(() => ({ isLoading: isLoading }));
@@ -142,4 +166,4 @@ export const setErrorModalContents = (contents: {
     errorModalContent: contents.errorModalContent,
   }));
 
-export default componentStore;
+export default useComponentStore;

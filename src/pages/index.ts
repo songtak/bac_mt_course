@@ -3,14 +3,14 @@ import MapViewPage from "./MapViewPage";
 import MountainListPage from "./MountainListPage";
 import SignUpPage from "./SignUpPage";
 import LoginPage from "./LoginPage";
-import MyPage from "./MyPage";
+import MyPage from "./myInfo/MyPage";
 import MapPage from "./MapPage";
 import RankingPage from "./RankingPage";
 import MarkerMapPage from "./MarkerMapPage";
 import MainPage from "./MainPage";
 import MyLocationPage from "./MyLocationPage";
 import BookmarkPage from "./BookmarkPage";
-import MyInfoPage from "./MyInfoPage";
+import MyInfoPage from "./myInfo/MyInfoPage";
 import SearchPage from "./SearchPage";
 
 export {

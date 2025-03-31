@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft, ArrowDown, ArrowUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import useUserStore from "../stores/useUserStore";
+import useUserStore from "../../stores/useUserStore";
 import {
   doc,
   getDoc,
@@ -10,14 +10,14 @@ import {
   where,
   getDocs,
 } from "firebase/firestore";
-import { auth, db } from "../utils/firebaseConfig";
-import Bookmark from "../components/Bookmark";
+import { auth, db } from "../../utils/firebaseConfig";
+import Bookmark from "../../components/Bookmark";
 import dayjs from "dayjs";
 import { signOut } from "firebase/auth";
-import { toFormattedDate } from "../utils/helpers";
+import { toFormattedDate } from "../../utils/helpers";
 import "dayjs/locale/ko"; // 한국어 locale 임포트
-import * as BADGE from "../components/Badges/index";
-import Header from "../components/Header";
+import * as BADGE from "../../components/Badges/index";
+import Header from "../../components/Header";
 
 const MyPage = () => {
   const userStore = useUserStore();

@@ -65,7 +65,7 @@ const NavigationBar = () => {
   /** ========================================================================= */
 
   return (
-    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-32px)] max-w-md border border-main-gray-100 flex justify-between items-center h-[60px] bg-main-white rounded-[34px] shadow-[0_4px_4px_rgba(0,0,0,0.1)] px-1">
+    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-32px)] max-w-md border border-main-gray-100 flex justify-between items-center h-[60px] bg-white rounded-[34px] shadow-[0_4px_4px_rgba(0,0,0,0.1)] px-1">
       {naviMenus.map((item: NavList, i: number) => (
         <div
           key={i}
