@@ -13,7 +13,7 @@ const CapitalBadge = ({ capital, isMain = false }: Props) => {
           {capital}
         </span>
       ) : (
-        <span className="font-semibold inline-block h-[16px] bg-main-gray-200 text-[#255A72] text-[8px] px-2 pb-[2px] pt-[2px] rounded-[14px]">
+        <span className="font-normal inline-block h-[16px] bg-main-gray-200 text-[#255A72]  text-[8px] px-2 pb-[2px] pt-[2px] rounded-[14px]">
           {capital}
         </span>
       )}

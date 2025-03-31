@@ -5,8 +5,8 @@ import {
 } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import { auth } from "../utils/firebaseConfig";
-import { getUserData } from "../services/userApi";
+import { auth } from "../../utils/firebaseConfig";
+import { getUserData } from "../../services/userApi";
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();

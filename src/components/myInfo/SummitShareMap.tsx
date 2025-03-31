@@ -34,7 +34,6 @@ const SummitShareMap = () => {
         style={{ height: "calc(100vh)" }}
       >
         <div>
-          {/* <div className="text-[24px] font-light">공유하기</div> */}
           <div className="pt-8"></div>
         </div>
         <nav className="fixed  bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-32px)] max-w-md border border-main-gray-100 flex justify-between items-center h-[60px] bg-white rounded-[34px] shadow-[0_4px_4px_rgba(0,0,0,0.1)] px-16">

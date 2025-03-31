@@ -8,10 +8,8 @@ import {
 } from "../components/Badges";
 
 const ListItem = ({ mountain }: any) => {
-  console.log("mountain", mountain);
-
   return (
-    <div className="p-4 border h-[72px] border-main-gray-100 flex justify-between items-center bg-white rounded-[24px] shadow-[0_4px_4px_rgba(0,0,0,0.1)] mb-4">
+    <div className="p-5 border h-[80px] border-main-gray-100 flex justify-between items-center bg-white rounded-[24px] shadow-[0_4px_4px_rgba(0,0,0,0.1)] mb-2">
       <div className="">
         <div className="flex items-center mb-1">
           <div className="text-[22px] font-thin">{mountain.name}</div>

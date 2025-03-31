@@ -2,7 +2,7 @@ import HomePage from "./HomePage";
 import MapViewPage from "./MapViewPage";
 import MountainListPage from "./MountainListPage";
 import SignUpPage from "./SignUpPage";
-import LoginPage from "./LoginPage";
+import LoginPage from "./auth/LoginPage";
 import MyPage from "./myInfo/MyPage";
 import MapPage from "./MapPage";
 import RankingPage from "./RankingPage";

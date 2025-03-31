@@ -8,8 +8,11 @@ import {
   RatingBadge,
   AltitudeBadge,
 } from "../components/Badges";
+import { useNavigate } from "react-router-dom";
 
 const MyLocationPage = () => {
+  const navigate = useNavigate();
+
   const sheetRef = useRef<HTMLDivElement>(null);
   const collapsedTopInit =
     typeof window !== "undefined" ? window.innerHeight - 180 : 600;
@@ -88,7 +91,12 @@ const MyLocationPage = () => {
             <span className="pl-2 pr-2 text-white">5km</span>
           </div>
         </div>
-        <div className="w-[46px] h-[46px] text-main-gray-300 bg-[#F8F8F8] rounded-full flex items-center justify-center shadow-[0_4px_4px_rgba(0,0,0,0.1)]">
+        <div
+          className="w-[46px] h-[46px] text-main-gray-300 bg-[#F8F8F8] rounded-full flex items-center justify-center shadow-[0_4px_4px_rgba(0,0,0,0.1)]"
+          onClick={() => {
+            navigate("/search");
+          }}
+        >
           <Search />
         </div>
       </header>

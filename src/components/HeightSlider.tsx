@@ -100,8 +100,8 @@ const DualRangeSlider: React.FC<HeightSliderProps> = ({
 
   return (
     <div>
-      <label className="block text-sm font-bold text-gray-700 ">
-        {/* <span>높이 </span> */}
+      <label className="block ">
+        <span className="text-sm text-main-gray-400 mb-2 mr-2">높이</span>
         <span className="text-xs font-light">
           ( {minVal}m ~ {maxVal}m )
         </span>
@@ -112,18 +112,18 @@ const DualRangeSlider: React.FC<HeightSliderProps> = ({
         {/* 선택된 범위 표시 */}
         <div
           ref={trackRef}
-          className="absolute top-1/2 -translate-y-1/2 h-2 bg-blue-500 rounded-lg"
+          className="absolute top-1/2 -translate-y-1/2 h-2 bg-main-green-200 rounded-lg"
         />
         {/* 최소 thumb */}
         <div
-          className="absolute top-1/2 -translate-y-1/2 w-5 h-5 bg-main-white border-2 border-blue-500 rounded-full cursor-pointer"
+          className="absolute top-1/2 -translate-y-1/2 w-5 h-5 bg-white border-2 border-main-green-200 rounded-full cursor-pointer"
           style={{ left: `${getPercent(minVal)}%`, zIndex: 3 }}
           onMouseDown={handleMouseDown("min")}
           onTouchStart={handleTouchStart("min")}
         />
         {/* 최대 thumb */}
         <div
-          className="absolute top-1/2 left-10 -translate-y-1/2 w-5 h-5 bg-main-white border-2 border-blue-500 rounded-full cursor-pointer"
+          className="absolute top-1/2 left-10 -translate-y-1/2 w-5 h-5 bg-white border-2 border-main-green-200 rounded-full cursor-pointer"
           style={{ left: `${getPercent(maxVal - 50)}%`, zIndex: 4 }}
           onMouseDown={handleMouseDown("max")}
           onTouchStart={handleTouchStart("max")}
