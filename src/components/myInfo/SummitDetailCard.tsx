@@ -32,7 +32,7 @@ const SummitDetailCard = (props: any) => {
 
       <div className="flex">
         <img
-          src={`../public/assets/images/wallpaper.jpg`}
+          src={`https://songtak.github.io/bac_mt_course/assets/images/wallpaper.jpg`}
           alt={props.detail.name}
           className="w-[56px] h-[42px] rounded-[4px] mr-3"
         />

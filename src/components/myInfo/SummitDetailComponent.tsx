@@ -75,7 +75,7 @@ const SummitDetailComponent = (props: Props) => {
         </div>
         <div className="pt-8">
           <img
-            src={`../public/assets/images/wallpaper.jpg`}
+            src={`https://songtak.github.io/bac_mt_course/assets/images/wallpaper.jpg`}
             alt={""}
             className="w-full h-full object-cover rounded-[8px]"
           />

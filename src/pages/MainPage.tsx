@@ -39,7 +39,10 @@ function MainPage() {
       <header className="flex justify-between items-center pt-10 pb-2">
         {/* 왼쪽: PeakHunter 로고 */}
         <div>
-          <img src="../public/assets/images/logo.png" alt="PeakHunter 로고" />
+          <img
+            src="https://songtak.github.io/bac_mt_course/assets/images/logo.png"
+            alt="PeakHunter 로고"
+          />
           <div className="pl-2 text-[12px] font-thin text-black">
             당신의 모든 산행이 이곳에
           </div>
@@ -84,7 +87,7 @@ function MainPage() {
         {/* 왼쪽 카드: 오늘의 산 */}
         <div className="relative flex-1 h-24 bg-gray-200 rounded-[24px] overflow-hidden shadow">
           <img
-            src="../public/assets/images/wallpaper.jpg"
+            src="https://songtak.github.io/bac_mt_course/assets/images/wallpaper.jpg"
             alt="가리왕산"
             className="w-full h-full object-cover"
           />
@@ -179,7 +182,7 @@ function MainPage() {
               className="relative flex-shrink-0 w-[120px] h-[213px] bg-gray-300 rounded-[24px] overflow-hidden shadow"
             >
               <img
-                src={`../public/assets/images/wallpaper.jpg`}
+                src={`https://songtak.github.io/bac_mt_course/assets/images/wallpaper.jpg`}
                 alt={mountain.name}
                 className="w-full h-full object-cover"
               />

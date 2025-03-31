@@ -71,7 +71,7 @@ const MyInfoPage = () => {
           ) : (
             <>
               <img
-                src="../public/assets/images/logo.png"
+                src="https://songtak.github.io/bac_mt_course/assets/images/logo.png"
                 alt="PeakHunter 로고"
               />
               <div className="pl-2 text-[12px] font-thin text-black">
