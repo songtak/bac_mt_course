@@ -39,7 +39,6 @@ function App() {
     <>
       <ScrollToTop />
       <Routes>
-        {/* <Route path="/" element={<ExcelUploader />} /> */}
         <Route element={<CommonLayout />}>
           <Route path="/" element={<PAGES.MainPage />} />
           <Route path="/my-location" element={<PAGES.MyLocationPage />} />
@@ -47,18 +46,21 @@ function App() {
           <Route path="/my-info" element={<PAGES.MyInfoPage />} />
         </Route>
         <Route path="/search" element={<PAGES.SearchPage />} />
-        {/* <Route path="/share" element={<MYPAGE.SummitSharePage />} /> */}
+        {/* auth */}
         <Route path="/login" element={<AUTH.LoginPage />} />
-        <Route path="/login:loginType" element={<AUTH.LoginPage />} />
+        <Route path="/login/:loginType" element={<AUTH.LoginPage />} />
+        <Route path="/sign-up" element={<AUTH.SignUpPage />} />
+        <Route path="/welcome" element={<AUTH.WelcomePage />} />
 
+        {/*  */}
         <Route path="/gpx" element={<GPXExporter />} />
         <Route path="/list" element={<PAGES.MountainListPage />} />
         <Route path="/map-detail/:mountainId" element={<PAGES.MapViewPage />} />
         <Route path="/map" element={<PAGES.MapPage />} />
-        <Route path="/sign-up" element={<PAGES.SignUpPage />} />
         <Route path="/my" element={<PAGES.MyPage />} />
         <Route path="/rank" element={<PAGES.RankingPage />} />
         <Route path="/map-marker" element={<PAGES.MarkerMapPage />} />
+        {/* <Route path="/" element={<ExcelUploader />} /> */}
         {/* <Route path="/" element={<PAGES.MainPage />} /> */}
       </Routes>
     </>

@@ -57,7 +57,6 @@ const mySummitList: any[] = [
 const MyInfoUserComponent = () => {
   const componentStore = useComponentStore();
   /** summitList, summitDetail, summitShare */
-  console.log("componentStore", componentStore.openfullModal);
 
   return (
     <div className="hide-scrollbar">
@@ -119,6 +118,7 @@ const MyInfoUserComponent = () => {
             <div className="p-2 text-[16px] font-extralight">최근 등산</div>
             <ChevronRight
               color="#808080"
+              className="mt-2"
               onClick={() => {
                 componentStore.setOpenFullModal("summitList");
               }}
