@@ -51,6 +51,10 @@ function App() {
         <Route path="/login/:loginType" element={<AUTH.LoginPage />} />
         <Route path="/sign-up" element={<AUTH.SignUpPage />} />
         <Route path="/welcome" element={<AUTH.WelcomePage />} />
+        <Route
+          path="/select-hiking-style"
+          element={<AUTH.SelectHikingTagsPage />}
+        />
 
         {/*  */}
         <Route path="/gpx" element={<GPXExporter />} />

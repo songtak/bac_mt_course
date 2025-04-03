@@ -1,6 +1,9 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 const WelcomePage = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="h-full mb-[100px] hide-scrollbar">
       <header
@@ -34,9 +37,12 @@ const WelcomePage = () => {
                 shadow-[0_4px_4px_rgba(0,0,0,0.1)]
                 py-3 rounded-[24px] transition focus:outline-none 
                 font-light
-                    bg-main-green-200 text-main-white hover:bg-blue-600
+                    bg-main-green-200 text-main-white hover:bg-main-green-300
             
                 }`}
+          onClick={() => {
+            navigate("/select-hiking-style");
+          }}
         >
           나만의 등산 취향 발견하기
         </button>
