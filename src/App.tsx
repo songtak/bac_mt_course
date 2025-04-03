@@ -15,6 +15,7 @@ import "./assets/common.css";
 import CommonLayout from "./components/CommonLayout";
 import * as MYPAGE from "./pages/myInfo";
 import * as AUTH from "./pages/auth";
+import HectoTestPage from "./pages/HectoTestPage";
 
 function App() {
   const user = useAuth();
@@ -51,6 +52,7 @@ function App() {
         <Route path="/login/:loginType" element={<AUTH.LoginPage />} />
         <Route path="/sign-up" element={<AUTH.SignUpPage />} />
         <Route path="/welcome" element={<AUTH.WelcomePage />} />
+        <Route path="/test" element={<HectoTestPage />} />
 
         {/*  */}
         <Route path="/gpx" element={<GPXExporter />} />
