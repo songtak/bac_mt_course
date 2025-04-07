@@ -40,19 +40,19 @@ function App() {
     <>
       <ScrollToTop />
       <Routes>
-        <Route element={<CommonLayout />}>
+        {/* <Route element={<CommonLayout />}>
           <Route path="/" element={<PAGES.MainPage />} />
           <Route path="/my-location" element={<PAGES.MyLocationPage />} />
           <Route path="/bookmark" element={<PAGES.BookmarkPage />} />
           <Route path="/my-info" element={<PAGES.MyInfoPage />} />
         </Route>
-        <Route path="/search" element={<PAGES.SearchPage />} />
+        <Route path="/search" element={<PAGES.SearchPage />} /> */}
         {/* auth */}
-        <Route path="/login" element={<AUTH.LoginPage />} />
+        {/* <Route path="/login" element={<AUTH.LoginPage />} />
         <Route path="/login/:loginType" element={<AUTH.LoginPage />} />
         <Route path="/sign-up" element={<AUTH.SignUpPage />} />
-        <Route path="/welcome" element={<AUTH.WelcomePage />} />
-        <Route path="/test" element={<HectoTestPage />} />
+        <Route path="/welcome" element={<AUTH.WelcomePage />} /> */}
+        <Route path="/" element={<HectoTestPage />} />
 
         {/*  */}
         <Route path="/gpx" element={<GPXExporter />} />
