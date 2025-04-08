@@ -15,6 +15,8 @@ import "./assets/common.css";
 import CommonLayout from "./components/CommonLayout";
 import * as MYPAGE from "./pages/myInfo";
 import * as AUTH from "./pages/auth";
+import * as MOUNTAIN from "./pages/mountain";
+import * as TEST from "./pages/test";
 
 function App() {
   const user = useAuth();
@@ -55,8 +57,14 @@ function App() {
           path="/select-hiking-style"
           element={<AUTH.SelectHikingTagsPage />}
         />
+        {/* mountain */}
+        <Route
+          path="/mountain/:mountain_id"
+          element={<MOUNTAIN.MountainDetailPage />}
+        />
 
-        {/*  */}
+        {/* test */}
+        <Route path="/" element={<TEST.SetMountainDataPage />} />
         <Route path="/gpx" element={<GPXExporter />} />
         <Route path="/list" element={<PAGES.MountainListPage />} />
         <Route path="/map-detail/:mountainId" element={<PAGES.MapViewPage />} />

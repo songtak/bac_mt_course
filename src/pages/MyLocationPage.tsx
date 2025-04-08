@@ -82,8 +82,107 @@ const MyLocationPage = () => {
     startYRef.current = null;
   };
 
+  /** ============================================================================ */
+  // 지도 관련 refs
+  const mapElement = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<any>(null);
+  const markerRef = useRef<naver.maps.Marker | null>(null);
+  const circleRef = useRef<naver.maps.Circle | null>(null);
+
+  const [currentMyLocation, setCurrentMyLocation] = useState({
+    lat: 0,
+    lng: 0,
+  });
+
+  // 네이버 지도 초기화: component mount 시 실행
+  const initMap = () => {
+    if (!mapElement.current) return;
+    // currentMyLocation이 0,0이면 fallback 좌표 (서울 중심) 사용
+    const centerLat =
+      currentMyLocation.lat !== 0 ? currentMyLocation.lat : 37.5665;
+    const centerLng =
+      currentMyLocation.lng !== 0 ? currentMyLocation.lng : 126.978;
+    const mapOptions = {
+      center: new naver.maps.LatLng(centerLat, centerLng),
+      zoom: 11,
+      mapTypeControl: true,
+    };
+    mapRef.current = new naver.maps.Map(mapElement.current, mapOptions);
+    // 내 위치 마커 및 5km 반경 원 생성/업데이트
+    getCurPosition(true);
+  };
+
+  // 내 위치 및 마커 업데이트: mountainDetail 등의 정보 대신, 현재 위치값 사용
+  const getCurPosition = (isCenter: boolean = false) => {
+    if (!navigator.geolocation) {
+      console.error("Geolocation을 지원하지 않습니다.");
+      return;
+    }
+    console.log("📡 getCurPosition 호출됨");
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        console.log("📍 현재 위치:", lat, lng);
+        setCurrentMyLocation({ lat, lng });
+        if (mapRef.current) {
+          const newPosition = new naver.maps.LatLng(lat, lng);
+          if (isCenter) {
+            mapRef.current.setCenter(newPosition);
+            mapRef.current.setZoom(11);
+          }
+          // 내 위치 마커 업데이트
+          if (markerRef.current) {
+            markerRef.current.setPosition(newPosition);
+          } else {
+            markerRef.current = new naver.maps.Marker({
+              position: newPosition,
+              map: mapRef.current,
+              icon: {
+                content: `<div style="width:12px; height:12px; font-size:12px;">📍</div>`,
+                anchor: new naver.maps.Point(12, 12),
+              },
+            });
+          }
+          // 내 위치 기준 5km 원 생성 또는 업데이트
+          if (circleRef.current) {
+            circleRef.current.setCenter(newPosition);
+          } else {
+            circleRef.current = new naver.maps.Circle({
+              map: mapRef.current,
+              center: newPosition,
+              radius: 5000, // 5km
+              strokeColor: "#0000FF",
+              strokeOpacity: 0.5,
+              strokeWeight: 2,
+              fillColor: "#0000FF",
+              fillOpacity: 0.1,
+            });
+          }
+        }
+      },
+      (error) => {
+        console.error("❌ 위치 정보를 가져오지 못했습니다.", error);
+      }
+    );
+  };
+
+  // 초기 지도 및 위치 설정
+  useEffect(() => {
+    initMap();
+  }, []);
+
+  useEffect(() => {
+    // getUserLocation();
+  }, []);
+
+  /** ============================================================================ */
+
   return (
     <div className="touch-none h-full">
+      <div className="absolute inset-0">
+        <div ref={mapElement} className="w-full h-full" />
+      </div>{" "}
       {/* 상단 헤더 */}
       <header className="flex justify-between items-center pt-4 pb-2 ">
         <div>
@@ -100,7 +199,6 @@ const MyLocationPage = () => {
           <Search />
         </div>
       </header>
-
       {/* 도착 여부에 따른 "근처" 팝업 */}
       {isArrival && (
         <div className="fixed top-[220px] left-1/2 transform -translate-x-1/2 z-50">
@@ -120,7 +218,6 @@ const MyLocationPage = () => {
           </div>
         </div>
       )}
-
       {/* Range Slider */}
       <div className="flex items-end justify-end mt-3">
         <RangeSlider
@@ -130,10 +227,8 @@ const MyLocationPage = () => {
           onChange={(val) => console.log("Slider value:", val)}
         />
       </div>
-
       {/* 검정색 오버레이: 확장 상태(isExpanded true)일 때 렌더링 */}
       {isExpanded && <div className="fixed inset-0 bg-black opacity-50 z-35" />}
-
       {/* Bottom Sheet: 상단만 둥글게, 하단은 고정, NavigationBar보다 한 레이어 아래 */}
       <div
         ref={sheetRef}
@@ -218,7 +313,6 @@ const MyLocationPage = () => {
           </div>
         )}
       </div>
-
       {/* NavigationBar: 최상위 레이어보다 위에 있도록 */}
       {!isExpanded && (
         <div

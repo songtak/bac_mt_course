@@ -6,15 +6,16 @@ interface Props {
 }
 
 const CapitalBadge = ({ capital, isMain = false }: Props) => {
+  const firstPart = capital.trim().split(/\s+/)[0];
   return (
     <>
       {isMain ? (
         <span className="inline-block h-[16px] bg-main-blue-200 text-main-white text-[8px] px-2 pb-[2px] pt-[2px] rounded-[14px]">
-          {capital}
+          {firstPart}
         </span>
       ) : (
         <span className="font-normal inline-block h-[16px] bg-main-gray-200 text-[#255A72]  text-[8px] px-2 pb-[2px] pt-[2px] rounded-[14px]">
-          {capital}
+          {firstPart}
         </span>
       )}
     </>

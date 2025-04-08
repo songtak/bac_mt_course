@@ -1,5 +1,5 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
@@ -20,8 +20,25 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+const mainApp =
+  getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+export const auth = getAuth(mainApp);
+export const db = getFirestore(mainApp);
 
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+/** 추가 Firebase 앱: peak-hunter-mountains */
+const peakHunterConfig = {
+  apiKey: "AIzaSyA_z1dhABa0LVtLDB0uE7uu-mXZnglG7r8",
+  authDomain: "peak-hunter-mountains.firebaseapp.com",
+  projectId: "peak-hunter-mountains",
+  storageBucket: "peak-hunter-mountains.firebasestorage.app",
+  messagingSenderId: "1065144316854",
+  appId: "1:1065144316854:web:3c78137134487baed74717",
+  measurementId: "G-WN3EP3TK3S",
+};
+
+// 이름 있는 앱으로 두 번째 Firebase 초기화
+const secondaryApp =
+  getApps().find((a) => a.name === "peakApp") ??
+  initializeApp(peakHunterConfig, "peakApp");
+
+export const mountains_db = getFirestore(secondaryApp);

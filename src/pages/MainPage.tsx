@@ -1,6 +1,10 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
-import { db, auth } from "../utils/firebaseConfig";
+import { useQuery } from "react-query";
+import _ from "lodash";
+import { db, auth, mountains_db } from "../utils/firebaseConfig";
+import { doc, getDoc } from "firebase/firestore";
 import useUserStore from "../stores/useUserStore";
 import NavigationBar from "../components/NavigationBar";
 import { Search, MoveRight, ChevronsUpDown, ChevronRight } from "lucide-react";
@@ -10,11 +14,95 @@ import {
   RatingBadge,
   AltitudeBadge,
 } from "../components/Badges/index";
+import dayjs from "dayjs";
+import { fetchTodayMountain, fetchMountainsByCodes } from "../apis/api";
+import { getShortTermWeather, getMidTermWeather } from "../apis/weatherApi";
+import { weatherEmojiMap } from "../utils/weatherParser";
 
 function MainPage() {
   const navigate = useNavigate();
   const userStore = useUserStore();
   const user = auth.currentUser;
+
+  /** 날씨 목록 */
+  const [weatherList, setWeatherList] = useState<any[]>([]);
+
+  /** 오늘의 산 취득 */
+  const {
+    data: todayMountain,
+    isLoading,
+    error,
+  } = useQuery("todayMountain", fetchTodayMountain, {
+    staleTime: Infinity, // 항상 신선하다고 간주 (무한 캐싱)
+    cacheTime: Infinity, // 캐시를 영구 보관 (앱 꺼질 때까지)
+    refetchOnWindowFocus: false, // 창 다시 포커스해도 refetch 안 함
+    refetchOnMount: false, // 컴포넌트 재마운트해도 refetch 안 함
+    refetchOnReconnect: false, // 인터넷 연결 회복해도 refetch 안 함
+  });
+
+  /** 단기 기상 정보 */
+  const {
+    data: shortTermWeather,
+    isLoading: shortTermWeatherLoading,
+    error: shortTermWeatherError,
+  } = useQuery(
+    [
+      "shortTermWeather",
+      {
+        nx: todayMountain?.nx,
+        ny: todayMountain?.ny,
+      },
+    ],
+    getShortTermWeather,
+    {
+      enabled: !!todayMountain?.nx && !!todayMountain?.ny, // ✅ 조건부 fetch
+    }
+  );
+
+  console.log("todayMountain", todayMountain);
+
+  /** 중기 기상 정보 */
+  const {
+    data: midTermWeather,
+    isLoading: midTermWeatherLoading,
+    error: midTermWeatherError,
+  } = useQuery(
+    [
+      "getMidTermWeather",
+      {
+        regId: todayMountain?.midTermForecast,
+        address: todayMountain?.address,
+      },
+    ],
+    getMidTermWeather,
+    {
+      enabled: !!todayMountain?.midTermForecast && !!todayMountain?.address, // ✅ 조건부 fetch
+    }
+  );
+
+  // console.log("shortTermWeather", shortTermWeather);
+  // console.log("midTermWeather", midTermWeather);
+
+  /** 산 목록 취득 */
+  const {
+    data: mountainList,
+    isLoading: mountainListLoading,
+    error: mountainListError,
+  } = useQuery("mountainList", fetchMountainsByCodes, {
+    staleTime: Infinity, // 항상 신선하다고 간주 (무한 캐싱)
+    cacheTime: Infinity, // 캐시를 영구 보관 (앱 꺼질 때까지)
+    refetchOnWindowFocus: false, // 창 다시 포커스해도 refetch 안 함
+    refetchOnMount: false, // 컴포넌트 재마운트해도 refetch 안 함
+    refetchOnReconnect: false, // 인터넷 연결 회복해도 refetch 안 함
+  });
+
+  /** ================================================================================ */
+  useEffect(() => {
+    if (!!shortTermWeather && !!midTermWeather) {
+      const combined = [...shortTermWeather, ...midTermWeather].slice(0, 5);
+      setWeatherList(combined);
+    }
+  }, [shortTermWeather, midTermWeather]);
 
   /** ================================================================================ */
   const openExternalLink = () => {
@@ -24,6 +112,9 @@ function MainPage() {
       "noopener,noreferrer"
     );
   };
+
+  console.log("weatherList", weatherList);
+
   /** ================================================================================ */
   // <div
   //   className="min-h-screen bg-cover bg-center animate-pan flex flex-col"
@@ -85,7 +176,12 @@ function MainPage() {
       {/* 주요 카드들 */}
       <div className="mt-6 flex gap-3">
         {/* 왼쪽 카드: 오늘의 산 */}
-        <div className="relative flex-1 h-24 bg-gray-200 rounded-[24px] overflow-hidden shadow">
+        <div
+          className="relative flex-1 h-24 bg-gray-200 rounded-[24px] overflow-hidden shadow"
+          onClick={() => {
+            navigate(`/mountain/${todayMountain?.mountain_id}`);
+          }}
+        >
           <img
             src="https://songtak.github.io/bac_mt_course/assets/images/wallpaper.jpg"
             alt="가리왕산"
@@ -95,7 +191,7 @@ function MainPage() {
             <span className="text-sm text-gray-200 font-thin">오늘의 산</span>
             <div className="flex items-center justify-between">
               <span className="text-2xl text-main-white font-medium">
-                가리왕산
+                {todayMountain?.mountain_name}
               </span>
               {/* <MoveRight className="text-sm text-main-white" /> */}
             </div>
@@ -116,20 +212,29 @@ function MainPage() {
           </div>
           <div className="flex space-x-4">
             {/* 요일 + 아이콘 + 온도 */}
-            {["수", "목", "금", "토", "일"].map((day) => (
-              <div
-                key={day}
-                className="flex flex-col items-start space-y-[-6px]"
-              >
-                <span className="text-[11px] text-main-blue-200 font-thin">
-                  {day}
-                </span>
-                <span className="text-xl">☁️</span>
-                <span className="text-[11px] text-main-blue-200 font-thin">
-                  13°C
-                </span>
-              </div>
-            ))}
+            {weatherList.length > 0 &&
+              weatherList.map((weather, i) => (
+                <div
+                  key={i}
+                  className="flex flex-col items-start space-y-[-6px]"
+                >
+                  <span className="text-[11px] text-main-blue-200 font-thin">
+                    {weather.day}
+                  </span>
+                  <span className="text-xl">
+                    {/* 단기예보 */}
+                    {weatherEmojiMap[weather.wf]}
+                    {/* 중기예보 */}
+                    {weatherEmojiMap[weather.wfPm]}
+                  </span>
+                  <span className="text-[11px] text-main-blue-200 font-thin">
+                    {Math.round(
+                      (Number(weather.taMin) + Number(weather.taMax)) / 2
+                    )}
+                    °C
+                  </span>
+                </div>
+              ))}
           </div>
           <ChevronsUpDown className="text-main-blue-200 mr-4" />
           {/* <div className="px-3 text-gray-400">⇅</div> */}
@@ -145,59 +250,33 @@ function MainPage() {
         </div>
         <div className="flex space-x-3 overflow-x-auto">
           {/* 카드 예시 */}
-          {[
-            {
-              name: "감악산",
-              height: 684.7,
-              region: "경기도",
-              badges: ["100대 명산"],
-            },
-            {
-              name: "지리산",
-              height: 1450,
-              region: "경상남도",
-              badges: ["100대 명산"],
-            },
-            {
-              name: "한라산",
-              height: 1950,
-              region: "제주특별자치도",
-              badges: [],
-            },
-            {
-              name: "한라산",
-              height: 1950,
-              region: "제주특별자치도",
-              badges: [],
-            },
-            {
-              name: "한라산",
-              height: 1950,
-              region: "제주특별자치도",
-              badges: [],
-            },
-          ].map((mountain, idx) => (
-            <div
-              key={idx}
-              className="relative flex-shrink-0 w-[120px] h-[213px] bg-gray-300 rounded-[24px] overflow-hidden shadow"
-            >
-              <img
-                src={`https://songtak.github.io/bac_mt_course/assets/images/wallpaper.jpg`}
-                alt={mountain.name}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute p-3 inset-0 bg-black bg-opacity-30 flex flex-col justify-end p-2">
-                <RatingBadge rating={"2.4"} />
-                <div className="text-main-white text-2xl font-light">
-                  {mountain.name}
-                </div>
-                <AltitudeBadge altitude={mountain.height} />
-                <div className="flex flex-wrap  mt-1">
-                  <CapitalBadge capital={mountain.region} />
+          {mountainList &&
+            mountainList.map((mountain, idx) => (
+              <div
+                key={idx}
+                onClick={() => {
+                  navigate(`/mountain/${mountain?.mountain_id}`);
+                }}
+                className="relative flex-shrink-0 w-[120px] h-[213px] bg-gray-300 rounded-[24px] overflow-hidden shadow"
+              >
+                <img
+                  src={`https://songtak.github.io/bac_mt_course/assets/images/wallpaper.jpg`}
+                  alt={mountain.name}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute p-3 inset-0 bg-black bg-opacity-30 flex flex-col justify-end p-2">
+                  <RatingBadge rating={"2.4"} />
+                  <div className="text-main-white text-2xl font-light">
+                    {mountain.mountain_name.split("_")[0]}
+                  </div>
+                  <AltitudeBadge altitude={mountain.height} />
+                  <div className="flex flex-wrap  mt-1">
+                    <CapitalBadge capital={mountain.address} />
+                    {/* {mountain.isBac === true && <IsBacBadge />} */}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
       </div>
 
