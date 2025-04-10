@@ -9,13 +9,21 @@ import {
   AltitudeBadge,
 } from "../components/Badges";
 import { useNavigate } from "react-router-dom";
+import { getNearbyMountains } from "../apis/mapApi"; // 위에서 작성한 함수 파일 경로에 맞게 수정
+import _ from "lodash";
 
 const MyLocationPage = () => {
   const navigate = useNavigate();
 
   const sheetRef = useRef<HTMLDivElement>(null);
   const collapsedTopInit =
-    typeof window !== "undefined" ? window.innerHeight - 180 : 600;
+    typeof window !== "undefined" ? window.innerHeight - 220 : 600;
+
+  /** 내 위치에서 근방 km */
+  const [distanceSliderValue, setDistanceSliderValue] = useState<number>(5);
+
+  /** 선택된 산 */
+  const [selectedMountain, setSelectedMountain] = useState<any>({});
 
   const [isArrival, setIsArrival] = useState<boolean>(false);
   // 추가된 플래그: Bottom Sheet가 확장되었는지 여부
@@ -84,52 +92,51 @@ const MyLocationPage = () => {
 
   /** ============================================================================ */
   // 지도 관련 refs
-  const mapElement = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<any>(null);
-  const markerRef = useRef<naver.maps.Marker | null>(null);
-  const circleRef = useRef<naver.maps.Circle | null>(null);
+  const mapElement = useRef(null);
+  const mapRef = useRef(null);
+  const markerRef = useRef(null);
+  const circleRef = useRef(null);
+  // 산 마커들을 담을 ref (삭제, 업데이트용)
+  const mountainMarkersRef = useRef([]);
 
   const [currentMyLocation, setCurrentMyLocation] = useState({
     lat: 0,
     lng: 0,
   });
 
-  // 네이버 지도 초기화: component mount 시 실행
+  // 네이버 지도 초기화
   const initMap = () => {
     if (!mapElement.current) return;
-    // currentMyLocation이 0,0이면 fallback 좌표 (서울 중심) 사용
     const centerLat =
       currentMyLocation.lat !== 0 ? currentMyLocation.lat : 37.5665;
     const centerLng =
       currentMyLocation.lng !== 0 ? currentMyLocation.lng : 126.978;
     const mapOptions = {
       center: new naver.maps.LatLng(centerLat, centerLng),
-      zoom: 11,
+      zoom: 12,
       mapTypeControl: true,
     };
     mapRef.current = new naver.maps.Map(mapElement.current, mapOptions);
-    // 내 위치 마커 및 5km 반경 원 생성/업데이트
+    // 내 위치 및 반경 원 업데이트
     getCurPosition(true);
   };
 
-  // 내 위치 및 마커 업데이트: mountainDetail 등의 정보 대신, 현재 위치값 사용
-  const getCurPosition = (isCenter: boolean = false) => {
+  // 사용자 현재 위치 및 지도 업데이트
+  const getCurPosition = (isCenter = false) => {
     if (!navigator.geolocation) {
       console.error("Geolocation을 지원하지 않습니다.");
       return;
     }
-    console.log("📡 getCurPosition 호출됨");
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
-        console.log("📍 현재 위치:", lat, lng);
         setCurrentMyLocation({ lat, lng });
         if (mapRef.current) {
           const newPosition = new naver.maps.LatLng(lat, lng);
           if (isCenter) {
             mapRef.current.setCenter(newPosition);
-            mapRef.current.setZoom(11);
+            mapRef.current.setZoom(12);
           }
           // 내 위치 마커 업데이트
           if (markerRef.current) {
@@ -144,7 +151,7 @@ const MyLocationPage = () => {
               },
             });
           }
-          // 내 위치 기준 5km 원 생성 또는 업데이트
+          // 반경 5km 원 생성 또는 업데이트
           if (circleRef.current) {
             circleRef.current.setCenter(newPosition);
           } else {
@@ -159,12 +166,51 @@ const MyLocationPage = () => {
               fillOpacity: 0.1,
             });
           }
+          // 산 마커 업데이트 (파이어베이스에서 데이터 조회)
+          updateMountainMarkers(lat, lng);
         }
       },
-      (error) => {
-        console.error("❌ 위치 정보를 가져오지 못했습니다.", error);
-      }
+      (error) => console.error("❌ 위치 정보를 가져오지 못했습니다.", error)
     );
+  };
+
+  // 산 데이터 조회 후 마커 추가 또는 업데이트
+  const updateMountainMarkers = async (
+    lat: number,
+    lng: number,
+    radius = 5
+  ) => {
+    // 기존 산 마커 삭제
+    if (mountainMarkersRef.current.length) {
+      mountainMarkersRef.current.forEach((marker) => marker.setMap(null));
+      mountainMarkersRef.current = [];
+    }
+
+    try {
+      const mountains = await getNearbyMountains(lat, lng, radius);
+      console.log("Nearby mountains:", mountains);
+      mountains.forEach((mountain) => {
+        const position = new naver.maps.LatLng(mountain.lat, mountain.lng);
+        const marker = new naver.maps.Marker({
+          position,
+          map: mapRef.current,
+          // 산 이모지 아이콘
+          icon: {
+            content: `<div style="font-size:14px; color:red;">🏔</div>`,
+            anchor: new naver.maps.Point(12, 12),
+          },
+        });
+
+        // 마커 클릭 이벤트 추가: 클릭 시 setSelectedMountain에 해당 산 데이터를 저장
+        naver.maps.Event.addListener(marker, "click", () => {
+          setSelectedMountain(mountain);
+        });
+
+        mountainMarkersRef.current.push(marker);
+      });
+    } catch (error) {
+      console.error("Error fetching mountain data:", error);
+    }
   };
 
   // 초기 지도 및 위치 설정
@@ -172,9 +218,19 @@ const MyLocationPage = () => {
     initMap();
   }, []);
 
-  useEffect(() => {
-    // getUserLocation();
-  }, []);
+  // 슬라이더 값 변경 시 (반경 업데이트 시) 산 마커 업데이트
+  const handleSliderChange = (val: number) => {
+    console.log("Slider value:", val);
+
+    if (currentMyLocation.lat && currentMyLocation.lng && mapRef.current) {
+      // 슬라이더 값(반경 km) 기반 업데이트
+      updateMountainMarkers(currentMyLocation.lat, currentMyLocation.lng, val);
+      // 원의 반경도 업데이트
+      if (circleRef.current) {
+        circleRef.current.setRadius(val * 1000); // km -> m 변환
+      }
+    }
+  };
 
   /** ============================================================================ */
 
@@ -187,7 +243,9 @@ const MyLocationPage = () => {
       <header className="flex justify-between items-center pt-4 pb-2 ">
         <div>
           <div className="bg-main-gray-300 h-[28px] rounded-[24px] opacity-65 shadow-[0_4px_4px_rgba(0,0,0,0.3)]">
-            <span className="pl-2 pr-2 text-white">5km</span>
+            <span className="pl-2 pr-2 text-white">
+              {distanceSliderValue}km
+            </span>
           </div>
         </div>
         <div
@@ -224,99 +282,117 @@ const MyLocationPage = () => {
           min={5}
           max={30}
           initialValue={5}
-          onChange={(val) => console.log("Slider value:", val)}
+          onChange={(val: number) => {
+            handleSliderChange(val);
+          }}
+          onImmediatelyChange={(val: number) => {
+            setDistanceSliderValue(val);
+          }}
         />
       </div>
       {/* 검정색 오버레이: 확장 상태(isExpanded true)일 때 렌더링 */}
       {isExpanded && <div className="fixed inset-0 bg-black opacity-50 z-35" />}
       {/* Bottom Sheet: 상단만 둥글게, 하단은 고정, NavigationBar보다 한 레이어 아래 */}
-      <div
-        ref={sheetRef}
-        className="fixed w-full -mx-6 max-w-md	 px-8 bg-white rounded-t-[24px] shadow-[0_-4px_4px_rgba(0,0,0,0.1)] transition-all duration-300 ease-in-out"
-        style={{ top: sheetTop, bottom: 0, zIndex: 40 }}
-      >
-        <div
-          className="flex justify-center cursor-pointer h-6"
-          style={{ touchAction: "none" }}
-          onPointerDown={(e) => handleDragStart(e.clientY, e.pointerId, e)}
-          onPointerMove={(e) => handleDragMove(e.clientY)}
-          onPointerUp={(e) => handleDragEnd(e.pointerId, e)}
-          onTouchStart={(e) => handleDragStart(e.touches[0].clientY)}
-          onTouchMove={(e) => handleDragMove(e.touches[0].clientY)}
-          onTouchEnd={handleDragEnd}
-        >
-          <div className="mt-2 w-10 h-[3px] bg-gray-300 rounded-md" />
-        </div>
-        {isExpanded ? (
-          <div className="pt-[8px]">
-            <div className="bg-yellow-200 h-[300px] -mx-8"></div>
-            <div className="mt-4">
-              <div className="flex justify-between items-center">
-                <RatingBadge rating={3.4} />
-                <div className="flex text-main-gray-200">
-                  <Share className="mr-6" />
-                  <BookmarkIcon />
+      {!_.isEmpty(selectedMountain) && (
+        <>
+          <div
+            ref={sheetRef}
+            className="fixed w-full -mx-6 max-w-md px-8 bg-white rounded-t-[24px] shadow-[0_-4px_4px_rgba(0,0,0,0.1)] transition-all duration-300 ease-in-out"
+            // 전체 영역에 드래그 이벤트 핸들러를 부착합니다.
+            onPointerDown={(e) => handleDragStart(e.clientY, e.pointerId, e)}
+            onPointerMove={(e) => handleDragMove(e.clientY)}
+            onPointerUp={(e) => handleDragEnd(e.pointerId, e)}
+            onTouchStart={(e) => handleDragStart(e.touches[0].clientY)}
+            onTouchMove={(e) => handleDragMove(e.touches[0].clientY)}
+            onTouchEnd={handleDragEnd}
+            style={{
+              touchAction: "none",
+              top: sheetTop,
+              bottom: 0,
+              zIndex: 100,
+            }}
+          >
+            {/* 내부에 드래그 바는 디자인 목적만 사용 */}
+            <div className="flex justify-center">
+              <div className="mt-2 w-10 h-[3px] bg-gray-300 rounded-md" />
+            </div>
+
+            {isExpanded ? (
+              <div className="pt-[8px]">
+                <div className="bg-yellow-200 h-[300px] -mx-8"></div>
+                <div className="mt-4">
+                  <div className="flex justify-between items-center">
+                    <RatingBadge rating={3.4} />
+                    <div className="flex text-main-gray-200">
+                      <Share className="mr-6" />
+                      <BookmarkIcon />
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <div className="flex justify-between items-center">
+                    <div className="flex">
+                      <div className="text-[32px] font-light mr-2">
+                        {selectedMountain.mountain_name}
+                      </div>
+                      <div className="self-center">
+                        <AltitudeBadge altitude={selectedMountain.height} />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-center h-[35px] text-[14px] bg-[#03C75A] text-main-white rounded-[24px] w-[66px] text-center shadow-[0_4px_4px_rgba(0,0,0,0.1)] ">
+                        <span className="font-extrabold mr-1">N</span>
+                        <span className="font-light text-[12px]">지도</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex mt-2">
+                  <CapitalBadge capital={selectedMountain.address} />
+                  {selectedMountain.isBac && <IsBacBadge />}
+                </div>
+                <div className="text-[18px] font-thin mt-2">
+                  {selectedMountain.address}
+                </div>
+
+                <div className="fixed bottom-6 left-1/2 -translate-x-1/2">
+                  <div className="h-[44px] w-[165px] bg-main-green-200 text-main-white rounded-[24px] font-light flex items-center justify-center shadow-[0_4px_4px_rgba(0,0,0,0.1)]">
+                    등산 시작
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="mt-4">
-              <div className="flex justify-between items-center">
-                <div className="flex">
-                  <div className="text-[32px] font-light mr-2">감악산</div>
-                  <div className="self-center">
-                    <AltitudeBadge altitude={242} />
+            ) : (
+              <div className="flex justify-between pb-4 pt-4">
+                <div>
+                  <div className="flex mb-2">
+                    <div className="text-[24px] font-extralight mr-2">
+                      {selectedMountain.mountain_name}
+                    </div>
+                    <div className="mt-2">
+                      <AltitudeBadge altitude={selectedMountain.height} />
+                    </div>
+                  </div>
+                  <div className="flex mt-4">
+                    <RatingBadge rating={3.4} />
+                    <span className="ml-2" />
+                    <CapitalBadge capital={selectedMountain.address} />
+                    {selectedMountain.isBac && <IsBacBadge />}
                   </div>
                 </div>
                 <div>
-                  <div className="flex items-center justify-center h-[35px] text-[14px] bg-[#03C75A] text-main-white rounded-[24px] w-[66px] text-center shadow-[0_4px_4px_rgba(0,0,0,0.1)] ">
-                    <span className="font-extrabold mr-1">N</span>
-                    <span className="font-light text-[12px]">지도</span>
+                  <div className="pt-4 pr-4">
+                    <BookmarkIcon className="text-main-gray-200" />
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="flex mt-2">
-              <CapitalBadge capital={"경기도"} />
-              <IsBacBadge />
-            </div>
-            <div className="text-[18px] font-thin mt-2">
-              경기도 파주시 적성면
-            </div>
-
-            <div className="fixed bottom-6 left-1/2 -translate-x-1/2">
-              <div className="h-[44px] w-[165px] bg-main-green-200 text-main-white rounded-[24px] font-light flex items-center justify-center shadow-[0_4px_4px_rgba(0,0,0,0.1)]">
-                등산 시작
-              </div>
-            </div>
+            )}
           </div>
-        ) : (
-          <div className="flex justify-between pb-4">
-            <div>
-              <div className="flex mb-2">
-                <div className="text-[24px] font-extralight mr-2">감악산</div>
-                <div className="mt-2">
-                  <AltitudeBadge altitude={242} />
-                </div>
-              </div>
-              <div className="flex">
-                <RatingBadge rating={3.4} />
-                <span className="ml-2" />
-                <CapitalBadge capital={"경기도"} />
-                <IsBacBadge />
-              </div>
-            </div>
-            <div>
-              <div className="pt-4 pr-4">
-                <BookmarkIcon />
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+        </>
+      )}
       {/* NavigationBar: 최상위 레이어보다 위에 있도록 */}
       {!isExpanded && (
         <div
-          style={{ position: "fixed", bottom: 0, width: "100%", zIndex: 50 }}
+          style={{ position: "fixed", bottom: 0, width: "100%", zIndex: 102 }}
         >
           <NavigationBar />
         </div>
