@@ -27,7 +27,7 @@ const LoginPage: React.FC = () => {
       await signInWithEmailAndPassword(auth, email, password);
       await getUserData();
 
-      navigate("/"); // 로그인 성공 후 이동할 페이지
+      navigate("/list"); // 로그인 성공 후 이동할 페이지
     } catch (error: any) {
       handleAuthError(error.code);
     } finally {
@@ -98,49 +98,73 @@ const LoginPage: React.FC = () => {
         </div>
         <div className="p-8">
           <div className="text-[24px] font-light mb-4">로그인</div>
-          <form className="" onSubmit={handleLogin}>
-            <input
-              type="email"
-              placeholder="이메일"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                setIsForgot(false);
-              }}
-              className="mb-2 w-full px-4 py-3 font-light border h-[48px] border-gray-200 rounded-[12px] focus:outline-none focus:ring-2 focus:ring-blue-200"
-            />
-            <input
-              type="password"
-              placeholder="비밀번호"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="mb-12 w-full px-4 py-3 font-light border h-[48px] border-gray-200 rounded-[12px] focus:outline-none focus:ring-2 focus:ring-blue-200"
-            />
 
-            {errorMessage && (
-              <p className="text-xs text-red-500">{errorMessage}</p>
-            )}
-            {isForgot && (
-              <button
-                onClick={handleResetPassword}
-                className="text-xs text-blue-500 underline"
-              >
-                비밀번호를 잊으셨나요?
-              </button>
-            )}
+          <button
+            type="submit"
+            disabled={isLoading}
+            className={`mt-4 w-full py-3 rounded-[24px] font-light  transition focus:outline-none shadow-[0_4px_4px_rgba(0,0,0,0.1)] ${
+              isLoading
+                ? "bg-gray-300 text-gray-700"
+                : "bg-main-green-200 text-main-white hover:bg-blue-600"
+            }`}
+          >
+            카카오 로그인
+          </button>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className={`mt-4 w-full py-3 rounded-[24px] font-light  transition focus:outline-none shadow-[0_4px_4px_rgba(0,0,0,0.1)] ${
+              isLoading
+                ? "bg-gray-300 text-gray-700"
+                : "bg-main-green-200 text-main-white hover:bg-blue-600"
+            }`}
+          >
+            네이버 로그인
+          </button>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className={`mt-4 w-full py-3 rounded-[24px] font-light  transition focus:outline-none shadow-[0_4px_4px_rgba(0,0,0,0.1)] ${
+              isLoading
+                ? "bg-gray-300 text-gray-700"
+                : "bg-main-green-200 text-main-white hover:bg-blue-600"
+            }`}
+          >
+            구글 로그인
+          </button>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className={`mt-4 w-full py-3 rounded-[24px] font-light  transition focus:outline-none shadow-[0_4px_4px_rgba(0,0,0,0.1)] ${
+              isLoading
+                ? "bg-gray-300 text-gray-700"
+                : "bg-main-green-200 text-main-white hover:bg-blue-600"
+            }`}
+          >
+            애플 로그인
+          </button>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className={`mt-4 w-full py-3 rounded-[24px] font-light  transition focus:outline-none shadow-[0_4px_4px_rgba(0,0,0,0.1)] ${
+              isLoading
+                ? "bg-gray-300 text-gray-700"
+                : "bg-main-green-200 text-main-white hover:bg-blue-600"
+            }`}
+            onClick={() => navigate("/login")}
+          >
+            로그인
+          </button>
 
+          <p className="mt-8 text-xs text-gray-500">
+            계정이 없으신가요?{" "}
             <button
-              type="submit"
-              disabled={isLoading}
-              className={`w-full py-3 rounded-[24px] font-light  transition focus:outline-none shadow-[0_4px_4px_rgba(0,0,0,0.1)] ${
-                isLoading
-                  ? "bg-gray-300 text-gray-700"
-                  : "bg-main-green-200 text-main-white hover:bg-blue-600"
-              }`}
+              onClick={() => navigate("/sign-up")}
+              className="text-main-green-300 underline transition hover:text-blue-600"
             >
-              {isLoading ? "로그인 중..." : "로그인"}
+              회원가입
             </button>
-          </form>
+          </p>
         </div>
       </main>
     </div>
@@ -199,15 +223,6 @@ const LoginPage: React.FC = () => {
     //       </button>
     //     </form>
 
-    //     <p className="text-xs text-gray-500">
-    //       계정이 없으신가요?{" "}
-    //       <button
-    //         onClick={() => navigate("/sign-up")}
-    //         className="text-blue-500 underline transition hover:text-blue-600"
-    //       >
-    //         회원가입
-    //       </button>
-    //     </p>
     //   </div>
     // </div>
   );

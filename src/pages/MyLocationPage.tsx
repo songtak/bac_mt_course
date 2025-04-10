@@ -26,6 +26,34 @@ const MyLocationPage = () => {
   const [selectedMountain, setSelectedMountain] = useState<any>({});
 
   const [isArrival, setIsArrival] = useState<boolean>(false);
+
+  /** ===[ 북마크 ]=========================================================================== */
+
+  /** 네이버맵 오픈 */
+  const openNaverMap = () => {
+    const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+    if (isMobile) {
+      // 모바일: 네이버 지도 앱을 여는 URL 스킴
+      // appname은 여러분의 앱 패키지명(있는 경우) 또는 임의 문자열로 지정할 수 있습니다.
+      const appName = "com.example.myapp"; // 필요에 따라 수정하세요.
+      const url = `nmap://search?query=${encodeURIComponent(
+        selectedMountain?.mountain_name
+      )}&lat=${selectedMountain?.lat}&lng=${
+        selectedMountain?.lng
+      }&appname=${appName}`;
+      window.location.href = url;
+    } else {
+      // PC: 네이버 지도 웹사이트 URL (새 탭에서 열기)
+      const url = `https://map.naver.com/v5/search/${encodeURIComponent(
+        selectedMountain?.mountain_name
+      )}`;
+      //   )}%20${mountainDetail?.lng},${mountainDetail?.lat}`;
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+  };
+
+  /** ===[ 선택된 산 ]========================================================================= */
+
   // 추가된 플래그: Bottom Sheet가 확장되었는지 여부
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   // 초기 접힌 위치: 창 높이에서 180px 위 (네비게이션 바 위쪽 영역)
@@ -75,22 +103,49 @@ const MyLocationPage = () => {
   };
 
   // 드래그 종료 후, 시작 위치에서 50px 이상 위로 이동했으면 확장, 아니면 접힘
-  const handleDragEnd = (pointerId?: number, e?: React.PointerEvent) => {
-    if (e && pointerId !== undefined) {
-      e.currentTarget.releasePointerCapture(pointerId);
+  const handleDragEnd = (
+    pointerId?: number,
+    e?: React.PointerEvent | React.TouchEvent
+  ) => {
+    if (e && pointerId !== undefined && "pointerId" in e) {
+      // pointer event인 경우에만 releasePointerCapture 호출
+      (e as React.PointerEvent).currentTarget.releasePointerCapture(pointerId);
     }
+
     const dragDelta = initialSheetTopRef.current - sheetTop;
-    if (dragDelta >= 50) {
-      setSheetTop(40);
-      setIsExpanded(true);
+    const TOLERANCE = 10; // 10px 이하의 움직임은 무시
+    const THRESHOLD = 50; // 최소 50px 이상의 움직임이 있어야 상태 변경
+
+    if (Math.abs(dragDelta) < TOLERANCE) {
+      // 드래그가 미미하면 기존 상태 유지
+      setSheetTop(isExpanded ? 40 : collapsedTop);
     } else {
-      setSheetTop(collapsedTop);
-      setIsExpanded(false);
+      if (isExpanded) {
+        // 열린 상태에서 아래로 충분히 드래그하면 닫기
+        if (sheetTop - initialSheetTopRef.current >= THRESHOLD) {
+          setSheetTop(collapsedTop);
+          setIsExpanded(false);
+        } else {
+          // 그렇지 않으면 열린 상태 복귀
+          setSheetTop(40);
+          setIsExpanded(true);
+        }
+      } else {
+        // 닫힌 상태에서 위로 충분히 드래그하면 열기
+        if (initialSheetTopRef.current - sheetTop >= THRESHOLD) {
+          setSheetTop(40);
+          setIsExpanded(true);
+        } else {
+          // 그렇지 않으면 닫힌 상태 복귀
+          setSheetTop(collapsedTop);
+          setIsExpanded(false);
+        }
+      }
     }
     startYRef.current = null;
   };
 
-  /** ============================================================================ */
+  /** ===[MAP]========================================================================= */
   // 지도 관련 refs
   const mapElement = useRef(null);
   const mapRef = useRef(null);
@@ -318,14 +373,39 @@ const MyLocationPage = () => {
             </div>
 
             {isExpanded ? (
-              <div className="pt-[8px]">
-                <div className="bg-yellow-200 h-[300px] -mx-8"></div>
+              <div
+                className="pt-[8px] overflow-y-auto overflow-x-hidden no-scrollbar"
+                style={{
+                  maxHeight: "calc(100vh - 150px)",
+                  scrollbarWidth: "none", // Firefox: 스크롤바 안 보이게
+                  msOverflowStyle: "none",
+                }}
+              >
+                <div className="bg-yellow-200 h-[300px] -mx-8 mt-6"></div>
                 <div className="mt-4">
                   <div className="flex justify-between items-center">
-                    <RatingBadge rating={3.4} />
+                    <div className="flex">
+                      <RatingBadge
+                        rating={
+                          selectedMountain?.rating
+                            ? selectedMountain?.rating
+                            : "- . -"
+                        }
+                      />
+                      <div className="ml-2"></div>
+                      <CapitalBadge capital={selectedMountain.address} />
+                      {selectedMountain.isBac && <IsBacBadge />}
+                    </div>
                     <div className="flex text-main-gray-200">
-                      <Share className="mr-6" />
-                      <BookmarkIcon />
+                      {/* <Share className="mr-6" /> */}
+                      <BookmarkIcon
+                        className="text-main-gray-200"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // 여기에 BookmarkIcon 별도의 이벤트 처리 코드를 작성합니다.
+                          console.log("BookmarkIcon clicked!");
+                        }}
+                      />
                     </div>
                   </div>
                 </div>
@@ -340,21 +420,32 @@ const MyLocationPage = () => {
                       </div>
                     </div>
                     <div>
-                      <div className="flex items-center justify-center h-[35px] text-[14px] bg-[#03C75A] text-main-white rounded-[24px] w-[66px] text-center shadow-[0_4px_4px_rgba(0,0,0,0.1)] ">
+                      <div
+                        className="flex items-center justify-center h-[35px] text-[14px] bg-[#03C75A] text-main-white rounded-[24px] w-[66px] text-center shadow-[0_4px_4px_rgba(0,0,0,0.1)] "
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // 여기에 BookmarkIcon 별도의 이벤트 처리 코드를 작성합니다.
+                          openNaverMap();
+                          console.log("BookmarkIcon clicked!");
+                        }}
+                      >
                         <span className="font-extrabold mr-1">N</span>
                         <span className="font-light text-[12px]">지도</span>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div className="flex mt-2">
+                {/* <div className="flex mt-2">
                   <CapitalBadge capital={selectedMountain.address} />
                   {selectedMountain.isBac && <IsBacBadge />}
-                </div>
-                <div className="text-[18px] font-thin mt-2">
+                </div> */}
+                <div className="text-[14px] font-thin text-main-gray-400 mt-2">
                   {selectedMountain.address}
                 </div>
-
+                <div className="font-light text-[14px] mt-2">
+                  <span>{selectedMountain?.overview}</span>
+                  <span>{selectedMountain?.description}</span>
+                </div>
                 <div className="fixed bottom-6 left-1/2 -translate-x-1/2">
                   <div className="h-[44px] w-[165px] bg-main-green-200 text-main-white rounded-[24px] font-light flex items-center justify-center shadow-[0_4px_4px_rgba(0,0,0,0.1)]">
                     등산 시작
@@ -381,7 +472,14 @@ const MyLocationPage = () => {
                 </div>
                 <div>
                   <div className="pt-4 pr-4">
-                    <BookmarkIcon className="text-main-gray-200" />
+                    <BookmarkIcon
+                      className="text-main-gray-200"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // 여기에 BookmarkIcon 별도의 이벤트 처리 코드를 작성합니다.
+                        console.log("BookmarkIcon clicked!");
+                      }}
+                    />
                   </div>
                 </div>
               </div>

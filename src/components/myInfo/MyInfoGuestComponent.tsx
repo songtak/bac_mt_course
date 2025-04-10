@@ -1,12 +1,20 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 const MyInfoGuestComponent = () => {
+  const navigate = useNavigate();
+
   return (
     <div>
-      <div className="h-[60px] mb-8 flex items-center rounded-[24px] border border-main-gray-100 shadow-[0_4px_4px_rgba(0,0,0,0.1)]">
+      <div
+        className="h-[60px] mb-8 flex items-center bg-white rounded-[24px] border border-main-gray-100 shadow-[0_4px_4px_rgba(0,0,0,0.1)]"
+        onClick={() => {
+          navigate("/login-list");
+        }}
+      >
         <span className="pl-6 font-extralight">로그인하기</span>
       </div>
-      <div className="p-6 rounded-[24px] border border-main-gray-100 shadow-[0_4px_4px_rgba(0,0,0,0.1)]">
+      <div className="p-6 rounded-[24px] border bg-white border-main-gray-100 shadow-[0_4px_4px_rgba(0,0,0,0.1)]">
         <div className="pb-8">피크헌터가 되면 가능해지는 것들이에요.</div>
         <div>
           <div className="text-[14px] font-normal mb-2">

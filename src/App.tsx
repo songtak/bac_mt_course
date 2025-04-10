@@ -17,12 +17,21 @@ import * as MYPAGE from "./pages/myInfo";
 import * as AUTH from "./pages/auth";
 import * as MOUNTAIN from "./pages/mountain";
 import * as TEST from "./pages/test";
+import AuthProvider from "./utils/AuthProvider";
+import { useQuery } from "@tanstack/react-query";
+import { getBookmarkList } from "./apis/bookmarkApi";
 
 function App() {
   const user = useAuth();
   const userStore = useUserStore();
   const previousLocation = usePreviousLocation();
   const commonStore = useCommonStore();
+
+  const { data: bookmarkList } = useQuery({
+    queryKey: ["bookmarkList"],
+    queryFn: () => getBookmarkList(),
+    enabled: !!userStore.bookmarkList,
+  });
 
   useEffect(() => {
     if (!_.isNull(user)) {
@@ -32,13 +41,17 @@ function App() {
   }, [user]);
 
   useEffect(() => {
+    userStore.setBookmarkList(bookmarkList);
+  }, [userStore.bookmarkList]);
+
+  useEffect(() => {
     return () => {
       commonStore.setPrevLocation(previousLocation);
     };
   }, [previousLocation]);
 
   return (
-    <>
+    <AuthProvider>
       <ScrollToTop />
       <Routes>
         <Route element={<CommonLayout />}>
@@ -49,6 +62,7 @@ function App() {
         </Route>
         <Route path="/search" element={<PAGES.SearchPage />} />
         {/* auth */}
+        <Route path="/login-list" element={<AUTH.LoginListPage />} />
         <Route path="/login" element={<AUTH.LoginPage />} />
         <Route path="/login/:loginType" element={<AUTH.LoginPage />} />
         <Route path="/sign-up" element={<AUTH.SignUpPage />} />
@@ -76,7 +90,7 @@ function App() {
         {/* <Route path="/" element={<ExcelUploader />} /> */}
         {/* <Route path="/" element={<PAGES.MainPage />} /> */}
       </Routes>
-    </>
+    </AuthProvider>
   );
 }
 

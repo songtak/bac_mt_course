@@ -138,22 +138,18 @@ const SignUpPage: React.FC = () => {
         formData.password
       );
 
-      // Firebase에서 생성된 유저 ID
+      // Firebase에서 생성된 유저 정보
       const user = userCredential.user;
       const token = await user.getIdToken(); // 🔥 JWT 토큰 가져오기
 
-      const usersRef = collection(db, "users");
-      const snapshot = await getDocs(usersRef);
-      const newUserId = snapshot.size + 1;
-
-      // Firestore에 유저 정보 저장
+      // Firestore에 유저 정보 저장 (여기서 user.uid를 사용)
       await setDoc(doc(db, "users", formData.email), {
         access_token: token, // 🔥 JWT 토큰 저장
         email: formData.email,
         name: formData.name,
         nickname: formData.nickname,
-        password: formData.password,
-        userId: newUserId,
+        // password: formData.password, // 보안상의 이유로 평문 비밀번호 저장은 권장되지 않음
+        userId: user.uid, // Firebase Auth에서 생성한 고유 uid 사용
         createdAt: new Date(),
       });
 
@@ -166,7 +162,6 @@ const SignUpPage: React.FC = () => {
       setIsLoading(false);
     }
   };
-
   return (
     <div className="h-full mb-[100px] hide-scrollbar">
       <header

@@ -8,6 +8,8 @@ interface ITokenStore {
   userInfo: any;
   setUserInfo: (info: any) => void;
   setLogout: () => void;
+  bookmarkList: any[];
+  setBookmarkList: (bookmarkList: any) => void;
 }
 
 const useUserStore = create<ITokenStore>()(
@@ -26,6 +28,10 @@ const useUserStore = create<ITokenStore>()(
           isLogin: null,
           userInfo: null,
         });
+      },
+      bookmarkList: [],
+      setBookmarkList: (bookmarkList: any[]) => {
+        set({ bookmarkList: bookmarkList });
       },
     }),
     {

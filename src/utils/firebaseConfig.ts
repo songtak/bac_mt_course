@@ -58,3 +58,19 @@ const courseApp =
   getApps().find((a) => a.name === "courseApp") ??
   initializeApp(courseConfig, "courseApp");
 export const course_db = getFirestore(courseApp);
+
+/** 추가 Firebase 앱: peak-hunter-bookmarks */
+const bookmarksConfig = {
+  apiKey: "AIzaSyBhHItsyyrZS8hJ0ttmok81y4jWWQ_l18M",
+  authDomain: "peak-hunter-bookmarks.firebaseapp.com",
+  projectId: "peak-hunter-bookmarks",
+  storageBucket: "peak-hunter-bookmarks.firebasestorage.app",
+  messagingSenderId: "686033676285",
+  appId: "1:686033676285:web:4a0d4e93ec4d1a6c929b94",
+  measurementId: "G-82WS2QV16C",
+};
+
+const bookmarksApp =
+  getApps().find((a) => a.name === "bookmarksApp") ??
+  initializeApp(bookmarksConfig, "bookmarksApp");
+export const bookmarks_db = getFirestore(bookmarksApp);
