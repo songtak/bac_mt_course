@@ -12,7 +12,7 @@ const HASH_KEY = "ST1009281328226982205"; // SHA-256 해시 키
 
 const HectoTestPage = () => {
   // 🔐 AES 암호화
-  const encrypted = AES.encrypt("1000", Utf8.parse(AES_KEY), {
+  const encrypted = AES.encrypt("1010", Utf8.parse(AES_KEY), {
     mode: ECB,
     padding: Pkcs7,
   });
@@ -52,7 +52,7 @@ const HectoTestPage = () => {
     const trdDt = "20211231";
     const trdTm = "100000";
     const mchtTrdNo = "ORDER20211231100000";
-    const trdAmtPlain = "1000";
+    const trdAmtPlain = "1010";
 
     const encryptedAmt = encrypted;
 
@@ -62,7 +62,7 @@ const HectoTestPage = () => {
       trdDt,
       trdTm,
       mchtTrdNo,
-      trdAmt: "1000", // pktHash는 암호화 전 금액 기준!
+      trdAmt: "1010", // pktHash는 암호화 전 금액 기준!
     });
 
     const payload = {
