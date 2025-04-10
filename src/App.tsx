@@ -64,7 +64,8 @@ function App() {
         />
 
         {/* test */}
-        <Route path="/" element={<TEST.SetMountainDataPage />} />
+        {/* <Route path="/" element={<TEST.AddGeohashPage />} /> */}
+        {/* <Route path="/" element={<TEST.SetMountainDataPage />} /> */}
         <Route path="/gpx" element={<GPXExporter />} />
         <Route path="/list" element={<PAGES.MountainListPage />} />
         <Route path="/map-detail/:mountainId" element={<PAGES.MapViewPage />} />

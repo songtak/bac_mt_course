@@ -49,10 +49,28 @@ const MountainDetailPage = () => {
   };
 
   /** 공유하기 버튼 클릭 */
-  const handleClickShare = () => {
-    //
-  };
+  const handleClickShare = async () => {
+    // 산의 고유 ID를 활용하여 딥 링크 생성 (예시: myapp 스킴 사용)
+    const deepLink = `myapp://mountain/${mountainDetail?.id}`;
+    // 또는 fallback URL: 앱이 설치되지 않은 경우 웹페이지로 연결
+    const webUrl = `https://yourdomain.com/mountains/${mountainDetail?.id}`;
 
+    // Web Share API 사용 예시
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: mountainDetail?.mountain_name || "산 정보",
+          text: "이 산에 대한 정보를 확인해보세요!",
+          url: deepLink, // 또는 fallback URL로 webUrl 사용
+        });
+      } catch (error) {
+        console.error("공유 오류:", error);
+      }
+    } else {
+      // Web Share API를 지원하지 않을 때 복사 기능 등을 구현할 수 있음
+      alert("공유 기능이 지원되지 않습니다. URL을 복사해주세요: " + deepLink);
+    }
+  };
   /** 북마크 */
   const handleClickBookmark = () => {
     //
@@ -119,9 +137,12 @@ const MountainDetailPage = () => {
           />
         }
       />
-      <main className="pt-[100px] p-8  bg-main-white ">
+      <div className="fixed top-[100px] left-0 w-full z-10">
+        <div ref={mapElement} className="bg-yellow-200 h-[300px] w-full"></div>
+      </div>
+      <main className="pt-[400px] p-8  bg-main-white ">
+        {/* <div ref={mapElement} className="overflow-hidden h-[300px] -mx-8"></div> */}
         <div className="pt-[8px]">
-          <div ref={mapElement} className="bg-yellow-200 h-[300px] -mx-8"></div>
           <div className="mt-4">
             <div className="flex justify-between items-center">
               <div className="flex">
@@ -171,19 +192,19 @@ const MountainDetailPage = () => {
               </div>
             </div>
           </div>
-          <div className="flex mt-2">
-            {/* <CapitalBadge capital={mountainDetail?.address} /> */}
-            {/* {mountainDetail?.isBac === true && <IsBacBadge />} */}
-          </div>
-          <div className="text-[18px] font-thin mt-2">
+          {/* <div className="flex mt-2">
+            <CapitalBadge capital={mountainDetail?.address} />
+            {mountainDetail?.isBac === true && <IsBacBadge />}
+          </div> */}
+          <div className="text-[14px] font-thin text-main-gray-400">
             {mountainDetail?.address}
           </div>
-          <div className="font-light my-2">
+          {/* <div className="text-[12px] font-light text-main-gray-400">
             <span>{mountainDetail?.management_city}</span>
             <span> </span>
             <span>{mountainDetail?.management_tel}</span>
-          </div>
-          <div className="font-light text-[14px]">
+          </div> */}
+          <div className="font-light text-[14px] mt-2">
             <span>{mountainDetail?.overview}</span>
             <span>{mountainDetail?.description}</span>
           </div>
@@ -193,6 +214,18 @@ const MountainDetailPage = () => {
               등산 시작
             </div>
           </div> */}
+          {/* 하단 오른쪽 플로팅 버튼 */}
+          <div className="fixed bottom-6 right-6 z-30">
+            <button
+              className="h-[56px] w-[56px] bg-main-green-200 text-main-white rounded-full flex items-center justify-center shadow-lg"
+              onClick={() => {
+                // 버튼 클릭 시 실행할 로직 작성
+                console.log("플로팅 버튼 클릭");
+              }}
+            >
+              ⛰️
+            </button>
+          </div>
         </div>
       </main>
     </div>

@@ -208,7 +208,7 @@ function MainPage() {
       <div className=" mt-4 ">
         <div className="bg-main-blue-100 h-[60px] bg-opacity-30 rounded-full flex items-center overflow-x-auto justify-between  border border-main-gray-100 shadow-[0_4px_4px_rgba(0,0,0,0.1)]">
           <div className="ml-4 py-2 font-light text-lg text-main-blue-200 w-[80px] overflow-hidden main-whitespace-nowrap text-ellipsis">
-            감악산
+            {todayMountain?.mountain_name}
           </div>
           <div className="flex space-x-4">
             {/* 요일 + 아이콘 + 온도 */}
