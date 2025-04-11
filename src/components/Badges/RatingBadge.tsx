@@ -1,5 +1,6 @@
 import React from "react";
 import { Star } from "lucide-react";
+import _ from "lodash";
 
 const RatingBadge = ({ rating, isMain = false }: any) => {
   return (
@@ -12,7 +13,9 @@ const RatingBadge = ({ rating, isMain = false }: any) => {
             color="#C8F169"
             className="mr-1 align-middle"
           />
-          <span className="flex items-center">{rating}</span>
+          <span className="flex items-center">
+            {!_.isUndefined(rating) ? rating : "- . -"}
+          </span>
         </span>
       ) : (
         <span className="flex items-center font-bold justify-center w-10 h-[16px] bg-main-green-100 text-main-green-300 text-[8px] rounded-[14px]">
@@ -22,7 +25,9 @@ const RatingBadge = ({ rating, isMain = false }: any) => {
             color="#2A6F2B"
             className="mr-1 align-middle"
           />
-          <span className="flex items-center">{rating}</span>
+          <span className="flex items-center">
+            {!_.isUndefined(rating) ? rating : "- . -"}
+          </span>
         </span>
       )}
     </>

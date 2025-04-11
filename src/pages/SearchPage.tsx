@@ -6,16 +6,25 @@ import { cities, searchTagList } from "../models/common";
 import useComponentStore from "../stores/useComponentStore";
 import { SearchResult } from "../components/search";
 import { SearchCard } from "../components/search";
+import useSearchStore from "../stores/useSearchStore";
 
 const SearchPage = () => {
   const navigate = useNavigate();
   const componentStore = useComponentStore();
+  const searchStore = useSearchStore();
 
-  console.log("componentStore", componentStore.openfullModal);
+  // console.log("componentStore", componentStore.openfullModal);
 
   // useEffect(() => {
   //   componentStore.setOpenFullModal("searchResult");
   // }, []);
+
+  // 언마운트 시에 searchStore를 초기화
+  useEffect(() => {
+    return () => {
+      searchStore.resetSearchStore();
+    };
+  }, []);
 
   return (
     <div>

@@ -39,11 +39,16 @@ export default {
           "50%": { backgroundPosition: "top" },
           "100%": { backgroundPosition: "center" },
         },
+        fade: {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
       },
       animation: {
         "arrow-shake": "arrowShake 0.5s ease-in-out",
         shake: "shake 0.5s ease-in-out 0s 3",
         pan: "pan 30s linear infinite",
+        fade: "fade 0.3s ease-in-out",
       },
     },
   },

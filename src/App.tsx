@@ -27,10 +27,11 @@ function App() {
   const previousLocation = usePreviousLocation();
   const commonStore = useCommonStore();
 
+  /** 북마크 목록 취득 */
   const { data: bookmarkList } = useQuery({
     queryKey: ["bookmarkList"],
     queryFn: () => getBookmarkList(),
-    enabled: !!userStore.bookmarkList,
+    enabled: !!userStore.bookmarkList && !_.isNull(user),
   });
 
   useEffect(() => {
@@ -40,9 +41,10 @@ function App() {
     }
   }, [user]);
 
+  /** 북마크 목록 취득 */
   useEffect(() => {
-    userStore.setBookmarkList(bookmarkList);
-  }, [userStore.bookmarkList]);
+    !_.isUndefined(bookmarkList) && userStore.setBookmarkList(bookmarkList);
+  }, [bookmarkList]);
 
   useEffect(() => {
     return () => {

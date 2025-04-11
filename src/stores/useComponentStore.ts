@@ -64,7 +64,8 @@ const useComponentStore = create<Props>()((set, get) => ({
     }));
   },
   /** ===[ Full Modal ]================================================================ */
-  openfullModal: [""],
+  openfullModal: [],
+  // openfullModal: ["searchResult"],
   setOpenFullModal: (modal: string) => {
     set((state) => {
       const exists = state.openfullModal.includes(modal);

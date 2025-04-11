@@ -25,6 +25,8 @@ const MountainDetailPage = () => {
     enabled: !!mountain_id, // mountain_id가 존재해야 쿼리 실행
   });
 
+  console.log("mountainDetail", mountainDetail);
+
   const openNaverMap = () => {
     const isMobile = /Mobi|Android/i.test(navigator.userAgent);
     if (isMobile) {

@@ -6,8 +6,7 @@ import { createBookmark, deleteBookmark } from "../../apis/bookmarkApi";
 
 const BookmarkButton = ({ mountain_detail }: any) => {
   const userStore = useUserStore();
-  const bookmarkList = useUserStore((state) => state.bookmarkList);
-
+  const { bookmarkList, setBookmarkList, isLogin } = useUserStore();
   // bookmarkInfo 상태: 북마크 정보 객체 (존재하면 해당 산이 북마크된 것)
   const [bookmarkInfo, setBookmarkInfo] = useState<any>(null);
 
@@ -17,9 +16,10 @@ const BookmarkButton = ({ mountain_detail }: any) => {
     onSuccess: (data) => {
       console.log("북마크 생성 완료, 문서 ID:", data);
       // 북마크 생성 후 bookmarkInfo 갱신(필요시 서버에서 새로 가져온 값을 사용하거나, 간단히 mountain_detail 기반 객체 생성)
-      setBookmarkInfo({
-        mountain_id: mountain_detail.mountain_id /* 다른 속성들 */,
-      });
+      const newBookmark = { ...mountain_detail, id: data };
+
+      setBookmarkInfo(newBookmark);
+      setBookmarkList([...bookmarkList, newBookmark]);
     },
     onError: (error) => {
       console.error("북마크 생성 실패:", error);
@@ -33,26 +33,33 @@ const BookmarkButton = ({ mountain_detail }: any) => {
       console.log("북마크 삭제 완료, 문서 ID:", data);
       // 북마크 삭제 성공 후 bookmarkInfo 상태를 null로 업데이트
       setBookmarkInfo(null);
+      setBookmarkList(bookmarkList.filter((bm: any) => bm.id !== data));
     },
     onError: (error) => {
       console.error("북마크 삭제 실패:", error);
     },
   });
 
-  const handleSubmit = () => {
+  /** 북마크 */
+  const handleSubmit = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (bookmarkInfo) {
       handleClickDeleteBookmark.mutate(bookmarkInfo.id as string);
     } else {
-      setBookmark.mutate(mountain_detail);
+      if (bookmarkList.length === 10) {
+        alert("북마크는 최대 30개까지 가능합니다");
+      } else {
+        setBookmark.mutate(mountain_detail);
+      }
     }
   };
 
   /** 게스트일 때 클릭 */
-  const handleClickGuest = () => {
+  const handleClickGuest = (e: React.MouseEvent) => {
+    e.stopPropagation();
+
     console.log("로그인이 필요한 서비스입니다. 로그인할까요?");
   };
-
-  console.log("bookmarkInfo", bookmarkInfo);
 
   useEffect(() => {
     if (!mountain_detail || !bookmarkList) return;
@@ -69,8 +76,8 @@ const BookmarkButton = ({ mountain_detail }: any) => {
       <BookmarkIcon
         // bookmarkInfo가 존재하면 이미 북마크된 상태로 스타일 또는 아이콘 상태 변경 가능
         className={bookmarkInfo ? "fill-current text-main-bookmark" : ""}
-        onClick={() => {
-          userStore.isLogin ? handleSubmit() : handleClickGuest();
+        onClick={(e) => {
+          userStore.isLogin ? handleSubmit(e) : handleClickGuest(e);
         }}
       />
     </div>

@@ -127,9 +127,12 @@ function MainPage() {
         </div>
         {/* 오른쪽: 사용자 정보 */}
         <div className="flex flex-col items-end self-end">
-          {userStore.isLogin ? (
+          {/* {userStore.isLogin ? ( */}
+          {!_.isNull(userStore.userInfo) ? (
             <>
-              <span className="text-[22px]">{userStore.userInfo.nickname}</span>
+              <span className="text-[22px]">
+                {userStore.userInfo?.nickname}
+              </span>
               <div className="pl-2 text-[12px] font-thin text-black">
                 새내기 사냥꾼
               </div>
