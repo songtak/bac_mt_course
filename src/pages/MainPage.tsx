@@ -144,7 +144,7 @@ function MainPage() {
       {/* 검색 바 */}
       <div className="pt-8">
         <div
-          className="relative text-main-gray-300 bg-main-white rounded-full flex items-center h-[44px]  border border-main-gray-100 shadow-[0_4px_4px_rgba(0,0,0,0.1)]"
+          className="relative text-main-gray-300 bg-white rounded-full flex items-center h-[44px]  border border-main-gray-100 shadow-[0_4px_4px_rgba(0,0,0,0.1)]"
           onClick={() => {
             navigate("/search");
           }}

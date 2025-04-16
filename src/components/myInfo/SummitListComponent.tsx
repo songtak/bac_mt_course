@@ -72,11 +72,14 @@ const SummitListComponent = () => {
       <Header
         disableSearch={true}
         left={
-          <ChevronLeft
+          <div
+            className="p-4 cursor-pointer"
             onClick={() => {
               componentStore.setOpenFullModal("summitList");
             }}
-          />
+          >
+            <ChevronLeft />
+          </div>
         }
       />
       {/* 모달 내부 콘텐츠 영역: Header 높이를 제외한 영역에 스크롤 설정 */}

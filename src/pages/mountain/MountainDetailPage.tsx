@@ -128,11 +128,14 @@ const MountainDetailPage = () => {
       {/* 상단 헤더 */}
       <Header
         left={
-          <ChevronLeft
+          <div
+            className="p-4 cursor-pointer"
             onClick={() => {
               navigate(-1);
             }}
-          />
+          >
+            <ChevronLeft />
+          </div>
         }
       />
       <div className="fixed top-[100px] left-0 w-full z-10">

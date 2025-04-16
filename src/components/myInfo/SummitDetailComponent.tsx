@@ -16,17 +16,21 @@ type Props = {
 const SummitDetailComponent = (props: Props) => {
   const navigate = useNavigate();
   const componentStore = useComponentStore();
+  //           <div></div>
 
   return (
     <div className="fixed top-0 left-0 w-screen h-screen bg-white z-50">
       <Header
         disableSearch={true}
         left={
-          <ChevronLeft
+          <div
+            className="p-4 cursor-pointer"
             onClick={() => {
               componentStore.setOpenFullModal("summitDetail");
             }}
-          />
+          >
+            <ChevronLeft />
+          </div>
         }
         right={
           <div className="flex items-center pl-[10px] h-[46px] w-[46px] text-main-gray-300 text-[24px] bg-white rounded-[24px] shadow-[0_4px_4px_rgba(0,0,0,0.2)] text-center">

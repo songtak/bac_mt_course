@@ -77,12 +77,15 @@ const LoginPage: React.FC = () => {
         className={`fixed px-6 pt-[26px] top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out flex justify-between items-center bg-main-white`}
         style={{ height: `100px` }}
       >
-        <ChevronLeft
+        <div
+          className="p-4 cursor-pointer"
           onClick={() => {
             navigate(-1);
             // componentStore.setOpenFullModal("summitList");
           }}
-        />
+        >
+          <ChevronLeft />
+        </div>
       </header>
       <main className="pt-[100px]">
         <div className="flex justify-center items-center">

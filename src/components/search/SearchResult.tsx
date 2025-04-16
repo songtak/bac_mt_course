@@ -79,11 +79,14 @@ const SearchResult = () => {
       <Header
         disableSearch={true}
         left={
-          <ChevronLeft
+          <div
+            className="p-4 cursor-pointer"
             onClick={() => {
               componentStore.setOpenFullModal("searchResult");
             }}
-          />
+          >
+            <ChevronLeft />
+          </div>
         }
         right={
           <div className="flex items-center">

@@ -1,8 +1,27 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { db, auth } from "../../utils/firebaseConfig";
+import { getUserInfo } from "../../apis/userApi";
+import { useQuery } from "@tanstack/react-query";
 
 const WelcomePage = () => {
   const navigate = useNavigate();
+  const user = auth.currentUser;
+
+  const {
+    data: userInfo,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["userInfo"],
+    queryFn: getUserInfo,
+    staleTime: Infinity, // 항상 신선하다고 간주 (무한 캐싱)
+    refetchOnWindowFocus: false, // 창 다시 포커스해도 refetch 안 함
+    refetchOnMount: false, // 컴포넌트 재마운트해도 refetch 안 함
+    refetchOnReconnect: false, // 인터넷 연결 회복해도 refetch 안 함
+  });
+
+  console.log("userInfo", userInfo);
 
   return (
     <div className="h-full mb-[100px] hide-scrollbar">

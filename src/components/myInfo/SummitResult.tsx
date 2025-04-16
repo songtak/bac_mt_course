@@ -19,11 +19,14 @@ const SummitResult = () => {
       <Header
         disableSearch={true}
         left={
-          <ChevronLeft
+          <div
+            className="p-4 cursor-pointer"
             onClick={() => {
               componentStore.setOpenFullModal("summitResult");
             }}
-          />
+          >
+            <ChevronLeft />
+          </div>
         }
         right={
           <div

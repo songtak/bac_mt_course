@@ -28,7 +28,7 @@ const MyInfoPage = () => {
       await signOut(auth);
       localStorage.clear();
       userStore.setLogout();
-      navigate("/list");
+      navigate("/");
       console.log("로그아웃 성공!");
     } catch (error) {
       console.error("로그아웃 실패:", error);
@@ -118,7 +118,7 @@ const MyInfoPage = () => {
         className="pt-[100px] pb-[100px] hide-scrollbar"
         ref={scrollContainerRef}
       >
-        {userStore.isLogin ? <MyInfoUserComponent /> : <MyInfoGuestComponent />}
+        {user ? <MyInfoUserComponent /> : <MyInfoGuestComponent />}
       </div>
       <div className="fixed  bottom-0 w-full left-1/2 -translate-x-1/2 h-[88px] bg-main-white shadow-[0_-4px_4px_rgba(0,0,0,0.1)]" />
 

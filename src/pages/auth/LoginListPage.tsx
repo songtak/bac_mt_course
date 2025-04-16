@@ -77,12 +77,16 @@ const LoginPage: React.FC = () => {
         className={`fixed px-6 pt-[26px] top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out flex justify-between items-center bg-main-white`}
         style={{ height: `100px` }}
       >
-        <ChevronLeft
+        <div
           onClick={() => {
             navigate(-1);
             // componentStore.setOpenFullModal("summitList");
           }}
-        />
+          className="p-4 cursor-pointer"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </div>
+        {/* 오른쪽 아이콘 등 다른 요소 */}
       </header>
       <main className="pt-[100px]">
         <div className="flex justify-center items-center">
@@ -105,7 +109,7 @@ const LoginPage: React.FC = () => {
             className={`mt-4 w-full py-3 rounded-[24px] font-light  transition focus:outline-none shadow-[0_4px_4px_rgba(0,0,0,0.1)] ${
               isLoading
                 ? "bg-gray-300 text-gray-700"
-                : "bg-main-green-200 text-main-white hover:bg-blue-600"
+                : "bg-main-green-200 text-main-white hover:bg-main-green-300"
             }`}
           >
             카카오 로그인
@@ -116,7 +120,7 @@ const LoginPage: React.FC = () => {
             className={`mt-4 w-full py-3 rounded-[24px] font-light  transition focus:outline-none shadow-[0_4px_4px_rgba(0,0,0,0.1)] ${
               isLoading
                 ? "bg-gray-300 text-gray-700"
-                : "bg-main-green-200 text-main-white hover:bg-blue-600"
+                : "bg-main-green-200 text-main-white hover:bg-main-green-300"
             }`}
           >
             네이버 로그인
@@ -127,7 +131,7 @@ const LoginPage: React.FC = () => {
             className={`mt-4 w-full py-3 rounded-[24px] font-light  transition focus:outline-none shadow-[0_4px_4px_rgba(0,0,0,0.1)] ${
               isLoading
                 ? "bg-gray-300 text-gray-700"
-                : "bg-main-green-200 text-main-white hover:bg-blue-600"
+                : "bg-main-green-200 text-main-white hover:bg-main-green-300"
             }`}
           >
             구글 로그인
@@ -138,7 +142,7 @@ const LoginPage: React.FC = () => {
             className={`mt-4 w-full py-3 rounded-[24px] font-light  transition focus:outline-none shadow-[0_4px_4px_rgba(0,0,0,0.1)] ${
               isLoading
                 ? "bg-gray-300 text-gray-700"
-                : "bg-main-green-200 text-main-white hover:bg-blue-600"
+                : "bg-main-green-200 text-main-white hover:bg-main-green-300"
             }`}
           >
             애플 로그인
@@ -149,7 +153,7 @@ const LoginPage: React.FC = () => {
             className={`mt-4 w-full py-3 rounded-[24px] font-light  transition focus:outline-none shadow-[0_4px_4px_rgba(0,0,0,0.1)] ${
               isLoading
                 ? "bg-gray-300 text-gray-700"
-                : "bg-main-green-200 text-main-white hover:bg-blue-600"
+                : "bg-main-green-200 text-main-white hover:bg-main-green-300"
             }`}
             onClick={() => navigate("/login")}
           >
@@ -216,7 +220,7 @@ const LoginPage: React.FC = () => {
     //         className={`w-full py-3 rounded-md shadow-sm transition focus:outline-none ${
     //           isLoading
     //             ? "bg-gray-300 text-gray-700"
-    //             : "bg-blue-500 text-main-white hover:bg-blue-600"
+    //             : "bg-blue-500 text-main-white hover:bg-main-green-300"
     //         }`}
     //       >
     //         {isLoading ? "로그인 중..." : "로그인"}

@@ -81,11 +81,14 @@ const SearchCard = () => {
       setSearchResults(data.results);
       searchStore.setSearchMountainList(data.results);
       searchStore.setPagination(data.pagination);
-      if (_.isNull(searchStore.searchParams)) {
+      if (data.results) {
         componentStore.setOpenFullModal("searchResult");
-      } else {
-        searchStore.setCloseSearchCard();
       }
+      // if (_.isNull(searchStore.searchParams)) {
+      //   searchStore.setCloseSearchCard();
+      // } else {
+      //   componentStore.setOpenFullModal("searchResult");
+      // }
     },
     onError: (error: any) => {
       searchStore.setSearchParams(null);
@@ -108,6 +111,8 @@ const SearchCard = () => {
     searchStore.setSearchParams(searchParams);
     searchMutation.mutate(searchParams);
   };
+
+  console.log("openfullModal", componentStore.openfullModal);
 
   return (
     <div className="max-w-sm w-full bg-white rounded-t-[20px] rounded-b-[24px] shadow-xl relative overflow-hidden">
