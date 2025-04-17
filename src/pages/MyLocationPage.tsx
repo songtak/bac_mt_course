@@ -11,6 +11,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { getNearbyMountains } from "../apis/mapApi"; // 위에서 작성한 함수 파일 경로에 맞게 수정
 import _ from "lodash";
+import { getDistanceFromLatLonInKm } from "../utils/geoHeplers";
 
 const MyLocationPage = () => {
   const navigate = useNavigate();
@@ -229,38 +230,47 @@ const MyLocationPage = () => {
     );
   };
 
-  // 산 데이터 조회 후 마커 추가 또는 업데이트
   const updateMountainMarkers = async (
     lat: number,
     lng: number,
     radius = 5
   ) => {
-    // 기존 산 마커 삭제
-    if (mountainMarkersRef.current.length) {
-      mountainMarkersRef.current.forEach((marker) => marker.setMap(null));
-      mountainMarkersRef.current = [];
-    }
+    // 이전 마커 제거
+    mountainMarkersRef.current.forEach((m) => m.setMap(null));
+    mountainMarkersRef.current = [];
 
     try {
       const mountains = await getNearbyMountains(lat, lng, radius);
-      console.log("Nearby mountains:", mountains);
+
+      // ——————————————————————————————————————————
+      // ▷ 1km 이내 산 찾기
+      const close = mountains.find(
+        (mtn) => getDistanceFromLatLonInKm(lat, lng, mtn.lat, mtn.lng) <= 1
+      );
+      if (close) {
+        console.log("!!");
+
+        setSelectedMountain(close);
+        setIsArrival(true);
+      } else {
+        setIsArrival(false);
+      }
+      // ——————————————————————————————————————————
+
+      // 마커 찍기
       mountains.forEach((mountain) => {
-        const position = new naver.maps.LatLng(mountain.lat, mountain.lng);
+        const pos = new naver.maps.LatLng(mountain.lat, mountain.lng);
         const marker = new naver.maps.Marker({
-          position,
+          position: pos,
           map: mapRef.current,
-          // 산 이모지 아이콘
           icon: {
             content: `<div style="font-size:14px; color:red;">🏔</div>`,
             anchor: new naver.maps.Point(12, 12),
           },
         });
-
-        // 마커 클릭 이벤트 추가: 클릭 시 setSelectedMountain에 해당 산 데이터를 저장
         naver.maps.Event.addListener(marker, "click", () => {
           setSelectedMountain(mountain);
         });
-
         mountainMarkersRef.current.push(marker);
       });
     } catch (error) {
@@ -268,10 +278,50 @@ const MyLocationPage = () => {
     }
   };
 
+  // // 산 데이터 조회 후 마커 추가 또는 업데이트
+  // const updateMountainMarkers = async (
+  //   lat: number,
+  //   lng: number,
+  //   radius = 5
+  // ) => {
+  //   // 기존 산 마커 삭제
+  //   if (mountainMarkersRef.current.length) {
+  //     mountainMarkersRef.current.forEach((marker) => marker.setMap(null));
+  //     mountainMarkersRef.current = [];
+  //   }
+
+  //   try {
+  //     const mountains = await getNearbyMountains(lat, lng, radius);
+  //     console.log("Nearby mountains:", mountains);
+  //     mountains.forEach((mountain) => {
+  //       const position = new naver.maps.LatLng(mountain.lat, mountain.lng);
+  //       const marker = new naver.maps.Marker({
+  //         position,
+  //         map: mapRef.current,
+  //         // 산 이모지 아이콘
+  //         icon: {
+  //           content: `<div style="font-size:14px; color:red;">🏔</div>`,
+  //           anchor: new naver.maps.Point(12, 12),
+  //         },
+  //       });
+
+  //       // 마커 클릭 이벤트 추가: 클릭 시 setSelectedMountain에 해당 산 데이터를 저장
+  //       naver.maps.Event.addListener(marker, "click", () => {
+  //         setSelectedMountain(mountain);
+  //       });
+
+  //       mountainMarkersRef.current.push(marker);
+  //     });
+  //   } catch (error) {
+  //     console.error("Error fetching mountain data:", error);
+  //   }
+  // };
+
   // 초기 지도 및 위치 설정
   useEffect(() => {
     initMap();
   }, []);
+  /** ============================================================================ */
 
   // 슬라이더 값 변경 시 (반경 업데이트 시) 산 마커 업데이트
   const handleSliderChange = (val: number) => {

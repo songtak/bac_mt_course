@@ -69,6 +69,22 @@ export const toFormattedDate = (timestamp: {
   return dayjs(ms);
 };
 
+/** 날짜를 수요일 오전 이런식으로 변환 */
+export const formatDateKo = (dateString: string) => {
+  // dayjs로 날짜 파싱 후 원하는 포맷으로 변환
+  return dayjs(dateString).locale("ko").format("dddd A"); // 예: '수요일 오전 10:12'
+};
+
+/** 초단위 소요시간을 hh:mm:ss로 변환 */
+export const formatDuration = (seconds: number) => {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = seconds % 60;
+  return `${hours}:${minutes.toString().padStart(2, "0")}:${remainingSeconds
+    .toString()
+    .padStart(2, "0")}`;
+};
+
 /** =================================================================================== */
 
 export const jsonToGpx = (jsonData: any) => {

@@ -39,7 +39,7 @@ const ListItem = ({ mountain }: any) => {
       <div className="flex">
         <BookmarkButton mountain_detail={mountain} />
         {/* <Bookmark className="w-[20px] h-[20px] text-main-gray-300 mr-2" /> */}
-        <ChevronRight className="w-[20px] h-[20px] text-main-gray-300" />
+        {/* <ChevronRight className="w-[20px] h-[20px] text-main-gray-300" /> */}
       </div>
     </div>
   );

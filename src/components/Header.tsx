@@ -48,12 +48,13 @@ const Header: React.FC<HeaderProps> = ({
       {/* 오른쪽: 사용자 정보 (아이콘은 항상 수직 중앙) */}
       {!disableSearch && (
         <div className="flex items-center">
-          <div className="w-[46px] h-[46px] text-main-gray-300 bg-white rounded-full flex items-center justify-center shadow-[0_4px_4px_rgba(0,0,0,0.1)]">
-            <Search
-              onClick={() => {
-                navigate("/search");
-              }}
-            />
+          <div
+            className="w-[46px] h-[46px] text-main-gray-300 bg-white rounded-full flex items-center justify-center shadow-[0_4px_4px_rgba(0,0,0,0.1)]"
+            onClick={() => {
+              navigate("/search");
+            }}
+          >
+            <Search />
           </div>
         </div>
       )}

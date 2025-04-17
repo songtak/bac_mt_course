@@ -3,6 +3,8 @@ import Header from "../Header";
 import { ChevronLeft } from "lucide-react";
 import { SummitDetailCard, SummitDetailComponent } from "./index";
 import useComponentStore from "../../stores/useComponentStore";
+import { getAllSummitsByUser } from "../../apis/summitApi";
+import { useQuery } from "@tanstack/react-query";
 
 const mySummitList: any[] = [
   {
@@ -66,6 +68,20 @@ type Props = {
 
 const SummitListComponent = () => {
   const componentStore = useComponentStore();
+  /** 최근 등산 목록 취득 */
+  const {
+    data: allSummits,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["allSummits"],
+    queryFn: getAllSummitsByUser,
+    staleTime: Infinity, // 항상 신선하다고 간주 (무한 캐싱)
+    cacheTime: Infinity, // 캐시를 영구 보관 (앱 꺼질 때까지)
+    refetchOnWindowFocus: false, // 창 다시 포커스해도 refetch 안 함
+    refetchOnMount: false, // 컴포넌트 재마운트해도 refetch 안 함
+    refetchOnReconnect: false, // 인터넷 연결 회복해도 refetch 안 함
+  });
 
   return (
     <div className="fixed top-0 left-0 w-screen h-screen bg-main-white z-50">
@@ -94,15 +110,16 @@ const SummitListComponent = () => {
       </div> */}
         </div>
         <div>
-          {mySummitList.map((item, i) => (
-            <SummitDetailCard
-              detail={item}
-              key={i}
-              onClick={() => {
-                componentStore.setOpenFullModal("summitDetail");
-              }}
-            />
-          ))}
+          {allSummits &&
+            allSummits.map((item, i) => (
+              <SummitDetailCard
+                detail={item}
+                key={i}
+                onClick={() => {
+                  componentStore.setOpenFullModal("summitDetail");
+                }}
+              />
+            ))}
         </div>
       </div>
       {/* {isOpenSummitDetail && (

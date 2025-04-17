@@ -71,11 +71,6 @@ const MountainDetailPage = () => {
     }
   };
 
-  /** 북마크 */
-  const handleClickBookmark = () => {
-    // 북마크 관련 로직 작성
-  };
-
   /** ================================================================================ */
   const mapElement = useRef(null);
   const mapRef = useRef(null);

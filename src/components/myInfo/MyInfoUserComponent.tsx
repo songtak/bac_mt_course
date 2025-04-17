@@ -5,8 +5,14 @@ import {
   RatingBadge,
   AltitudeBadge,
 } from "../Badges";
+import { useQuery } from "@tanstack/react-query";
 import { Search, MoveRight, ChevronsUpDown, ChevronRight } from "lucide-react";
 import useComponentStore from "../../stores/useComponentStore";
+import useUserStore from "../../stores/useUserStore";
+import { mock_summits } from "../../data/mockList";
+import { doc, setDoc } from "firebase/firestore";
+import { summits_db } from "../../utils/firebaseConfig"; // peak-hunter-summits Firebase 앱
+import { getRecentSummits } from "../../apis/summitApi";
 
 import {
   SummitListComponent,
@@ -56,6 +62,56 @@ const mySummitList: any[] = [
 
 const MyInfoUserComponent = () => {
   const componentStore = useComponentStore();
+  const userStore = useUserStore();
+
+  /** 최근 등산 목록 취득 */
+  const {
+    data: recentSummits,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["recentSummits"],
+    queryFn: getRecentSummits,
+    staleTime: Infinity, // 항상 신선하다고 간주 (무한 캐싱)
+    cacheTime: Infinity, // 캐시를 영구 보관 (앱 꺼질 때까지)
+    refetchOnWindowFocus: false, // 창 다시 포커스해도 refetch 안 함
+    refetchOnMount: false, // 컴포넌트 재마운트해도 refetch 안 함
+    refetchOnReconnect: false, // 인터넷 연결 회복해도 refetch 안 함
+  });
+
+  console.log("recentSummits", recentSummits);
+
+  //getRecentSummits
+
+  /** 등산 정보 목데이터 업로드용 */
+  // const saveSummitRecords = async () => {
+  //   if (
+  //     !mock_summits ||
+  //     !Array.isArray(mock_summits) ||
+  //     mock_summits.length === 0
+  //   ) {
+  //     console.error("mock_summits가 비어 있거나 배열이 아닙니다.");
+  //     return;
+  //   }
+
+  //   try {
+  //     // mock_summits 배열을 순회하면서 각 데이터를 Firestore에 저장
+  //     for (const summit of mock_summits) {
+  //       if (!summit.summitId) {
+  //         console.error("summitId가 없는 데이터가 있습니다:", summit);
+  //         continue; // summitId가 없는 경우는 건너뛰기
+  //       }
+
+  //       const summitRef = doc(summits_db, "summits", summit.summitId);
+  //       // Firestore에 기록 저장
+  //       await setDoc(summitRef, summit);
+  //       console.log("등산 기록이 저장되었습니다!", summit.summitId);
+  //     }
+  //   } catch (error) {
+  //     console.error("등산 기록 저장 실패:", error);
+  //   }
+  // };
+
   /** summitList, summitDetail, summitShare */
 
   return (
@@ -89,7 +145,9 @@ const MyInfoUserComponent = () => {
               <div className="mb-1">
                 <RatingBadge rating={"2.4"} />
               </div>
-              <div className="text-[28px] text-main-white font-light">송탁</div>
+              <div className="text-[28px] text-main-white font-light">
+                {userStore.userInfo.nickname}
+              </div>
               <div className="text-[12px] text-main-white font-thin">
                 새내기 사냥꾼
               </div>
@@ -111,6 +169,7 @@ const MyInfoUserComponent = () => {
           </div>
         </div>
       </div>
+
       {/* 메인 컨텐츠 */}
       <div className="mt-4">
         <div className=" p-4  border bg-white border-main-gray-100 shadow-[0_4px_4px_rgba(0,0,0,0.2)] rounded-[24px]">
@@ -125,16 +184,17 @@ const MyInfoUserComponent = () => {
             />
           </div>
           <div>
-            {mySummitList.map((item, i) => (
-              <SummitDetailCard
-                detail={item}
-                key={i}
-                onClick={() => {
-                  componentStore.setOpenFullModal("summitDetail");
-                  // setIsOpenSummitDetail(true);
-                }}
-              />
-            ))}
+            {recentSummits &&
+              recentSummits.map((item, i) => (
+                <SummitDetailCard
+                  detail={item}
+                  key={i}
+                  onClick={() => {
+                    componentStore.setOpenFullModal("summitDetail");
+                    // setIsOpenSummitDetail(true);
+                  }}
+                />
+              ))}
           </div>
           <div className="flex justify-center">
             <div

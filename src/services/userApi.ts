@@ -22,7 +22,6 @@ const getUserData = async () => {
       const setUserInfo = useUserStore.getState().setUserInfo;
       // userSnap.data()
       setUserInfo({
-        name: userSnap.data().name,
         nickname: userSnap.data().nickname,
         email: userSnap.data().email,
       });

@@ -40,12 +40,13 @@ const SearchPage = () => {
         // }
         right={
           <div className="flex items-center">
-            <div className="w-[46px] h-[46px] text-main-gray-300 bg-white rounded-full flex items-center justify-center shadow-[0_4px_4px_rgba(0,0,0,0.1)]">
-              <X
-                onClick={() => {
-                  navigate(-1);
-                }}
-              />
+            <div
+              className="w-[46px] h-[46px] text-main-gray-300 bg-white rounded-full flex items-center justify-center shadow-[0_4px_4px_rgba(0,0,0,0.1)]"
+              onClick={() => {
+                navigate(-1);
+              }}
+            >
+              <X />
             </div>
           </div>
         }

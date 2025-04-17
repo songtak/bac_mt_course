@@ -78,6 +78,7 @@ function App() {
           path="/mountain/:mountain_id"
           element={<MOUNTAIN.MountainDetailPage />}
         />
+        <Route path="/start/:mountain_id" element={<MOUNTAIN.StartPage />} />
 
         {/* test */}
         {/* <Route path="/" element={<TEST.AddGeohashPage />} /> */}
