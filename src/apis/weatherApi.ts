@@ -10,7 +10,10 @@ import {
   doc,
   getDoc,
 } from "firebase/firestore";
-import { parseForecastData } from "../utils/weatherParser";
+import {
+  parseUltraShortWeatherData,
+  parseForecastData,
+} from "../utils/weatherParser";
 
 const SERVICE_KEY = import.meta.env.VITE_DATA_OPEN_API_SERVICE_KEY;
 const now = dayjs(); // 현재 시간
@@ -31,6 +34,52 @@ let weatherTime = now.set("hour", closestHour).startOf("hour");
 if (closestHour === 23 && currentHour < 2) {
   weatherTime = weatherTime.subtract(1, "day");
 }
+
+/** 기상청 - 초단기 예보 */
+export const getUltraShortTermWeather = async ({ queryKey }: any) => {
+  const [_key, { nx, ny }] = queryKey;
+
+  // 오늘 날짜 구하기 (YYYYMMDD 형식)
+  const today = new Date();
+  const base_date = today.toISOString().slice(0, 10).replace(/-/g, ""); // YYYYMMDD
+
+  let base_time;
+  const currentHour = today.getHours();
+  const currentMinutes = today.getMinutes();
+
+  // `currentMinutes`가 30분 이상이라면, 현재 시간을 기준으로 이전 30분 단위로 설정합니다.
+  if (currentMinutes >= 30) {
+    base_time = `${currentHour}30`; // 30분 이상일 경우 현재 시각에서 30분 단위 설정
+  } else {
+    // 30분 미만일 경우, 이전 시각의 00분을 사용합니다.
+    base_time = `${currentHour - 1 < 0 ? 23 : currentHour - 1}00`; // 이전 시각으로 설정
+  }
+
+  // API 호출을 위한 파라미터 설정
+  const params = new URLSearchParams({
+    serviceKey: SERVICE_KEY, // API 인증키
+    numOfRows: "100", // 호출할 데이터 수
+    pageNo: "1", // 페이지 번호
+    dataType: "JSON",
+    base_date: base_date, // 날짜
+    base_time: base_time, // 시간
+    nx: nx.toString(), // x 좌표
+    ny: ny.toString(), // y 좌표
+  });
+  // getUltraSrtNcst
+  // getUltraSrtFcst
+  // URL 생성
+  const url = `http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtFcst?${params}`;
+
+  const response = await fetch(url);
+
+  const json = await response.json();
+
+  if (!response.ok) throw new Error("날씨 정보를 불러오지 못했습니다.");
+
+  return parseUltraShortWeatherData(json);
+  // return json.response.body.items.item;
+};
 
 /** 기상청 - 단기 예보 */
 export const getShortTermWeather = async ({ queryKey }: any) => {

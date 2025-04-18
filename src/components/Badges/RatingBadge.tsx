@@ -1,6 +1,7 @@
 import React from "react";
 import { Star } from "lucide-react";
 import _ from "lodash";
+import { formatNumberConvertDecimalOne } from "../../utils/helpers";
 
 const RatingBadge = ({ rating, isMain = false }: any) => {
   return (
@@ -14,7 +15,9 @@ const RatingBadge = ({ rating, isMain = false }: any) => {
             className="mr-1 align-middle"
           />
           <span className="flex items-center">
-            {!_.isUndefined(rating) ? rating : "- . -"}
+            {!_.isUndefined(rating)
+              ? formatNumberConvertDecimalOne(Number(rating))
+              : "- . -"}
           </span>
         </span>
       ) : (
@@ -26,7 +29,9 @@ const RatingBadge = ({ rating, isMain = false }: any) => {
             className="mr-1 align-middle"
           />
           <span className="flex items-center">
-            {!_.isUndefined(rating) ? rating : "- . -"}
+            {!_.isUndefined(rating)
+              ? formatNumberConvertDecimalOne(Number(rating))
+              : "- . -"}
           </span>
         </span>
       )}

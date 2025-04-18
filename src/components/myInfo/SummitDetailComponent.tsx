@@ -9,6 +9,10 @@ import {
 } from "../Badges";
 import { useNavigate } from "react-router-dom";
 import useComponentStore from "../../stores/useComponentStore";
+import useMountainStore from "../../stores/useMountainStore";
+import { formatDateKoShort, formatDuration } from "../../utils/helpers";
+import dayjs from "dayjs";
+import "dayjs/locale/ko";
 
 type Props = {
   onClose: () => void;
@@ -16,7 +20,11 @@ type Props = {
 const SummitDetailComponent = (props: Props) => {
   const navigate = useNavigate();
   const componentStore = useComponentStore();
-  //           <div></div>
+  const mountainStore = useMountainStore();
+
+  /**
+   * @todo 날씨 정보, 뱃지 추가... 그리고 어떤 데이터를 더 보여줄 수 있지?
+   */
 
   return (
     <div className="fixed top-0 left-0 w-screen h-screen bg-white z-50">
@@ -46,12 +54,16 @@ const SummitDetailComponent = (props: Props) => {
       {/* 모달 내부 콘텐츠 */}
       <div className="p-8">
         <div>
-          <div className="text-[16px] font-light text-main-gray-300">
-            2025. 3. 19. (수) 오후 3:50
+          <div className="text-[16px] font-light text-main-gray-300 tracking-wider">
+            {dayjs(mountainStore.summitDetail?.endTime).format("YYYY.MM.DD")}{" "}
+            {formatDateKoShort(mountainStore.summitDetail?.endTime)}
+            {/* 2025. 3. 19. (수) 오후 3:50 */}
           </div>
         </div>
         <div className="flex items-end  pt-8">
-          <div className="text-[42px] mr-2">감악산</div>
+          <div className="text-[42px] mr-2">
+            {mountainStore.summitDetail?.mountainName}
+          </div>
           <div className="pb-2">
             <AltitudeBadge altitude={647} />
           </div>
@@ -59,19 +71,25 @@ const SummitDetailComponent = (props: Props) => {
 
         <div className="flex justify-between pt-4">
           <div>
-            <div className="text-[22px] font-extralight">1,032 m</div>
+            <div className="text-[22px] font-extralight">
+              {mountainStore.summitDetail?.distance} m
+            </div>
             <div className="text-[14px] font-extralight text-main-gray-300">
               거리
             </div>
           </div>
           <div>
-            <div className="text-[22px] font-extralight">534.3 m</div>
+            <div className="text-[22px] font-extralight">
+              {mountainStore.summitDetail?.altitudeGain} m
+            </div>
             <div className="text-[14px] font-extralight text-main-gray-300">
               상승 고도
             </div>
           </div>
           <div>
-            <div className="text-[22px] font-extralight">1:02:13</div>
+            <div className="text-[22px] font-extralight">
+              {formatDuration(mountainStore.summitDetail?.duration)}
+            </div>
             <div className="text-[14px] font-extralight text-main-gray-300">
               시간
             </div>

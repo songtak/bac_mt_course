@@ -44,6 +44,12 @@ const skyMap: Record<number, string> = {
   // 4: "☁️",
 };
 
+const skyEmoji: Record<number, string> = {
+  1: "☀️",
+  3: "⛅",
+  4: "☁️",
+};
+
 // PTY 코드 맵핑 (강수형태)
 const ptyMap: Record<number, string> = {
   0: "없음", // 없음
@@ -54,6 +60,94 @@ const ptyMap: Record<number, string> = {
   5: "빗방울", // 빗방울
   6: "빗방울눈날림", // 빗방울눈날림
   7: "눈날림", // 눈날림
+};
+
+const ptyEmoji: Record<number, string> = {
+  0: "", // 없음
+  1: "🌧️", // 비
+  2: "🌧️❄️", // 비/눈
+  3: "❄️", // 눈
+  4: "🌦️", // 소나기
+  5: "💧", // 빗방울
+  6: "🌧️❄️", // 빗방울눈날림
+  7: "❄️💨", // 눈날림
+};
+/** 초단기 예보 */
+interface WeatherItem {
+  baseDate: string;
+  baseTime: string;
+  category: string;
+  fcstDate: string;
+  fcstTime: string;
+  fcstValue: string;
+  nx: number;
+  ny: number;
+}
+
+interface WeatherData {
+  [fcstTime: string]: {
+    [category: string]: string;
+  };
+}
+
+// 강수량(RN1) 범주 값 변환
+const rainCategory = (value: string): string => {
+  const rainAmount = parseFloat(value);
+
+  if (rainAmount < 1) {
+    return "1mm 미만";
+  } else if (rainAmount >= 1 && rainAmount < 30) {
+    return `${Math.floor(rainAmount)}mm`; // 1mm 이상 30mm 미만
+  } else if (rainAmount >= 30 && rainAmount < 50) {
+    return "30~50mm";
+  } else if (rainAmount >= 50) {
+    return "50mm 이상";
+  }
+  return value; // 잘못된 값이 있을 경우 그대로 반환
+};
+
+/** 초단기 예보 */
+export const parseUltraShortWeatherData = (data: {
+  response: { body: { items: { item: WeatherItem[] } } };
+}): any[] => {
+  // 결과를 담을 배열 생성
+  const weatherData: any[] = [];
+
+  // 응답 데이터에서 item 배열 추출
+  const items = data.response.body.items.item;
+
+  // 각 항목을 시간대별로 묶기
+  items.forEach((item) => {
+    const { fcstTime, category, fcstValue } = item;
+
+    // 해당 시간대에 맞는 항목을 찾거나 새로 생성
+    let weatherTime = weatherData.find((data) => data.fcstTime === fcstTime);
+
+    if (!weatherTime) {
+      // 시간대가 없으면 새로 추가
+      weatherTime = {
+        fcstTime,
+        categories: {},
+      };
+      weatherData.push(weatherTime);
+    }
+
+    // SKY와 PTY 카테고리인 경우 코드값을 변환
+    let valueToStore = fcstValue;
+    if (category === "SKY") {
+      valueToStore = skyEmoji[fcstValue] || fcstValue;
+    } else if (category === "PTY") {
+      valueToStore = ptyEmoji[fcstValue] || fcstValue;
+    } else if (category === "RN1") {
+      // RN1 카테고리의 경우 강수량을 범주에 맞게 변환
+      valueToStore = rainCategory(fcstValue);
+    }
+
+    // 해당 시간대의 카테고리 값 저장
+    weatherTime.categories[category] = valueToStore;
+  });
+
+  return weatherData;
 };
 
 export const weatherEmojiMap: Record<string, string> = {

@@ -13,6 +13,7 @@ import { mock_summits } from "../../data/mockList";
 import { doc, setDoc } from "firebase/firestore";
 import { summits_db } from "../../utils/firebaseConfig"; // peak-hunter-summits Firebase 앱
 import { getRecentSummits } from "../../apis/summitApi";
+import useMountainStore from "../../stores/useMountainStore";
 
 import {
   SummitListComponent,
@@ -24,45 +25,10 @@ import {
   SummitResult,
 } from "./index";
 
-const mySummitList: any[] = [
-  {
-    id: 1,
-    name: "감악산",
-    altitude: 684.7,
-    rating: 4.3,
-    capital: "경기도",
-    summitDate: "",
-    mountainId: 5324,
-    badges: [
-      { title: "새내기 사냥꾼", icon: "🐣" },
-      { title: "새내기 사냥꾼", icon: "🎁" },
-    ],
-  },
-  {
-    id: 2,
-    name: "감악산",
-    altitude: 684.7,
-    rating: 4.3,
-    capital: "경기도",
-    summitDate: "",
-    mountainId: 5324,
-    badges: [],
-  },
-  {
-    id: 3,
-    name: "감악산",
-    altitude: 684.7,
-    rating: 4.3,
-    capital: "경기도",
-    summitDate: "",
-    mountainId: 5324,
-    badges: [{ title: "새내기 사냥꾼", icon: "🐣" }],
-  },
-];
-
 const MyInfoUserComponent = () => {
-  const componentStore = useComponentStore();
   const userStore = useUserStore();
+  const mountainStore = useMountainStore();
+  const componentStore = useComponentStore();
 
   /** 최근 등산 목록 취득 */
   const {
@@ -78,8 +44,6 @@ const MyInfoUserComponent = () => {
     refetchOnMount: false, // 컴포넌트 재마운트해도 refetch 안 함
     refetchOnReconnect: false, // 인터넷 연결 회복해도 refetch 안 함
   });
-
-  console.log("recentSummits", recentSummits);
 
   //getRecentSummits
 
@@ -190,8 +154,8 @@ const MyInfoUserComponent = () => {
                   detail={item}
                   key={i}
                   onClick={() => {
+                    mountainStore.setSummitDetail(item);
                     componentStore.setOpenFullModal("summitDetail");
-                    // setIsOpenSummitDetail(true);
                   }}
                 />
               ))}

@@ -12,6 +12,16 @@ import { useNavigate } from "react-router-dom";
 import { getNearbyMountains } from "../apis/mapApi"; // 위에서 작성한 함수 파일 경로에 맞게 수정
 import _ from "lodash";
 import { getDistanceFromLatLonInKm } from "../utils/geoHeplers";
+import { formatTime } from "../utils/helpers";
+import { useQuery } from "@tanstack/react-query";
+import {
+  getUltraShortTermWeather,
+  getShortTermWeather,
+  getMidTermWeather,
+} from "../apis/weatherApi";
+import dayjs from "dayjs";
+import "dayjs/locale/ko"; // 한글 요일 지원
+dayjs.locale("ko"); // 전역 locale 설정
 
 const MyLocationPage = () => {
   const navigate = useNavigate();
@@ -337,6 +347,46 @@ const MyLocationPage = () => {
     }
   };
 
+  /** ===[ 기상 정보 ]=========================================================================== */
+
+  // console.log("selectedMountain", selectedMountain);
+
+  /** 초단기 기상 정보 */
+  const {
+    data: ultraShortTermWeather,
+    isLoading: ultraShortTermWeatherLoading,
+    error: ultraShortTermWeatherError,
+  } = useQuery({
+    queryKey: [
+      "ultraShortTermWeather",
+      {
+        nx: selectedMountain?.nx,
+        ny: selectedMountain?.ny,
+      },
+    ],
+    queryFn: getUltraShortTermWeather,
+    enabled: !!selectedMountain?.nx && !!selectedMountain?.ny, // 조건부 fetch
+  });
+
+  console.log("ultraShortTermWeather", ultraShortTermWeather);
+
+  /** 단기 기상 정보 */
+  // const {
+  //   data: shortTermWeather,
+  //   isLoading: shortTermWeatherLoading,
+  //   error: shortTermWeatherError,
+  // } = useQuery({
+  //   queryKey: [
+  //     "shortTermWeather",
+  //     {
+  //       nx: selectedMountain?.nx,
+  //       ny: selectedMountain?.ny,
+  //     },
+  //   ],
+  //   queryFn: getShortTermWeather,
+  //   enabled: !!selectedMountain?.nx && !!selectedMountain?.ny, // 조건부 fetch
+  // });
+
   /** ============================================================================ */
 
   return (
@@ -492,10 +542,19 @@ const MyLocationPage = () => {
                 <div className="text-[14px] font-thin text-main-gray-400 mt-2">
                   {selectedMountain.address}
                 </div>
-                <div className="font-light text-[14px] mt-2">
+                <div className="flex justify-between mt-4 text-main-gray-300">
+                  {ultraShortTermWeather &&
+                    ultraShortTermWeather.map((item, i) => (
+                      <div key={i}>
+                        <div>{formatTime(item.fcstTime)}</div>
+                        {/* <div>{dayjs(item.fcstTime).format("hh:mm")}</div> */}
+                      </div>
+                    ))}
+                </div>
+                {/* <div className="font-light text-[14px] mt-2">
                   <span>{selectedMountain?.overview}</span>
                   <span>{selectedMountain?.description}</span>
-                </div>
+                </div> */}
                 <div className="fixed bottom-6 left-1/2 -translate-x-1/2">
                   <div className="h-[44px] w-[165px] bg-main-green-200 text-main-white rounded-[24px] font-light flex items-center justify-center shadow-[0_4px_4px_rgba(0,0,0,0.1)]">
                     등산 시작

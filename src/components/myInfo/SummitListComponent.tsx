@@ -5,62 +5,7 @@ import { SummitDetailCard, SummitDetailComponent } from "./index";
 import useComponentStore from "../../stores/useComponentStore";
 import { getAllSummitsByUser } from "../../apis/summitApi";
 import { useQuery } from "@tanstack/react-query";
-
-const mySummitList: any[] = [
-  {
-    id: 1,
-    name: "감악산",
-    altitude: 684.7,
-    rating: 4.3,
-    capital: "경기도",
-    summitDate: "",
-    mountainId: 5324,
-    badges: [
-      { title: "새내기 사냥꾼", icon: "🐣" },
-      { title: "새내기 사냥꾼", icon: "🎁" },
-    ],
-  },
-  {
-    id: 2,
-    name: "감악산",
-    altitude: 684.7,
-    rating: 4.3,
-    capital: "경기도",
-    summitDate: "",
-    mountainId: 5324,
-    badges: [],
-  },
-  {
-    id: 3,
-    name: "감악산",
-    altitude: 684.7,
-    rating: 4.3,
-    capital: "경기도",
-    summitDate: "",
-    mountainId: 5324,
-    badges: [{ title: "새내기 사냥꾼", icon: "🐣" }],
-  },
-  {
-    id: 4,
-    name: "감악산",
-    altitude: 684.7,
-    rating: 4.3,
-    capital: "경기도",
-    summitDate: "",
-    mountainId: 5324,
-    badges: [{ title: "새내기 사냥꾼", icon: "🐣" }],
-  },
-  {
-    id: 5,
-    name: "감악산",
-    altitude: 684.7,
-    rating: 4.3,
-    capital: "경기도",
-    summitDate: "",
-    mountainId: 5324,
-    badges: [{ title: "새내기 사냥꾼", icon: "🐣" }],
-  },
-];
+import useMountainStore from "../../stores/useMountainStore";
 
 type Props = {
   onClose: () => void;
@@ -68,6 +13,8 @@ type Props = {
 
 const SummitListComponent = () => {
   const componentStore = useComponentStore();
+  const mountainStore = useMountainStore();
+
   /** 최근 등산 목록 취득 */
   const {
     data: allSummits,
@@ -116,6 +63,7 @@ const SummitListComponent = () => {
                 detail={item}
                 key={i}
                 onClick={() => {
+                  mountainStore.setSummitDetail(item);
                   componentStore.setOpenFullModal("summitDetail");
                 }}
               />

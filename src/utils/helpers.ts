@@ -75,6 +75,11 @@ export const formatDateKo = (dateString: string) => {
   return dayjs(dateString).locale("ko").format("dddd A"); // 예: '수요일 오전 10:12'
 };
 
+export const formatDateKoShort = (dateString: string) => {
+  // dayjs로 날짜 파싱 후 원하는 포맷으로 변환
+  return dayjs(dateString).locale("ko").format("(dd) A hh:mm"); // 예: '수요일 오전 10:12'
+};
+
 /** 초단위 소요시간을 hh:mm:ss로 변환 */
 export const formatDuration = (seconds: number) => {
   const hours = Math.floor(seconds / 3600);
@@ -83,6 +88,27 @@ export const formatDuration = (seconds: number) => {
   return `${hours}:${minutes.toString().padStart(2, "0")}:${remainingSeconds
     .toString()
     .padStart(2, "0")}`;
+};
+
+/** 정수도 소수점으로 반환 */
+export const formatNumberConvertDecimalOne = (num: number) => {
+  // 숫자가 소수점이 있으면 그대로 반환
+  if (num % 1 !== 0) {
+    return num.toFixed(1); // 소수점 1자리까지 표시
+  } else {
+    return num.toFixed(1); // 정수인 경우에도 소수점 1자리까지 표시
+  }
+};
+
+/** 시간 hh:mm 으로 변환 */
+export const formatTime = (time: number): string => {
+  // 숫자를 문자열로 변환하고, 앞 두 자리는 시, 뒤 두 자리는 분으로 처리
+  const timeString = time.toString().padStart(4, "0"); // 1200 -> "1200"
+  const hours = timeString.slice(0, 2); // "12"
+  const minutes = timeString.slice(2, 4); // "00"
+
+  // 시와 분을 :로 연결하여 반환
+  return `${hours}:${minutes}`;
 };
 
 /** =================================================================================== */
