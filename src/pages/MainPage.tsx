@@ -219,7 +219,7 @@ function MainPage() {
       </div>
 
       {/* 산 리스트 */}
-      <div className="mt-6 p-4 border border-main-gray-100 shadow-[0_4px_4px_rgba(0,0,0,0.1)] rounded-[24px]">
+      <div className="mt-6 p-4 border border-main-gray-100 bg-white shadow-[0_4px_4px_rgba(0,0,0,0.1)] rounded-[24px]">
         <div className="flex justify-between items-center mb-4">
           <span className="text-base text-gray-700">산 리스트</span>
           <ChevronRight className="text-main-gray-300" />

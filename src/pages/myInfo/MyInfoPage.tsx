@@ -95,12 +95,25 @@ const MyInfoPage = () => {
         </div>
         {/* 오른쪽: 사용자 정보 (아이콘은 항상 수직 중앙) */}
         <div className="flex items-center">
-          <div
-            onClick={() => {
-              handleLogout();
-            }}
-          >
-            임시 로그아웃 버튼
+          <div>
+            <div
+              onClick={() => {
+                handleLogout();
+              }}
+            >
+              임시 로그아웃 버튼
+            </div>
+            <div
+              onClick={() => {
+                if (window?.ReactNativeWebView?.postMessage) {
+                  window.ReactNativeWebView.postMessage("START_TRACKING");
+                } else {
+                  console.log("웹 환경에서는 메시지를 보낼 수 없습니다.");
+                }
+              }}
+            >
+              임시 시작하기 버튼
+            </div>
           </div>
           <div
             className="w-[46px] h-[46px] text-main-gray-300 bg-white rounded-full flex items-center justify-center shadow-[0_4px_4px_rgba(0,0,0,0.1)]"
