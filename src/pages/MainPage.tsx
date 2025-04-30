@@ -18,6 +18,7 @@ import dayjs from "dayjs";
 import { fetchTodayMountain, fetchMountainsByCodes } from "../apis/api";
 import { getShortTermWeather, getMidTermWeather } from "../apis/weatherApi";
 import { weatherEmojiMap } from "../utils/weatherParser";
+import { callFlutterBridge } from "../utils/bridge";
 
 function MainPage() {
   const navigate = useNavigate();
@@ -114,7 +115,7 @@ function MainPage() {
   return (
     <div className="">
       {/* 헤더 */}
-      <header className="flex justify-between items-center pt-10 pb-2">
+      <header className="flex justify-between items-center pt-10">
         {/* 왼쪽: PeakHunter 로고 */}
         <div>
           <img
@@ -180,7 +181,12 @@ function MainPage() {
           </div>
         </div>
         {/* 오른쪽 카드: 등산하기 */}
-        <div className="flex-1 h-24 bg-main-green-200 rounded-[24px] shadow flex items-center justify-center">
+        <div
+          className="flex-1 h-24 bg-main-green-200 rounded-[24px] shadow flex items-center justify-center"
+          onClick={() => {
+            callFlutterBridge("startTracking");
+          }}
+        >
           <span className="text-main-white text-lg font-thin">등 산 하 기</span>
         </div>
       </div>
