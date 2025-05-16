@@ -128,7 +128,7 @@ const BookmarkPage = () => {
         }
       />
       {openType === "map" && (
-        <main className="pt-[80px] relative">
+        <main className="pt-[100px] relative">
           <div
             ref={mapElement}
             className="absolute top-0 left-1/2 w-screen -translate-x-1/2 h-[calc(100vh-80px)]"
@@ -145,7 +145,7 @@ const BookmarkPage = () => {
         </main>
       )}
       {openType === "list" && (
-        <main className="pt-[80px]">
+        <main className="pt-[100px]">
           <div className="flex justify-end items-end text-main-gray-300 mb-4">
             <div
               className="text-[14px] mr-2 underline cursor-pointer h-[22px]"

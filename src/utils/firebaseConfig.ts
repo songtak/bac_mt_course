@@ -88,6 +88,23 @@ const summitsApp =
   initializeApp(summitsConfig, "summitsApp");
 export const summits_db = getFirestore(summitsApp);
 
+/** Firebase 앱: peak-hunter-gpx */
+const gpxConfig = {
+  apiKey: "AIzaSyDKIMQglwfG2-zMDauk18tX3iu9FpGayeQ",
+  authDomain: "peak-hunter-gpx.firebaseapp.com",
+  projectId: "peak-hunter-gpx",
+  storageBucket: "peak-hunter-gpx.firebasestorage.app",
+  messagingSenderId: "223261974081",
+  appId: "1:223261974081:web:c1c252babff07cc2a6b0c0",
+  measurementId: "G-5ZCL4JEPM0",
+};
+
+// Initialize Firebase for peak-hunter-summits app
+const gpxApp =
+  getApps().find((a) => a.name === "gpxApp") ??
+  initializeApp(gpxConfig, "gpxApp");
+export const gpx_db = getFirestore(gpxApp);
+
 // Analytics setup for peak-hunter-summits app
 // const analytics = getAnalytics(summitsApp);
 

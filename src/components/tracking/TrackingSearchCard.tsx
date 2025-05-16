@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import { cities, searchTagList } from "../../models/common";
-import HeightSlider from "../../components/HeightSlider";
+import HeightSlider from "../HeightSlider";
 import { useMutation } from "@tanstack/react-query";
 import { searchMountains } from "../../apis/searchApi";
 import { MountainSearchParams } from "../../interface/mountainInterface";
@@ -9,7 +9,7 @@ import useComponentStore from "../../stores/useComponentStore";
 import useSearchStore from "../../stores/useSearchStore";
 import _ from "lodash";
 
-const SearchCard = () => {
+const TrackingSearchCard = () => {
   const componentStore = useComponentStore();
   const searchStore = useSearchStore();
 
@@ -186,4 +186,4 @@ const SearchCard = () => {
   );
 };
 
-export default SearchCard;
+export default TrackingSearchCard;

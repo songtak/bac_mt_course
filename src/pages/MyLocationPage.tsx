@@ -63,6 +63,24 @@ const MyLocationPage = () => {
     }
   };
 
+  /** ===[ 등산 시작 ]========================================================================= */
+
+  const handleClickStart = () => {
+    console.log(`mountain_id`, selectedMountain?.mountain_id);
+
+    /** @ts-ignore */
+    if (window.flutter_inappwebview) {
+      /** @ts-ignore */
+      window.flutter_inappwebview.callHandler(
+        "flutterBridge",
+        "startTracking",
+        selectedMountain?.mountain_id
+      );
+    } else {
+      console.error("Flutter bridge is not available");
+    }
+  };
+
   /** ===[ 선택된 산 ]========================================================================= */
 
   // 추가된 플래그: Bottom Sheet가 확장되었는지 여부
@@ -452,7 +470,7 @@ const MyLocationPage = () => {
         <>
           <div
             ref={sheetRef}
-            className="fixed w-full -mx-6 max-w-md px-8 bg-white rounded-t-[24px] shadow-[0_-4px_4px_rgba(0,0,0,0.1)] transition-all duration-300 ease-in-out"
+            className="fixed w-full -mx-6 max-w-md pt-1 px-8 bg-white rounded-t-[24px] shadow-[0_-4px_4px_rgba(0,0,0,0.1)] transition-all duration-300 ease-in-out"
             // 전체 영역에 드래그 이벤트 핸들러를 부착합니다.
             onPointerDown={(e) => handleDragStart(e.clientY, e.pointerId, e)}
             onPointerMove={(e) => handleDragMove(e.clientY)}
@@ -556,7 +574,12 @@ const MyLocationPage = () => {
                   <span>{selectedMountain?.description}</span>
                 </div> */}
                 <div className="fixed bottom-6 left-1/2 -translate-x-1/2">
-                  <div className="h-[44px] w-[165px] bg-main-green-200 text-main-white rounded-[24px] font-light flex items-center justify-center shadow-[0_4px_4px_rgba(0,0,0,0.1)]">
+                  <div
+                    className="h-[44px] w-[165px] bg-main-green-200 text-main-white rounded-[24px] font-light flex items-center justify-center shadow-[0_4px_4px_rgba(0,0,0,0.1)]"
+                    onClick={() => {
+                      handleClickStart();
+                    }}
+                  >
                     등산 시작
                   </div>
                 </div>

@@ -16,7 +16,9 @@ import CommonLayout from "./components/CommonLayout";
 import * as MYPAGE from "./pages/myInfo";
 import * as AUTH from "./pages/auth";
 import * as MOUNTAIN from "./pages/mountain";
+import * as TRACKING from "./pages/tracking";
 import * as TEST from "./pages/test";
+
 import AuthProvider from "./utils/AuthProvider";
 import { useQuery } from "@tanstack/react-query";
 import { getBookmarkList } from "./apis/bookmarkApi";
@@ -79,6 +81,21 @@ function App() {
           element={<MOUNTAIN.MountainDetailPage />}
         />
         <Route path="/start/:mountain_id" element={<MOUNTAIN.StartPage />} />
+
+        {/* Tracking gpx */}
+        <Route
+          path="/tracking/done/:tracking_id"
+          element={<TRACKING.TrackingDonePage />}
+        />
+        <Route
+          path="/tracking/detail/:tracking_id"
+          element={<TRACKING.TrackingDetailPage />}
+        />
+        <Route path="/tracking/list" element={<TRACKING.TrackingListPage />} />
+        <Route
+          path="/tracking/upload"
+          element={<TRACKING.TrackingUploadPage />}
+        />
 
         {/* test */}
         {/* <Route path="/" element={<TEST.AddGeohashPage />} /> */}

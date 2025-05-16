@@ -35,6 +35,32 @@ const MyInfoPage = () => {
     }
   };
 
+  /** 웹뷰 닫기 브릿지 */
+  const handleCloseWebview = () => {
+    /** @ts-ignore */
+    if (window.flutter_inappwebview) {
+      /** @ts-ignore */
+      window.flutter_inappwebview.callHandler("flutterBridge", "closeWebview");
+    } else {
+      console.error("Flutter bridge is not available");
+    }
+  };
+
+  /** 등산 시작하기 */
+  const handleClickStart = () => {
+    /** @ts-ignore */
+    if (window.flutter_inappwebview) {
+      /** @ts-ignore */
+      window.flutter_inappwebview.callHandler(
+        "flutterBridge",
+        "startTracking",
+        111100101
+      );
+    } else {
+      console.error("Flutter bridge is not available");
+    }
+  };
+
   /** =========================================================================== */
 
   // useEffect(() => {
@@ -70,7 +96,7 @@ const MyInfoPage = () => {
   return (
     <div className="h-full mb-[100px] hide-scrollbar">
       <header
-        className={`fixed px-6 pt-[26px] top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out flex justify-between items-center ${
+        className={`fixed px-6 pt-[60px] top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out flex justify-between items-center ${
           scrolled
             ? "bg-main-white shadow-[0_4px_4px_rgba(0,0,0,0.1)]"
             : "bg-main-white"
@@ -105,14 +131,17 @@ const MyInfoPage = () => {
             </div>
             <div
               onClick={() => {
-                if (window?.ReactNativeWebView?.postMessage) {
-                  window.ReactNativeWebView.postMessage("START_TRACKING");
-                } else {
-                  console.log("웹 환경에서는 메시지를 보낼 수 없습니다.");
-                }
+                handleClickStart();
               }}
             >
               임시 시작하기 버튼
+            </div>
+            <div
+              onClick={() => {
+                handleCloseWebview();
+              }}
+            >
+              임시 웹뷰 닫기 버튼
             </div>
           </div>
           <div

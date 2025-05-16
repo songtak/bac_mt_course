@@ -57,9 +57,6 @@ const SearchPage = () => {
       >
         <div>
           <div className="text-[24px] font-light mb-4">어디로 갈까요?</div>
-          {/* <div>
-          <div>이름순</div>
-      </div> */}
         </div>
         <SearchCard />
       </div>

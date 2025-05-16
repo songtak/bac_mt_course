@@ -24,7 +24,7 @@ const Header: React.FC<HeaderProps> = ({
 
   return (
     <header
-      className={`fixed px-6 pt-[26px] top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out flex justify-between items-center bg-main-white`}
+      className={`fixed px-6 pt-[60px] top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out flex justify-between items-center bg-main-white`}
       style={{ height: `100px` }}
     >
       {/* 왼쪽: 로고/타이틀 */}

@@ -184,10 +184,14 @@ function MainPage() {
         <div
           className="flex-1 h-24 bg-main-green-200 rounded-[24px] shadow flex items-center justify-center"
           onClick={() => {
-            callFlutterBridge("startTracking");
+            navigate("/tracking/list");
+            // callFlutterBridge("startTracking");
           }}
         >
-          <span className="text-main-white text-lg font-thin">등 산 하 기</span>
+          <span className="text-main-white text-[24px] font-semibold">
+            <div>GPX</div>
+          </span>
+          {/* <span className="text-main-white text-lg font-thin">등 산 하 기</span> */}
         </div>
       </div>
 
